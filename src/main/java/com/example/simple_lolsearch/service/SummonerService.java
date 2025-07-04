@@ -1,7 +1,8 @@
 package com.example.simple_lolsearch.service;
 
-import com.example.simple_lolsearch.dto.SummonerDto;
+import com.example.simple_lolsearch.dto.AccountDto;
 
 public interface SummonerService {
-    SummonerDto getSummonerByName(String summonerName);
+    AccountDto getAccountByRiotId(String gameName, String tagLine);
+
 }

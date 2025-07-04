@@ -11,4 +11,3 @@ public class RiotApiProperties {
     private String region;
     private String platform;
 }
-
