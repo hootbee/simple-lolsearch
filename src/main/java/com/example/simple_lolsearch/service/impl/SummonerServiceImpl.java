@@ -5,6 +5,7 @@ import com.example.simple_lolsearch.dto.LeagueEntryDto;
 import com.example.simple_lolsearch.service.SummonerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URLEncoder;
@@ -74,6 +75,40 @@ public class SummonerServiceImpl implements SummonerService {
         } catch (Exception e) {
             log.error("리그 정보 조회 실패: {}", e.getMessage());
             throw new RuntimeException("리그 정보를 조회할 수 없습니다: " + puuid, e);
+        }
+    }
+    @Override
+    public List<String> getRecentMatchIds(String puuid, int count) {
+        log.debug("PUUID로 최근 매치 ID 조회: {}, count: {}", puuid, count);
+
+        System.out.println("=== 최근 매치 ID 조회 ===");
+        System.out.println("PUUID: " + puuid);
+        System.out.println("Count: " + count);
+        System.out.println("요청 URL: https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?start=0&count=" + count);
+
+        try {
+            // bodyToFlux 대신 bodyToMono로 List 전체를 받기
+            List<String> matchIds = riotAsiaWebClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
+                            .queryParam("start", 0)
+                            .queryParam("count", count)
+                            .build(puuid))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<String>>() {})  // 수정된 부분
+                    .block();
+
+            System.out.println("=== 매치 ID 조회 결과 ===");
+            System.out.println("총 " + matchIds.size() + "개의 매치 ID 조회됨");
+            for (int i = 0; i < matchIds.size(); i++) {
+                System.out.println((i + 1) + ". " + matchIds.get(i));
+            }
+
+            return matchIds;
+
+        } catch (Exception e) {
+            log.error("매치 ID 조회 실패: {}", e.getMessage());
+            throw new RuntimeException("매치 ID를 조회할 수 없습니다: " + puuid, e);
         }
     }
 
