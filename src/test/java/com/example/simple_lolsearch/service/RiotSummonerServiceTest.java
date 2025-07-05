@@ -67,7 +67,7 @@ public class RiotSummonerServiceTest {
     @Test
     void getLeagueEntriesByPuuid_directCall_shouldReturnLeagueInfo() {
         // given
-        String gameName = "땡야땡야땡야땡야";
+        String gameName = "숨쉬머";
         String tagLine = "KR1";
 
         System.out.println("=== PUUID 직접 리그 조회 테스트 ===");
@@ -88,6 +88,29 @@ public class RiotSummonerServiceTest {
             System.out.println("---");
         }
     }
+    @Test
+    void getRecentMatchIds_shouldReturn10Matches() {
+        // given
+        String gameName = "땡야땡야땡야땡야";
+        String tagLine = "KR1";
+        int count = 10;
 
+        System.out.println("=== 최근 매치 ID 조회 테스트 ===");
+
+        // when
+        String puuid = summonerService.getPuuidByRiotId(gameName, tagLine);
+        List<String> matchIds = summonerService.getRecentMatchIds(puuid, count);
+
+        // then
+        assertNotNull(matchIds);
+        assertTrue(matchIds.size() <= count);  // 최대 10개
+        assertTrue(matchIds.size() > 0);       // 최소 1개는 있어야 함
+
+        System.out.println("=== 조회된 매치 ID 목록 ===");
+        for (int i = 0; i < matchIds.size(); i++) {
+            System.out.println((i + 1) + ". " + matchIds.get(i));
+            assertTrue(matchIds.get(i).startsWith("KR_"));  // 한국 서버 매치 ID 형식
+        }
+    }
 
 }
