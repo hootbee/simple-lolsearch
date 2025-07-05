@@ -5,4 +5,5 @@ import com.example.simple_lolsearch.dto.AccountDto;
 public interface SummonerService {
     AccountDto getAccountByRiotId(String gameName, String tagLine);
 
+    String getPuuidByRiotId(String gameName, String tagLine);
 }

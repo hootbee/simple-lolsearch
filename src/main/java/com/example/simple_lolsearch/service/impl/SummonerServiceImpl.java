@@ -18,12 +18,25 @@ public class SummonerServiceImpl implements SummonerService {
     public AccountDto getAccountByRiotId(String gameName, String tagLine) {
         log.debug("Riot ID로 계정 조회: {}#{}", gameName, tagLine);
 
-        String encodedGameName = URLEncoder.encode(gameName, StandardCharsets.UTF_8);
-
+        // UriBuilder 사용으로 자동 인코딩 (수동 인코딩 제거)
         return riotAsiaWebClient.get()
-                .uri("/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}", encodedGameName, tagLine)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}")
+                        .build(gameName, tagLine))  // Spring이 자동으로 올바르게 인코딩
                 .retrieve()
                 .bodyToMono(AccountDto.class)
                 .block();
+    }
+
+    @Override
+    public String getPuuidByRiotId(String gameName, String tagLine) {
+        log.debug("Riot ID로 PUUID 조회: {}#{}", gameName, tagLine);
+
+        AccountDto account = getAccountByRiotId(gameName, tagLine);
+
+        System.out.println("=== PUUID 추출 결과 ===");
+        System.out.println("PUUID: " + account.getPuuid());
+
+        return account.getPuuid();
     }
 }
