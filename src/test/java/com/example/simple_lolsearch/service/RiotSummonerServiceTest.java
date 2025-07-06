@@ -1,8 +1,10 @@
 package com.example.simple_lolsearch.service;
 
 import com.example.simple_lolsearch.dto.AccountDto;
+import com.example.simple_lolsearch.dto.GameSummaryDto;
 import com.example.simple_lolsearch.dto.LeagueEntryDto;
 import com.example.simple_lolsearch.dto.MatchDetailDto;
+import com.example.simple_lolsearch.service.impl.SummonerServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -94,37 +96,37 @@ public class RiotSummonerServiceTest {
         System.out.println("역할: " + playerInfo.getRole());
     }
 
-//    @Test
-//    void convertToGameSummary_shouldCreateSummary() {
-//        // given
-//        String gameName = "땡야땡야땡야땡야";
-//        String tagLine = "KR1";
-//
-//        // when
-//        AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
-//        String puuid = account.getPuuid();
-//
-//        List<String> matchIds = summonerService.getRecentMatchIds(puuid, 1);
-//        String firstMatchId = matchIds.get(0);
-//        MatchDetailDto matchDetail = summonerService.getMatchDetail(firstMatchId);
-//
-//        GameSummaryDto summary = ((SummonerServiceImpl) summonerService)
-//                .convertToGameSummary(matchDetail, puuid);
-//
-//        // then
-//        assertNotNull(summary);
-//        assertEquals(firstMatchId, summary.getMatchId());
-//        assertNotNull(summary.getChampionName());
-//        assertTrue(summary.getKills() >= 0);
-//        assertTrue(summary.getDeaths() >= 0);
-//        assertTrue(summary.getAssists() >= 0);
-//
-//        System.out.println("=== 게임 요약 정보 ===");
-//        System.out.println("챔피언: " + summary.getChampionName());
-//        System.out.println("KDA: " + summary.getKills() + "/" + summary.getDeaths() + "/" + summary.getAssists() + " (" + summary.getKda() + ")");
-//        System.out.println("결과: " + (summary.isWin() ? "승리" : "패배"));
-//        System.out.println("CS: " + summary.getCs());
-//        System.out.println("골드: " + summary.getGoldEarned());
-//    }
+    @Test
+    void convertToGameSummary_shouldCreateSummary() {
+        // given
+        String gameName = "숨쉬머";
+        String tagLine = "KR1";
+
+        // when
+        AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
+        String puuid = account.getPuuid();
+
+        List<String> matchIds = summonerService.getRecentMatchIds(puuid, 1);
+        String firstMatchId = matchIds.get(0);
+        MatchDetailDto matchDetail = summonerService.getMatchDetail(firstMatchId);
+
+        GameSummaryDto summary = ((SummonerServiceImpl) summonerService)
+                .convertToGameSummary(matchDetail, puuid);
+
+        // then
+        assertNotNull(summary);
+        assertEquals(firstMatchId, summary.getMatchId());
+        assertNotNull(summary.getChampionName());
+        assertTrue(summary.getKills() >= 0);
+        assertTrue(summary.getDeaths() >= 0);
+        assertTrue(summary.getAssists() >= 0);
+
+        System.out.println("=== 게임 요약 정보 ===");
+        System.out.println("챔피언: " + summary.getChampionName());
+        System.out.println("KDA: " + summary.getKills() + "/" + summary.getDeaths() + "/" + summary.getAssists() + " (" + summary.getKda() + ")");
+        System.out.println("결과: " + (summary.isWin() ? "승리" : "패배"));
+        System.out.println("CS: " + summary.getCs());
+        System.out.println("골드: " + summary.getGoldEarned());
+    }
 
 }
