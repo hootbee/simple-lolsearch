@@ -1,10 +1,8 @@
 package com.example.simple_lolsearch.service;
 
-import com.example.simple_lolsearch.dto.AccountDto;
-import com.example.simple_lolsearch.dto.GameSummaryDto;
-import com.example.simple_lolsearch.dto.LeagueEntryDto;
-import com.example.simple_lolsearch.dto.MatchDetailDto;
+import com.example.simple_lolsearch.dto.*;
 import com.example.simple_lolsearch.service.impl.SummonerServiceImpl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -127,6 +125,31 @@ public class RiotSummonerServiceTest {
         System.out.println("결과: " + (summary.isWin() ? "승리" : "패배"));
         System.out.println("CS: " + summary.getCs());
         System.out.println("골드: " + summary.getGoldEarned());
+    }
+    @Test
+    @DisplayName("PUUID로 소환사 정보 조회 테스트")
+    void getSummonerByPuuid_Success() {
+        // given
+        String puuid = "sR6S9_2yZIic24-oSLv1mQ9wx8oAbL7Qhz441d6_tgm9oGLh_7h2KOjBZn1EszNDrXo1zceX4bFZdw";
+
+        System.out.println("=== PUUID로 소환사 정보 조회 테스트 ===");
+
+        // when
+        SummonerDto summoner = summonerService.getSummonerByPuuid(puuid);
+
+        // then
+        assertNotNull(summoner);
+        assertNotNull(summoner.getId());
+        assertEquals(puuid, summoner.getPuuid());
+        assertTrue(summoner.getProfileIconId() > 0);
+        assertTrue(summoner.getSummonerLevel() > 0);
+        assertTrue(summoner.getRevisionDate() > 0);
+
+        System.out.println("=== 소환사 정보 검증 완료 ===");
+        System.out.println("Summoner ID: " + summoner.getId());
+        System.out.println("Profile Icon ID: " + summoner.getProfileIconId());
+        System.out.println("Level: " + summoner.getSummonerLevel());
+        System.out.println("Profile Icon URL: http://ddragon.leagueoflegends.com/cdn/14.24.1/img/profileicon/" + summoner.getProfileIconId() + ".png");
     }
 
 }
