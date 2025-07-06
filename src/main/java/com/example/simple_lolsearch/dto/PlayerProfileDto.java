@@ -9,6 +9,10 @@ import java.util.List;
 public class PlayerProfileDto {
     private AccountDto account;
     private List<LeagueEntryDto> leagueEntries;
+    private String summonerId;
+    private int profileIconId;
+    private long revisionDate;
+    private int summonerLevel;
 
     // 편의 메서드들
     public LeagueEntryDto getSoloRank() {
@@ -23,6 +27,9 @@ public class PlayerProfileDto {
                 .filter(entry -> "RANKED_FLEX_SR".equals(entry.getQueueType()))
                 .findFirst()
                 .orElse(null);
+    }
+    public String getProfileIconUrl() {
+        return "http://ddragon.leagueoflegends.com/cdn/14.24.1/img/profileicon/" + profileIconId + ".png";
     }
 
     public boolean isUnranked() {

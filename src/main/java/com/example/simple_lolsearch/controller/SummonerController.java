@@ -120,13 +120,20 @@ public class SummonerController {
             AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
             String puuid = account.getPuuid();
 
-            // 2. 리그 정보 조회
+            // 2. 소환사 정보 조회 (새로 추가)
+            SummonerDto summoner = summonerService.getSummonerByPuuid(puuid);
+
+            // 3. 리그 정보 조회
             List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
 
-            // 3. 통합 프로필 생성
+            // 4. 통합 프로필 생성
             PlayerProfileDto profile = PlayerProfileDto.builder()
                     .account(account)
                     .leagueEntries(leagueEntries)
+                    .summonerId(summoner.getId())
+                    .profileIconId(summoner.getProfileIconId())
+                    .revisionDate(summoner.getRevisionDate())
+                    .summonerLevel(summoner.getSummonerLevel())
                     .build();
 
             return ResponseEntity.ok(profile);
@@ -135,4 +142,6 @@ public class SummonerController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+
 }
