@@ -12,9 +12,12 @@ import {
   ErrorMessage
 } from './styles/GlobalStyle';
 import UserInfo from './components/UserInfo';
-import RankInfo from './components/RankInfo';
+import RankInfo from './components/RankInfo';  // default export로 import
 import GameHistory from './components/GameHistory';
 import { getPlayerProfile, getGameHistory } from './services/api';
+
+// 나머지 코드는 동일...
+
 
 function App() {
   const [gameName, setGameName] = useState('');
