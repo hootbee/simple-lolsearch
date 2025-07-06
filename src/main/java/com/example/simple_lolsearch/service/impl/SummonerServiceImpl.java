@@ -1,9 +1,6 @@
 package com.example.simple_lolsearch.service.impl;
 
-import com.example.simple_lolsearch.dto.AccountDto;
-import com.example.simple_lolsearch.dto.GameSummaryDto;
-import com.example.simple_lolsearch.dto.LeagueEntryDto;
-import com.example.simple_lolsearch.dto.MatchDetailDto;
+import com.example.simple_lolsearch.dto.*;
 import com.example.simple_lolsearch.service.SummonerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -165,4 +162,33 @@ public class SummonerServiceImpl implements SummonerService {
             throw new RuntimeException("리그 정보를 조회할 수 없습니다: " + puuid, e);
         }
     }
+    @Override
+    public SummonerDto getSummonerByPuuid(String puuid) {
+        log.debug("PUUID로 소환사 정보 조회: {}", puuid);
+
+        System.out.println("=== 소환사 정보 조회 ===");
+        System.out.println("PUUID: " + puuid);
+        System.out.println("요청 URL: https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/" + puuid);
+
+        try {
+            SummonerDto summoner = riotKrWebClient.get()
+                    .uri("/lol/summoner/v4/summoners/by-puuid/{puuid}", puuid)
+                    .retrieve()
+                    .bodyToMono(SummonerDto.class)
+                    .block();
+
+            System.out.println("=== 소환사 정보 결과 ===");
+            System.out.println("Summoner ID: " + summoner.getId());
+            System.out.println("Profile Icon ID: " + summoner.getProfileIconId());
+            System.out.println("Summoner Level: " + summoner.getSummonerLevel());
+            System.out.println("Revision Date: " + summoner.getRevisionDate());
+
+            return summoner;
+
+        } catch (Exception e) {
+            log.error("소환사 정보 조회 실패: {}", e.getMessage());
+            throw new RuntimeException("소환사 정보를 조회할 수 없습니다: " + puuid, e);
+        }
+    }
+
 }
