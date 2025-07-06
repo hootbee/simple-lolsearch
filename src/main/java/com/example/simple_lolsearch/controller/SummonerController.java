@@ -1,8 +1,6 @@
 package com.example.simple_lolsearch.controller;
 
-import com.example.simple_lolsearch.dto.AccountDto;
-import com.example.simple_lolsearch.dto.GameSummaryDto;
-import com.example.simple_lolsearch.dto.MatchDetailDto;
+import com.example.simple_lolsearch.dto.*;
 import com.example.simple_lolsearch.service.SummonerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +92,46 @@ public class SummonerController {
 
         } catch (Exception e) {
             log.error("게임 기록 조회 실패: {}#{}", gameName, tagLine, e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    @GetMapping("/league")
+    public ResponseEntity<List<LeagueEntryDto>> getLeagueEntries(@RequestParam String puuid) {
+
+        log.info("리그 정보 조회 요청: {}", puuid);
+
+        try {
+            List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
+            return ResponseEntity.ok(leagueEntries);
+        } catch (Exception e) {
+            log.error("리그 정보 조회 실패: {}", puuid, e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    @GetMapping("/profile")
+    public ResponseEntity<PlayerProfileDto> getPlayerProfile(
+            @RequestParam String gameName,
+            @RequestParam String tagLine) {
+
+        log.info("플레이어 프로필 조회 요청: {}#{}", gameName, tagLine);
+
+        try {
+            // 1. 계정 정보 조회
+            AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
+            String puuid = account.getPuuid();
+
+            // 2. 리그 정보 조회
+            List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
+
+            // 3. 통합 프로필 생성
+            PlayerProfileDto profile = PlayerProfileDto.builder()
+                    .account(account)
+                    .leagueEntries(leagueEntries)
+                    .build();
+
+            return ResponseEntity.ok(profile);
+        } catch (Exception e) {
+            log.error("플레이어 프로필 조회 실패: {}#{}", gameName, tagLine, e);
             return ResponseEntity.badRequest().build();
         }
     }
