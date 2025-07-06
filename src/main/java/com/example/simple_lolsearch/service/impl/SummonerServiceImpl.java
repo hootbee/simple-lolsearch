@@ -1,6 +1,7 @@
 package com.example.simple_lolsearch.service.impl;
 
 import com.example.simple_lolsearch.dto.AccountDto;
+import com.example.simple_lolsearch.dto.GameSummaryDto;
 import com.example.simple_lolsearch.dto.LeagueEntryDto;
 import com.example.simple_lolsearch.dto.MatchDetailDto;
 import com.example.simple_lolsearch.service.SummonerService;
@@ -94,6 +95,40 @@ public class SummonerServiceImpl implements SummonerService {
             log.error("매치 상세 정보 조회 실패: {}", e.getMessage());
             throw new RuntimeException("매치 상세 정보를 조회할 수 없습니다: " + matchId, e);
         }
+    }
+    public GameSummaryDto convertToGameSummary(MatchDetailDto match, String puuid) {
+        MatchDetailDto.ParticipantDto participant = match.getInfo().getParticipants().stream()
+                .filter(p -> p.getPuuid().equals(puuid))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("참가자 정보를 찾을 수 없습니다."));
+
+        String kda = calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists());
+        int cs = participant.getTotalMinionsKilled() + participant.getNeutralMinionsKilled();
+
+        return GameSummaryDto.builder()
+                .matchId(match.getMetadata().getMatchId())
+                .championName(participant.getChampionName())
+                .kills(participant.getKills())
+                .deaths(participant.getDeaths())
+                .assists(participant.getAssists())
+                .win(participant.isWin())
+                .gameDuration(match.getInfo().getGameDuration())
+                .gameMode(match.getInfo().getGameMode())
+                .kda(kda)
+                .cs(cs)
+                .goldEarned(participant.getGoldEarned())
+                .visionScore(participant.getVisionScore())
+                .lane(participant.getLane())
+                .role(participant.getRole())
+                .build();
+    }
+
+    private String calculateKDA(int kills, int deaths, int assists) {
+        if (deaths == 0) {
+            return "Perfect";
+        }
+        double kda = (double)(kills + assists) / deaths;
+        return String.format("%.2f", kda);
     }
 
 
