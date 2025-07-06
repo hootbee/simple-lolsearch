@@ -44,40 +44,6 @@ public class SummonerServiceImpl implements SummonerService {
         return account.getPuuid();
     }
     @Override
-    public List<LeagueEntryDto> getLeagueEntriesByPuuid(String puuid) {
-        log.debug("PUUID로 리그 정보 직접 조회: {}", puuid);
-
-        System.out.println("=== 리그 정보 조회 (PUUID 직접) ===");
-        System.out.println("PUUID: " + puuid);
-        System.out.println("요청 URL: https://kr.api.riotgames.com/lol/league/v4/entries/by-puuid/" + puuid);
-
-        try {
-            List<LeagueEntryDto> leagueEntries = riotKrWebClient.get()
-                    .uri("/lol/league/v4/entries/by-puuid/{puuid}", puuid)
-                    .retrieve()
-                    .bodyToFlux(LeagueEntryDto.class)
-                    .collectList()
-                    .block();
-
-            // 결과 출력 코드 (완성)
-            System.out.println("=== 리그 정보 결과 ===");
-            System.out.println("총 " + leagueEntries.size() + "개의 리그 정보 조회됨");
-
-            for (LeagueEntryDto entry : leagueEntries) {
-                System.out.println("Queue: " + entry.getQueueType() +
-                        ", Tier: " + entry.getTier() + " " + entry.getRank() +
-                        ", LP: " + entry.getLeaguePoints() +
-                        ", W/L: " + entry.getWins() + "/" + entry.getLosses());
-            }
-
-            return leagueEntries;
-
-        } catch (Exception e) {
-            log.error("리그 정보 조회 실패: {}", e.getMessage());
-            throw new RuntimeException("리그 정보를 조회할 수 없습니다: " + puuid, e);
-        }
-    }
-    @Override
     public List<String> getRecentMatchIds(String puuid, int count) {
         log.debug("PUUID로 최근 매치 ID 조회: {}, count: {}", puuid, count);
 

@@ -9,8 +9,5 @@ public interface SummonerService {
     AccountDto getAccountByRiotId(String gameName, String tagLine);
 
     String getPuuidByRiotId(String gameName, String tagLine);
-
-    List<LeagueEntryDto> getLeagueEntriesByPuuid(String puuid);  // PUUID 직접 사
-
     List<String> getRecentMatchIds(String puuid,int count);
 }
