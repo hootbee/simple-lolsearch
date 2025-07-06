@@ -1,71 +1,78 @@
 import React from 'react';
 import styled from 'styled-components';
+import ChampionImage from './ChampionImage';
 
 const GameCard = styled.div`
-  background: ${props => props.win ? '#e8f5e8' : '#ffeaea'};
-  border-left: 4px solid ${props => props.win ? '#4caf50' : '#f44336'};
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
+    background: ${props => props.win ? '#e8f5e8' : '#ffeaea'};
+    border-left: 4px solid ${props => props.win ? '#4caf50' : '#f44336'};
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
 `;
 
 const GameInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+`;
+
+const ChampionInfo = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 120px;
 `;
 
 const ChampionName = styled.span`
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: #333;
-  min-width: 100px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
 `;
 
 const KDA = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 `;
 
 const KDANumbers = styled.span`
-  font-weight: bold;
-  color: #333;
+    font-weight: bold;
+    color: #333;
 `;
 
 const KDARatio = styled.span`
-  font-size: 0.9rem;
-  color: #666;
+    font-size: 0.9rem;
+    color: #666;
 `;
 
 const GameStats = styled.div`
-  display: flex;
-  gap: 16px;
-  align-items: center;
+    display: flex;
+    gap: 16px;
+    align-items: center;
 `;
 
 const Stat = styled.div`
-  text-align: center;
+    text-align: center;
 `;
 
 const StatLabel = styled.div`
-  font-size: 0.8rem;
-  color: #666;
+    font-size: 0.8rem;
+    color: #666;
 `;
 
 const StatValue = styled.div`
-  font-weight: bold;
-  color: #333;
+    font-weight: bold;
+    color: #333;
 `;
 
 const Result = styled.span`
@@ -84,7 +91,15 @@ const GameHistoryItem = ({ game }) => {
     return (
         <GameCard win={game.win}>
             <GameInfo>
-                <ChampionName>{game.championName}</ChampionName>
+                <ChampionInfo>
+                    {/* 챔피언 이미지로 변경 */}
+                    <ChampionImage
+                        championName={game.championName}
+                        size="48px"
+                    />
+                    <ChampionName>{game.championName}</ChampionName>
+                </ChampionInfo>
+
                 <KDA>
                     <KDANumbers>{game.kills}/{game.deaths}/{game.assists}</KDANumbers>
                     <KDARatio>{game.kda} KDA</KDARatio>
