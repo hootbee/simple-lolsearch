@@ -12,13 +12,14 @@ import {
   ErrorMessage
 } from './styles/GlobalStyle';
 import UserInfo from './components/UserInfo';
+import RankInfo from './components/RankInfo';
 import GameHistory from './components/GameHistory';
-import { searchSummoner, getGameHistory } from './services/api';
+import { getPlayerProfile, getGameHistory } from './services/api';
 
 function App() {
   const [gameName, setGameName] = useState('');
   const [tagLine, setTagLine] = useState('KR1');
-  const [account, setAccount] = useState(null);
+  const [playerProfile, setPlayerProfile] = useState(null);
   const [gameHistoryData, setGameHistoryData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -32,19 +33,31 @@ function App() {
     setError(null);
 
     try {
-      // 계정 정보 조회
-      const accountData = await searchSummoner(gameName.trim(), tagLine);
-      setAccount(accountData);
+      console.log('=== 플레이어 프로필 조회 시작 ===');
+      console.log('GameName:', gameName);
+      console.log('TagLine:', tagLine);
 
-      // 게임 기록 조회
+      // 1. 플레이어 프로필 조회 (계정 + 랭크 정보)
+      const profileData = await getPlayerProfile(gameName.trim(), tagLine);
+      setPlayerProfile(profileData);
+
+      console.log('=== 플레이어 프로필 조회 완료 ===');
+      console.log('Account:', profileData.account);
+      console.log('League Entries:', profileData.leagueEntries);
+
+      // 2. 게임 기록 조회
+      console.log('=== 게임 기록 조회 시작 ===');
       const historyData = await getGameHistory(gameName.trim(), tagLine, 20);
       setGameHistoryData(historyData);
+
+      console.log('=== 게임 기록 조회 완료 ===');
+      console.log('Game History Count:', historyData.length);
 
       setIsSearched(true);
     } catch (err) {
       console.error('검색 실패:', err);
-      setError(err.response?.data?.message || '소환사를 찾을 수 없습니다.');
-      setAccount(null);
+      setError(err.response?.data?.message || '플레이어를 찾을 수 없습니다.');
+      setPlayerProfile(null);
       setGameHistoryData([]);
     } finally {
       setLoading(false);
@@ -81,8 +94,20 @@ function App() {
           {loading && <LoadingSpinner />}
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
-          {account && <UserInfo account={account} />}
-          {gameHistoryData.length > 0 && <GameHistory gameHistory={gameHistoryData} />}
+          {playerProfile && (
+              <>
+                {/* 계정 정보 */}
+                <UserInfo account={playerProfile.account} />
+
+                {/* 랭크 정보 */}
+                <RankInfo leagueEntries={playerProfile.leagueEntries} />
+
+                {/* 게임 기록 */}
+                {gameHistoryData.length > 0 && (
+                    <GameHistory gameHistory={gameHistoryData} />
+                )}
+              </>
+          )}
         </Container>
       </>
   );
