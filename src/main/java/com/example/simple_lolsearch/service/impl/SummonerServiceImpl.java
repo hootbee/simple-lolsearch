@@ -2,6 +2,7 @@ package com.example.simple_lolsearch.service.impl;
 
 import com.example.simple_lolsearch.dto.AccountDto;
 import com.example.simple_lolsearch.dto.LeagueEntryDto;
+import com.example.simple_lolsearch.dto.MatchDetailDto;
 import com.example.simple_lolsearch.service.SummonerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,17 +33,6 @@ public class SummonerServiceImpl implements SummonerService {
                 .block();
     }
 
-    @Override
-    public String getPuuidByRiotId(String gameName, String tagLine) {
-        log.debug("Riot ID로 PUUID 조회: {}#{}", gameName, tagLine);
-
-        AccountDto account = getAccountByRiotId(gameName, tagLine);
-
-        System.out.println("=== PUUID 추출 결과 ===");
-        System.out.println("PUUID: " + account.getPuuid());
-
-        return account.getPuuid();
-    }
     @Override
     public List<String> getRecentMatchIds(String puuid, int count) {
         log.debug("PUUID로 최근 매치 ID 조회: {}, count: {}", puuid, count);
@@ -75,6 +65,34 @@ public class SummonerServiceImpl implements SummonerService {
         } catch (Exception e) {
             log.error("매치 ID 조회 실패: {}", e.getMessage());
             throw new RuntimeException("매치 ID를 조회할 수 없습니다: " + puuid, e);
+        }
+    }
+    @Override
+    public MatchDetailDto getMatchDetail(String matchId) {
+        log.debug("매치 상세 정보 조회: {}", matchId);
+
+        System.out.println("=== 매치 상세 정보 조회 ===");
+        System.out.println("Match ID: " + matchId);
+        System.out.println("요청 URL: https://asia.api.riotgames.com/lol/match/v5/matches/" + matchId);
+
+        try {
+            MatchDetailDto matchDetail = riotAsiaWebClient.get()
+                    .uri("/lol/match/v5/matches/{matchId}", matchId)
+                    .retrieve()
+                    .bodyToMono(MatchDetailDto.class)
+                    .block();
+
+            System.out.println("=== 매치 상세 정보 결과 ===");
+            System.out.println("게임 모드: " + matchDetail.getInfo().getGameMode());
+            System.out.println("게임 시간: " + matchDetail.getInfo().getGameDuration() + "초");
+            System.out.println("맵 ID: " + matchDetail.getInfo().getMapId());
+            System.out.println("참가자 수: " + matchDetail.getInfo().getParticipants().size());
+
+            return matchDetail;
+
+        } catch (Exception e) {
+            log.error("매치 상세 정보 조회 실패: {}", e.getMessage());
+            throw new RuntimeException("매치 상세 정보를 조회할 수 없습니다: " + matchId, e);
         }
     }
 

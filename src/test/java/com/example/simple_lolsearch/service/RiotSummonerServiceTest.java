@@ -2,6 +2,7 @@ package com.example.simple_lolsearch.service;
 
 import com.example.simple_lolsearch.dto.AccountDto;
 import com.example.simple_lolsearch.dto.LeagueEntryDto;
+import com.example.simple_lolsearch.dto.MatchDetailDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,75 +43,88 @@ public class RiotSummonerServiceTest {
         // 실제 데이터에 맞게 검증
         assertTrue(result.getGameName().contains("땡야땡야땡야땡야"));
     }
+
     @Test
-    void getPuuidByRiotId_T1Faker_shouldReturnPuuid() {
+    void getMatchDetail_shouldReturnDetailedMatchInfo() {
         // given
         String gameName = "숨쉬머";
         String tagLine = "KR1";
 
-        System.out.println("=== PUUID 추출 테스트 ===");
-        System.out.println("GameName: " + gameName);
-        System.out.println("TagLine: " + tagLine);
+        System.out.println("=== 매치 상세 정보 조회 테스트 ===");
 
         // when
-        String puuid = summonerService.getPuuidByRiotId(gameName, tagLine);
+        AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
+        String puuid = account.getPuuid();
+
+        List<String> matchIds = summonerService.getRecentMatchIds(puuid, 1);
+        assertFalse(matchIds.isEmpty(), "매치 기록이 없습니다");
+
+        String firstMatchId = matchIds.get(0);
+        MatchDetailDto matchDetail = summonerService.getMatchDetail(firstMatchId);
 
         // then
-        assertNotNull(puuid);
-        assertFalse(puuid.isEmpty());
-        assertTrue(puuid.length() > 50); // PUUID는 보통 78자 정도
+        assertNotNull(matchDetail);
+        assertNotNull(matchDetail.getMetadata());
+        assertNotNull(matchDetail.getInfo());
+        assertEquals(firstMatchId, matchDetail.getMetadata().getMatchId());
+        assertEquals(10, matchDetail.getInfo().getParticipants().size());
 
-        System.out.println("=== 추출된 PUUID ===");
-        System.out.println("PUUID: " + puuid);
-        System.out.println("PUUID 길이: " + puuid.length());
+        System.out.println("=== 매치 상세 정보 ===");
+        System.out.println("Match ID: " + matchDetail.getMetadata().getMatchId());
+        System.out.println("게임 모드: " + matchDetail.getInfo().getGameMode());
+        System.out.println("게임 시간: " + matchDetail.getInfo().getGameDuration() + "초");
+        System.out.println("맵: " + matchDetail.getInfo().getMapId());
+
+        // 해당 플레이어 정보 찾기
+        MatchDetailDto.ParticipantDto playerInfo = matchDetail.getInfo().getParticipants().stream()
+                .filter(p -> p.getPuuid().equals(puuid))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(playerInfo, "플레이어 정보를 찾을 수 없습니다");
+
+        System.out.println("=== 플레이어 정보 ===");
+        System.out.println("챔피언: " + playerInfo.getChampionName());
+        System.out.println("KDA: " + playerInfo.getKills() + "/" + playerInfo.getDeaths() + "/" + playerInfo.getAssists());
+        System.out.println("승리: " + (playerInfo.isWin() ? "승리" : "패배"));
+        System.out.println("CS: " + (playerInfo.getTotalMinionsKilled() + playerInfo.getNeutralMinionsKilled()));
+        System.out.println("골드: " + playerInfo.getGoldEarned());
+        System.out.println("시야 점수: " + playerInfo.getVisionScore());
+        System.out.println("라인: " + playerInfo.getLane());
+        System.out.println("역할: " + playerInfo.getRole());
     }
-    @Test
-    void getLeagueEntriesByPuuid_directCall_shouldReturnLeagueInfo() {
-        // given
-        String gameName = "숨쉬머";
-        String tagLine = "KR1";
 
-        System.out.println("=== PUUID 직접 리그 조회 테스트 ===");
-
-        // when
-        String puuid = summonerService.getPuuidByRiotId(gameName, tagLine);
-        List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
-
-        // then
-        assertNotNull(leagueEntries);
-
-        System.out.println("=== 조회된 리그 정보 ===");
-        for (LeagueEntryDto entry : leagueEntries) {
-            System.out.println("Queue Type: " + entry.getQueueType());
-            System.out.println("Tier: " + entry.getTier() + " " + entry.getRank());
-            System.out.println("LP: " + entry.getLeaguePoints());
-            System.out.println("승/패: " + entry.getWins() + "승 " + entry.getLosses() + "패");
-            System.out.println("---");
-        }
-    }
-    @Test
-    void getRecentMatchIds_shouldReturn10Matches() {
-        // given
-        String gameName = "땡야땡야땡야땡야";
-        String tagLine = "KR1";
-        int count = 10;
-
-        System.out.println("=== 최근 매치 ID 조회 테스트 ===");
-
-        // when
-        String puuid = summonerService.getPuuidByRiotId(gameName, tagLine);
-        List<String> matchIds = summonerService.getRecentMatchIds(puuid, count);
-
-        // then
-        assertNotNull(matchIds);
-        assertTrue(matchIds.size() <= count);  // 최대 10개
-        assertTrue(matchIds.size() > 0);       // 최소 1개는 있어야 함
-
-        System.out.println("=== 조회된 매치 ID 목록 ===");
-        for (int i = 0; i < matchIds.size(); i++) {
-            System.out.println((i + 1) + ". " + matchIds.get(i));
-            assertTrue(matchIds.get(i).startsWith("KR_"));  // 한국 서버 매치 ID 형식
-        }
-    }
+//    @Test
+//    void convertToGameSummary_shouldCreateSummary() {
+//        // given
+//        String gameName = "땡야땡야땡야땡야";
+//        String tagLine = "KR1";
+//
+//        // when
+//        AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
+//        String puuid = account.getPuuid();
+//
+//        List<String> matchIds = summonerService.getRecentMatchIds(puuid, 1);
+//        String firstMatchId = matchIds.get(0);
+//        MatchDetailDto matchDetail = summonerService.getMatchDetail(firstMatchId);
+//
+//        GameSummaryDto summary = ((SummonerServiceImpl) summonerService)
+//                .convertToGameSummary(matchDetail, puuid);
+//
+//        // then
+//        assertNotNull(summary);
+//        assertEquals(firstMatchId, summary.getMatchId());
+//        assertNotNull(summary.getChampionName());
+//        assertTrue(summary.getKills() >= 0);
+//        assertTrue(summary.getDeaths() >= 0);
+//        assertTrue(summary.getAssists() >= 0);
+//
+//        System.out.println("=== 게임 요약 정보 ===");
+//        System.out.println("챔피언: " + summary.getChampionName());
+//        System.out.println("KDA: " + summary.getKills() + "/" + summary.getDeaths() + "/" + summary.getAssists() + " (" + summary.getKda() + ")");
+//        System.out.println("결과: " + (summary.isWin() ? "승리" : "패배"));
+//        System.out.println("CS: " + summary.getCs());
+//        System.out.println("골드: " + summary.getGoldEarned());
+//    }
 
 }
