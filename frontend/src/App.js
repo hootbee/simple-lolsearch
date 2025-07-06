@@ -37,13 +37,12 @@ function App() {
       console.log('GameName:', gameName);
       console.log('TagLine:', tagLine);
 
-      // 1. 플레이어 프로필 조회 (계정 + 랭크 정보)
+      // 1. 플레이어 프로필 조회 (계정 + 랭크 + 소환사 정보)
       const profileData = await getPlayerProfile(gameName.trim(), tagLine);
       setPlayerProfile(profileData);
 
       console.log('=== 플레이어 프로필 조회 완료 ===');
-      console.log('Account:', profileData.account);
-      console.log('League Entries:', profileData.leagueEntries);
+      console.log('Profile Data:', profileData);
 
       // 2. 게임 기록 조회
       console.log('=== 게임 기록 조회 시작 ===');
@@ -96,8 +95,8 @@ function App() {
 
           {playerProfile && (
               <>
-                {/* 계정 정보 */}
-                <UserInfo account={playerProfile.account} />
+                {/* 플레이어 정보 (아이콘 + 레벨 포함) */}
+                <UserInfo playerProfile={playerProfile} />
 
                 {/* 랭크 정보 */}
                 <RankInfo leagueEntries={playerProfile.leagueEntries} />
