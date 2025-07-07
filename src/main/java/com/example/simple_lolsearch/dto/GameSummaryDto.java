@@ -20,4 +20,6 @@ public class GameSummaryDto {
     private int visionScore;
     private String lane;
     private String role;
+    private String gameDate;    // 포맷된 날짜 문자열
+    private long gameCreation;  // 게임 생성 시간 (밀리초)
 }

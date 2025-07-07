@@ -9,6 +9,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -102,6 +107,10 @@ public class SummonerServiceImpl implements SummonerService {
         String kda = calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists());
         int cs = participant.getTotalMinionsKilled() + participant.getNeutralMinionsKilled();
 
+        // 날짜 정보 추가
+        long gameCreation = match.getInfo().getGameCreation();
+        String formattedDate = formatGameDate(gameCreation);
+
         return GameSummaryDto.builder()
                 .matchId(match.getMetadata().getMatchId())
                 .championName(participant.getChampionName())
@@ -117,8 +126,11 @@ public class SummonerServiceImpl implements SummonerService {
                 .visionScore(participant.getVisionScore())
                 .lane(participant.getLane())
                 .role(participant.getRole())
+                .gameCreation(gameCreation)  // 추가
+                .gameDate(formattedDate)     // 추가
                 .build();
     }
+
 
     private String calculateKDA(int kills, int deaths, int assists) {
         if (deaths == 0) {
@@ -188,6 +200,35 @@ public class SummonerServiceImpl implements SummonerService {
         } catch (Exception e) {
             log.error("소환사 정보 조회 실패: {}", e.getMessage());
             throw new RuntimeException("소환사 정보를 조회할 수 없습니다: " + puuid, e);
+        }
+    }
+    // 날짜 포맷팅 헬퍼 메서드 수정
+    private String formatGameDate(long gameCreation) {
+        LocalDateTime gameTime = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(gameCreation),
+                ZoneId.of("Asia/Seoul")
+        );
+
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        Duration duration = Duration.between(gameTime, now);
+
+        long minutes = duration.toMinutes();
+        long hours = duration.toHours();
+        long days = duration.toDays();
+
+        if (minutes < 60) {
+            // 1시간 미만: 분 단위
+            return minutes + "분 전";
+        } else if (hours < 24) {
+            // 1일 미만: 시간 단위
+            return hours + "시간 전";
+        } else if (days <= 30) {
+            // 1개월 이내: 일 단위
+            return days + "일 전";
+        } else {
+            // 1개월 초과: 날짜 형식
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM월 dd일");
+            return gameTime.format(formatter);
         }
     }
 
