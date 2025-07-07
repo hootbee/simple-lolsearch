@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import ChampionImage from './ChampionImage';
 
@@ -76,23 +76,159 @@ const StatValue = styled.div`
 `;
 
 const Result = styled.span`
-  font-weight: bold;
-  color: ${props => props.win ? '#4caf50' : '#f44336'};
-  font-size: 1.1rem;
+    font-weight: bold;
+    color: ${props => props.win ? '#4caf50' : '#f44336'};
+    font-size: 1.1rem;
+`;
+
+// 게임 시간 정보를 표시하는 스타일 컴포넌트
+const TimeInfo = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+    gap: 4px;
+    position: relative;
+`;
+
+const RelativeTime = styled.div`
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #007bff;
+    background: rgba(0, 123, 255, 0.1);
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: help;
+    transition: all 0.2s ease;
+    text-align: center;
+
+    &:hover {
+        background: rgba(0, 123, 255, 0.2);
+        transform: scale(1.05);
+    }
+`;
+
+const GameMode = styled.div`
+    font-size: 0.75rem;
+    color: #666;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+`;
+
+// 커스텀 툴팁 스타일
+const Tooltip = styled.div`
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 5px;
+    opacity: ${props => props.show ? 1 : 0};
+    visibility: ${props => props.show ? 'visible' : 'hidden'};
+    transition: all 0.2s ease;
+    
+    /* 툴팁 화살표 */
+    &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: rgba(0, 0, 0, 0.9);
+    }
 `;
 
 const GameHistoryItem = ({ game }) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+
     const formatDuration = (seconds) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
+    // 백업용 상대적 시간 계산 함수
+    const calculateTimeAgo = (timestamp) => {
+        if (!timestamp) return '시간 정보 없음';
+
+        const now = new Date();
+        const gameTime = new Date(timestamp);
+        const diffMs = now - gameTime;
+
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffMinutes < 60) {
+            return `${diffMinutes}분 전`;
+        } else if (diffHours < 24) {
+            return `${diffHours}시간 전`;
+        } else if (diffDays <= 30) {
+            return `${diffDays}일 전`;
+        } else {
+            return gameTime.toLocaleDateString('ko-KR', {
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    };
+
+    // 상대적 시간 표시 로직
+    const getRelativeTime = () => {
+        // 1순위: 백엔드에서 제공하는 relativeTime 필드 사용
+        if (game.relativeTime) {
+            return game.relativeTime;
+        }
+
+        // 2순위: 백엔드에서 제공하는 gameDate 필드 사용 (기존 호환성)
+        if (game.gameDate && !game.gameDate.includes('-')) {
+            return game.gameDate;
+        }
+
+        // 3순위: 프론트엔드에서 직접 계산 (백업)
+        if (game.gameCreation) {
+            return calculateTimeAgo(game.gameCreation);
+        }
+
+        return '시간 정보 없음';
+    };
+
+    // 호버 시 표시할 상세 시간 정보
+    const getDetailedTime = () => {
+        // 백엔드에서 제공하는 detailedTime 사용
+        if (game.detailedTime) {
+            return game.detailedTime;
+        }
+
+        // 백업: gameCreation으로 계산
+        if (game.gameCreation) {
+            const date = new Date(game.gameCreation);
+            return date.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Asia/Seoul'
+            });
+        }
+
+        return '상세 시간 정보 없음';
+    };
+
     return (
         <GameCard win={game.win}>
             <GameInfo>
                 <ChampionInfo>
-                    {/* 챔피언 이미지로 변경 */}
                     <ChampionImage
                         championName={game.championName}
                         size="48px"
@@ -113,7 +249,7 @@ const GameHistoryItem = ({ game }) => {
                 </Stat>
                 <Stat>
                     <StatLabel>골드</StatLabel>
-                    <StatValue>{game.goldEarned.toLocaleString()}</StatValue>
+                    <StatValue>{game.goldEarned?.toLocaleString()}</StatValue>
                 </Stat>
                 <Stat>
                     <StatLabel>시야</StatLabel>
@@ -123,6 +259,24 @@ const GameHistoryItem = ({ game }) => {
                     <StatLabel>시간</StatLabel>
                     <StatValue>{formatDuration(game.gameDuration)}</StatValue>
                 </Stat>
+
+                {/* 상대적 시간 정보 표시 - 커스텀 툴팁 추가 */}
+                <TimeInfo>
+                    <RelativeTime
+                        onMouseEnter={() => setShowTooltip(true)}
+                        onMouseLeave={() => setShowTooltip(false)}
+                    >
+                        {getRelativeTime()}
+                    </RelativeTime>
+
+                    {/* 커스텀 툴팁 */}
+                    <Tooltip show={showTooltip}>
+                        {getDetailedTime()}
+                    </Tooltip>
+
+                    <GameMode>{game.gameMode}</GameMode>
+                </TimeInfo>
+
                 <Result win={game.win}>{game.win ? '승리' : '패배'}</Result>
             </GameStats>
         </GameCard>
