@@ -2,7 +2,6 @@ package com.example.simple_lolsearch.dto;
 
 import lombok.Builder;
 import lombok.Data;
-
 import java.util.List;
 
 @Data
@@ -22,10 +21,20 @@ public class GameSummaryDto {
     private int visionScore;
     private String lane;
     private String role;
-    private String gameDate;    // 포맷된 날짜 문자열
-    private long gameCreation;  // 게임 생성 시간 (밀리초)
-    private String relativeTime;    // 상대적 시간 ("20일 전", "3시간 전") - 새로 추가
+    private String gameDate;
+    private long gameCreation;
+    private String relativeTime;
     private String detailedTime;
     private List<Integer> items;
     private int trinket;
+
+    private int summonerSpell1Id;
+    private int summonerSpell2Id;
+
+    // 룬 정보
+    private int keystoneId;
+    private int primaryRuneTree;
+    private int secondaryRuneTree;
+    private List<Integer> runes;      // 전체 룬 ID
+    private List<Integer> statRunes;  // 스탯 룬 ID
 }

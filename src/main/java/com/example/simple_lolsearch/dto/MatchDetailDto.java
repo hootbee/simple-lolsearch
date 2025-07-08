@@ -57,6 +57,44 @@ public class MatchDetailDto {
         private String lane;
         private String role;
         private int teamId;
+
+        private int summoner1Id;
+        private int summoner2Id;
+
+        // 실제 구조: PerksDto로 받기
+        private PerksDto perks;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PerksDto {
+        private PerkStatsDto statPerks;
+        private List<PerkStyleDto> styles;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PerkStatsDto {
+        private int defense;
+        private int flex;
+        private int offense;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PerkStyleDto {
+        private String description;
+        private List<PerkStyleSelectionDto> selections;
+        private int style;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PerkStyleSelectionDto {
+        private int perk;
+        private int var1;
+        private int var2;
+        private int var3;
     }
 
     @Data

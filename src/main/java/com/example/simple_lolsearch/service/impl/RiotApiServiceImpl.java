@@ -73,6 +73,7 @@ public class RiotApiServiceImpl implements RiotApiService {
                     .retrieve()
                     .bodyToMono(MatchDetailDto.class)
                     .block();
+
         } catch (Exception e) {
             log.error("매치 상세 정보 조회 실패: {}", e.getMessage());
             throw new RuntimeException("매치 상세 정보를 조회할 수 없습니다: " + matchId, e);
