@@ -1,5 +1,5 @@
 // Data Dragon 버전 (최신 버전으로 업데이트 필요)
-const DDRAGON_VERSION = '14.24.1';
+const DDRAGON_VERSION = '15.1.1';
 const ITEM_IMAGE_BASE_URL = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/`;
 
 /**
@@ -87,6 +87,14 @@ export const getItemName = (itemId) => {
         3020: '마법사의 신발',
         3047: '판금 장화',
         3111: '헤르메스의 발걸음',
+
+        // Triumphant Boots 업그레이드 (추정 ID - 실제 확인 필요)
+        224006: '무장진격', // Armored Advance (판금 장화 업그레이드)
+        224009: '신속행진', // Swiftmarch (신속의 장화 업그레이드)
+        224020: '주문술사의 신발', // Spellslinger's Shoes (마법사의 신발 업그레이드)
+        224047: '강화 판금 장화', // Enhanced Plated Steelcaps
+        224111: '강화 헤르메스의 발걸음', // Enhanced Mercury's Treads
+        224158: '강화 이오니아의 장화', // Enhanced Ionian Boots
 
         // 전설 아이템 (3000번대)
         3001: '심연의 가면',
@@ -250,6 +258,11 @@ export const getItemCategory = (itemId) => {
     // 신발류
     if ([3006, 3009, 3020, 3047, 3111, 3117, 3158].includes(itemId)) {
         return 'boots';
+    }
+
+    // 새로운 Triumphant Boots (Tier 3 신발)
+    if ([224006, 224009, 224020, 224047, 224111, 224158].includes(itemId)) {
+        return 'triumphant_boots';
     }
 
     // 시작 아이템
