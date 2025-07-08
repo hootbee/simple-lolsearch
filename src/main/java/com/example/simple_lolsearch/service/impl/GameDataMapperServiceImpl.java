@@ -7,6 +7,9 @@ import com.example.simple_lolsearch.service.TimeFormatterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class GameDataMapperServiceImpl implements GameDataMapperService {
@@ -22,6 +25,16 @@ public class GameDataMapperServiceImpl implements GameDataMapperService {
 
         String kda = calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists());
         int cs = participant.getTotalMinionsKilled() + participant.getNeutralMinionsKilled();
+
+        // 아이템 정보 처리
+        List<Integer> items = Arrays.asList(
+                participant.getItem0(),
+                participant.getItem1(),
+                participant.getItem2(),
+                participant.getItem3(),
+                participant.getItem4(),
+                participant.getItem5()
+        );
 
         // 시간 정보 처리 (TimeFormatterService 사용)
         long gameCreation = match.getInfo().getGameCreation();
@@ -48,6 +61,8 @@ public class GameDataMapperServiceImpl implements GameDataMapperService {
                 .gameDate(absoluteDate)
                 .relativeTime(relativeTime)
                 .detailedTime(detailedTime)
+                .items(items)
+                .trinket(participant.getItem6())
                 .build();
     }
 
