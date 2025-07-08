@@ -111,85 +111,60 @@ export const getStatRuneInfo = (statId) =>
 /**
  * 룬 조합 분석
  */
-export const analyzeRuneCombination = (keystoneId, primaryTree, secondaryTree) => {
-    const keystone  = getKeystoneInfo(keystoneId);
-    const primary   = getRuneTreeInfo(primaryTree);
-    const secondary = getRuneTreeInfo(secondaryTree);
 
-    const comboKey  = `${primary.key.toLowerCase()}_${secondary.key.toLowerCase()}`;
-    const combo     = POPULAR_COMBOS[comboKey] ?? {
-        roles: ['특수'],
-        style: '실험적',
-        description: '드문 룬 조합'
-    };
-
-    return {
-        keystone: keystone.name,
-        primaryTree: primary.name,
-        secondaryTree: secondary.name,
-        combination: combo
-    };
-};
 
 /**
  * 키스톤 룬 이미지 URL 생성
  */
 export const getKeystoneImageUrl = (runeId) => {
-    const baseUrl = 'https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles';
+    // Community Dragon API 사용 (더 안정적)
+    const baseUrl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/perk-images/styles';
+
     const keystoneImages = {
-        // 정밀
-        8005: `${baseUrl}/Precision/PressTheAttack/PressTheAttack.png`,
-        8008: `${baseUrl}/Precision/LethalTempo/LethalTempoTemp.png`,
-        8021: `${baseUrl}/Precision/FleetFootwork/FleetFootwork.png`,
-        8010: `${baseUrl}/Precision/Conqueror/Conqueror.png`,
+        // 정밀 (Precision)
+        8005: `${baseUrl}/precision/presstheattack/presstheattack.png`,
+        8008: `${baseUrl}/precision/lethaltempo/lethaltempotemp.png`,
+        8021: `${baseUrl}/precision/fleetfootwork/fleetfootwork.png`,
+        8010: `${baseUrl}/precision/conqueror/conqueror.png`,
 
-        // 지배
-        8112: `${baseUrl}/Domination/Electrocute/Electrocute.png`,
-        8124: `${baseUrl}/Domination/Predator/Predator.png`,
-        8128: `${baseUrl}/Domination/DarkHarvest/DarkHarvest.png`,
-        9923: `${baseUrl}/Domination/HailOfBlades/HailOfBlades.png`,
+        // 지배 (Domination)
+        8112: `${baseUrl}/domination/electrocute/electrocute.png`,
+        8124: `${baseUrl}/domination/predator/predator.png`,
+        8128: `${baseUrl}/domination/darkharvest/darkharvest.png`,
+        9923: `${baseUrl}/domination/hailofblades/hailofblades.png`,
 
-        // 마법
-        8214: `${baseUrl}/Sorcery/SummonAery/SummonAery.png`,
-        8229: `${baseUrl}/Sorcery/ArcaneComet/ArcaneComet.png`,
-        8230: `${baseUrl}/Sorcery/PhaseRush/PhaseRush.png`,
+        // 마법 (Sorcery)
+        8214: `${baseUrl}/sorcery/summonaery/summonaery.png`,
+        8229: `${baseUrl}/sorcery/arcanecomet/arcanecomet.png`,
+        8230: `${baseUrl}/sorcery/phaserush/phaserush.png`,
 
-        // 결의
-        8437: `${baseUrl}/Resolve/GraspOfTheUndying/GraspOfTheUndying.png`,
-        8439: `${baseUrl}/Resolve/VeteranAftershock/VeteranAftershock.png`,
-        8465: `${baseUrl}/Resolve/Guardian/Guardian.png`,
+        // 결의 (Resolve)
+        8437: `${baseUrl}/resolve/graspoftheundying/graspoftheundying.png`,
+        8439: `${baseUrl}/resolve/veteranaftershock/veteranaftershock.png`,
+        8465: `${baseUrl}/resolve/guardian/guardian.png`,
 
-        // 영감
-        8351: `${baseUrl}/Inspiration/GlacialAugment/GlacialAugment.png`,
-        8360: `${baseUrl}/Inspiration/UnsealedSpellbook/UnsealedSpellbook.png`,
-        8369: `${baseUrl}/Inspiration/FirstStrike/FirstStrike.png`
+        // 영감 (Inspiration)
+        8351: `${baseUrl}/inspiration/glacialaugment/glacialaugment.png`,
+        8360: `${baseUrl}/inspiration/unsealedspellbook/unsealedspellbook.png`,
+        8369: `${baseUrl}/inspiration/firststrike/firststrike.png`
     };
 
-    return keystoneImages[runeId] || `${baseUrl}/7201_Precision.png`;
+    return keystoneImages[runeId] || `${baseUrl}/precision/conqueror/conqueror.png`;
 };
 
 /**
- * 룬 트리 이미지 URL 생성
+ * 룬 트리 이미지 URL 생성 (수정된 버전)
  */
 export const getRuneTreeImageUrl = (treeId) => {
-    const baseUrl = 'https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles';
+    const baseUrl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/perk-images/styles';
+
     const treeImages = {
-        8000: `${baseUrl}/7201_Precision.png`,
-        8100: `${baseUrl}/7200_Domination.png`,
-        8200: `${baseUrl}/7202_Sorcery.png`,
-        8300: `${baseUrl}/7204_Resolve.png`,
-        8400: `${baseUrl}/7203_Whimsy.png`
+        8000: `${baseUrl}/7201_precision.png`,
+        8100: `${baseUrl}/7200_domination.png`,
+        8200: `${baseUrl}/7202_sorcery.png`,
+        8300: `${baseUrl}/7204_resolve.png`,
+        8400: `${baseUrl}/7203_whimsy.png`
     };
 
-    return treeImages[treeId] || `${baseUrl}/7201_Precision.png`;
+    return treeImages[treeId] || `${baseUrl}/7201_precision.png`;
 };
-
-/**
- * 룬 트리별 색상 가져오기
- */
-export const getRuneTreeColor = (treeId) => getRuneTreeInfo(treeId).color;
-
-/**
- * 키스톤 룬 이름 가져오기
- */
-export const getKeystoneName = (runeId) => getKeystoneInfo(runeId).name;

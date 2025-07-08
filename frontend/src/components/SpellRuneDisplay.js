@@ -8,9 +8,8 @@ import {
 import {
     getKeystoneInfo,
     getRuneTreeInfo,
-    getStatRuneInfo,
-    getKeystoneImageUrl,    // ← 새로 추가
-    getRuneTreeImageUrl     // ← 새로 추가
+    getKeystoneImageUrl,
+    getRuneTreeImageUrl
 } from '../utils/RuneUtils';
 
 /* ---------- Styled Components ---------- */
@@ -43,13 +42,13 @@ const SpellImage = styled.img`
 const RunesContainer = styled.div`
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 6px;  /* 간격 조정 */
 `;
 
 // 키스톤을 실제 이미지로 표시
 const KeystoneImage = styled.img`
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     border: 2px solid ${({ borderColor }) => borderColor || '#c89b3c'};
     cursor: help;
@@ -61,28 +60,14 @@ const KeystoneImage = styled.img`
 
 // 룬 트리를 실제 이미지로 표시
 const RuneTreeImage = styled.img`
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     border: 1px solid #fff;
     cursor: help;
 
     &:hover {
         transform: scale(1.1);
-    }
-`;
-
-const StatRunes = styled.div`
-    display: flex;
-    gap: 2px;
-    font-size: 0.6rem;
-`;
-
-const StatRune = styled.span`
-    cursor: help;
-
-    &:hover {
-        transform: scale(1.2);
     }
 `;
 
@@ -93,7 +78,7 @@ const SpellRuneDisplay = ({
                               keystoneId,
                               primaryRuneTree,
                               secondaryRuneTree,
-                              statRunes = []
+                              statRunes = []  // 사용하지 않지만 props는 유지
                           }) => {
     const spell1Info = getSummonerSpellInfo(summonerSpell1Id);
     const spell2Info = getSummonerSpellInfo(summonerSpell2Id);
@@ -123,25 +108,32 @@ const SpellRuneDisplay = ({
                 />
             </SpellsContainer>
 
-            {/* 룬 정보 - 실제 이미지 사용 */}
+            {/* 룬 정보 - 키스톤 + 보조 룬 트리만 */}
             <RunesContainer>
+                {/* 키스톤 룬 이미지 (감전, 정복자 등) */}
                 <KeystoneImage
                     src={getKeystoneImageUrl(keystoneId)}
                     alt={keystoneInfo.name}
                     borderColor={primaryTreeInfo.color}
-                    title={`${keystoneInfo.name} - ${keystoneInfo.description}`}
+                    title={`${keystoneInfo.name} (${primaryTreeInfo.name})\n${keystoneInfo.description}`}
                     onError={(e) => {
                         e.target.src = getKeystoneImageUrl(8021); // 기본값: 정복자
                     }}
                 />
+
+                {/* 주 룬 트리 이미지 제거 - 이 부분을 삭제 */}
+                {/*
                 <RuneTreeImage
                     src={getRuneTreeImageUrl(primaryRuneTree)}
                     alt={primaryTreeInfo.name}
                     title={`주 룬: ${primaryTreeInfo.name} - ${primaryTreeInfo.description}`}
                     onError={(e) => {
-                        e.target.src = getRuneTreeImageUrl(8000); // 기본값: 정밀
+                        e.target.src = getRuneTreeImageUrl(8000);
                     }}
                 />
+                */}
+
+                {/* 보조 룬 트리 이미지만 유지 (결의, 영감 등) */}
                 <RuneTreeImage
                     src={getRuneTreeImageUrl(secondaryRuneTree)}
                     alt={secondaryTreeInfo.name}
@@ -152,7 +144,8 @@ const SpellRuneDisplay = ({
                 />
             </RunesContainer>
 
-            {/* 스탯 룬 */}
+            {/* 스탯 룬 완전 제거 */}
+            {/*
             {statRunes.length > 0 && (
                 <StatRunes>
                     {statRunes.map((statId, index) => {
@@ -168,6 +161,7 @@ const SpellRuneDisplay = ({
                     })}
                 </StatRunes>
             )}
+            */}
         </SpellRuneContainer>
     );
 };
