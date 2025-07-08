@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import ChampionImage from './ChampionImage';
+import ItemBuild from './ItemBuild';
+import {
+    getItemName,
+    getItemCategory,
+    getItemBorderColor,
+    calculateBuildCost,
+    getTotalItems
+} from '../utils/ItemUtils';
 
 const GameCard = styled.div`
     background: ${props => props.win ? '#e8f5e8' : '#ffeaea'};
@@ -24,6 +32,7 @@ const GameInfo = styled.div`
     display: flex;
     align-items: center;
     gap: 16px;
+    flex: 1;
 `;
 
 const ChampionInfo = styled.div`
@@ -43,16 +52,49 @@ const KDA = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 80px;
 `;
 
 const KDANumbers = styled.span`
     font-weight: bold;
     color: #333;
+    font-size: 1rem;
 `;
 
 const KDARatio = styled.span`
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #666;
+`;
+
+const ItemSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 200px;
+`;
+
+const ItemBuildContainer = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+`;
+
+const ItemInfo = styled.div`
+    display: flex;
+    gap: 8px;
+    font-size: 0.7rem;
+    color: #666;
+`;
+
+const ItemCount = styled.span`
+    color: #007bff;
+    font-weight: 500;
+`;
+
+const BuildCost = styled.span`
+    color: #f39c12;
+    font-weight: 500;
 `;
 
 const GameStats = styled.div`
@@ -63,6 +105,7 @@ const GameStats = styled.div`
 
 const Stat = styled.div`
     text-align: center;
+    min-width: 50px;
 `;
 
 const StatLabel = styled.div`
@@ -73,22 +116,23 @@ const StatLabel = styled.div`
 const StatValue = styled.div`
     font-weight: bold;
     color: #333;
+    font-size: 0.9rem;
 `;
 
 const Result = styled.span`
     font-weight: bold;
     color: ${props => props.win ? '#4caf50' : '#f44336'};
     font-size: 1.1rem;
+    min-width: 50px;
+    text-align: center;
 `;
 
-// 게임 시간 정보를 표시하는 스타일 컴포넌트
 const TimeInfo = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
     min-width: 90px;
     gap: 4px;
-    position: relative;
 `;
 
 const RelativeTime = styled.div`
@@ -101,7 +145,7 @@ const RelativeTime = styled.div`
     cursor: help;
     transition: all 0.2s ease;
     text-align: center;
-
+    
     &:hover {
         background: rgba(0, 123, 255, 0.2);
         transform: scale(1.05);
@@ -117,7 +161,6 @@ const GameMode = styled.div`
     border-radius: 4px;
 `;
 
-// 커스텀 툴팁 스타일
 const Tooltip = styled.div`
     position: absolute;
     bottom: 100%;
@@ -134,8 +177,7 @@ const Tooltip = styled.div`
     opacity: ${props => props.show ? 1 : 0};
     visibility: ${props => props.show ? 'visible' : 'hidden'};
     transition: all 0.2s ease;
-    
-    /* 툴팁 화살표 */
+
     &::after {
         content: '';
         position: absolute;
@@ -156,7 +198,6 @@ const GameHistoryItem = ({ game }) => {
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
-    // 백업용 상대적 시간 계산 함수
     const calculateTimeAgo = (timestamp) => {
         if (!timestamp) return '시간 정보 없음';
 
@@ -175,26 +216,23 @@ const GameHistoryItem = ({ game }) => {
         } else if (diffDays <= 30) {
             return `${diffDays}일 전`;
         } else {
-            return gameTime.toLocaleDateString('ko-KR', {
-                month: 'long',
-                day: 'numeric'
-            });
+            return "30일 이전";
         }
     };
 
-    // 상대적 시간 표시 로직
     const getRelativeTime = () => {
-        // 1순위: 백엔드에서 제공하는 relativeTime 필드 사용
         if (game.relativeTime) {
             return game.relativeTime;
         }
 
-        // 2순위: 백엔드에서 제공하는 gameDate 필드 사용 (기존 호환성)
+        if (game.gameDate && (game.gameDate.includes('월') && game.gameDate.includes('일'))) {
+            return "30일 이전";
+        }
+
         if (game.gameDate && !game.gameDate.includes('-')) {
             return game.gameDate;
         }
 
-        // 3순위: 프론트엔드에서 직접 계산 (백업)
         if (game.gameCreation) {
             return calculateTimeAgo(game.gameCreation);
         }
@@ -202,14 +240,11 @@ const GameHistoryItem = ({ game }) => {
         return '시간 정보 없음';
     };
 
-    // 호버 시 표시할 상세 시간 정보
     const getDetailedTime = () => {
-        // 백엔드에서 제공하는 detailedTime 사용
         if (game.detailedTime) {
             return game.detailedTime;
         }
 
-        // 백업: gameCreation으로 계산
         if (game.gameCreation) {
             const date = new Date(game.gameCreation);
             return date.toLocaleString('ko-KR', {
@@ -224,6 +259,10 @@ const GameHistoryItem = ({ game }) => {
 
         return '상세 시간 정보 없음';
     };
+
+    // 아이템 관련 계산
+    const itemCount = getTotalItems(game.items || []);
+    const buildCost = calculateBuildCost(game.items || []);
 
     return (
         <GameCard win={game.win}>
@@ -240,6 +279,20 @@ const GameHistoryItem = ({ game }) => {
                     <KDANumbers>{game.kills}/{game.deaths}/{game.assists}</KDANumbers>
                     <KDARatio>{game.kda} KDA</KDARatio>
                 </KDA>
+
+                <ItemSection>
+                    <ItemBuildContainer>
+                        <ItemBuild
+                            items={game.items || []}
+                            trinket={game.trinket || 0}
+                            size={28}
+                        />
+                    </ItemBuildContainer>
+                    <ItemInfo>
+                        <ItemCount>{itemCount}/6 아이템</ItemCount>
+                        <BuildCost>{buildCost.toLocaleString()}G</BuildCost>
+                    </ItemInfo>
+                </ItemSection>
             </GameInfo>
 
             <GameStats>
@@ -260,7 +313,6 @@ const GameHistoryItem = ({ game }) => {
                     <StatValue>{formatDuration(game.gameDuration)}</StatValue>
                 </Stat>
 
-                {/* 상대적 시간 정보 표시 - 커스텀 툴팁 추가 */}
                 <TimeInfo>
                     <RelativeTime
                         onMouseEnter={() => setShowTooltip(true)}
@@ -269,7 +321,6 @@ const GameHistoryItem = ({ game }) => {
                         {getRelativeTime()}
                     </RelativeTime>
 
-                    {/* 커스텀 툴팁 */}
                     <Tooltip show={showTooltip}>
                         {getDetailedTime()}
                     </Tooltip>
