@@ -1,11 +1,11 @@
-import React, {useRef, useState} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import ChampionImage from './ChampionImage';
 import ItemBuild from './ItemBuild';
 import SpellRuneDisplay from './SpellRuneDisplay';
-import { calculateBuildCost, getTotalItems } from '../utils/ItemUtils';
 import ItemDetailModal from './ItemDetailModal';
-import {useEffect} from "react";
+import SpellDetailModal from './SpellDetailModal';
+import { calculateBuildCost, getTotalItems } from '../utils/ItemUtils';
 
 /* ---------- Styled Components ---------- */
 const GameCard = styled.div`
@@ -66,13 +66,13 @@ const StatsSection = styled.div`
 
 const StatItem = styled.div`
     text-align: center;
-    
+
     b {
         display: block;
         font-size: 0.8rem;
         color: #666;
     }
-    
+
     span {
         font-weight: bold;
         color: #333;
@@ -120,7 +120,7 @@ const Tooltip = styled.div`
     font-size: 0.75rem;
     white-space: nowrap;
     z-index: 1000;
-    
+
     &::after {
         content: '';
         position: absolute;
@@ -138,14 +138,19 @@ const ResultBadge = styled.div`
     font-size: 1.1rem;
 `;
 
+/* ---------- Component ---------- */
 const GameHistoryItem = ({ game }) => {
     const [showTooltip, setShowTooltip] = useState(false);
-    // 아이템 호버 상태 추가
+
+    // 아이템 호버 상태
     const [hoveredItemId, setHoveredItemId] = useState(null);
     const [showItemModal, setShowItemModal] = useState(false);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 }); // 마우스 위치 추가
 
-    // 타이머 관리를 위한 ref 추가
+    // 스펠 호버 상태
+    const [hoveredSpellId, setHoveredSpellId] = useState(null);
+    const [showSpellModal, setShowSpellModal] = useState(false);
+
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const hideTimeoutRef = useRef(null);
 
     // 게임 시간 포맷팅
@@ -169,9 +174,8 @@ const GameHistoryItem = ({ game }) => {
     const itemCount = getTotalItems(game.items || []);
     const buildCost = calculateBuildCost(game.items || []);
 
-    // 아이템 호버 핸들러 - 타이머 취소 로직 추가
+    // 아이템 호버 핸들러
     const handleItemHover = (itemId, event) => {
-        // 기존 타이머가 있다면 취소
         if (hideTimeoutRef.current) {
             clearTimeout(hideTimeoutRef.current);
             hideTimeoutRef.current = null;
@@ -180,15 +184,17 @@ const GameHistoryItem = ({ game }) => {
         setHoveredItemId(itemId);
         setMousePosition({ x: event.clientX, y: event.clientY });
         setShowItemModal(true);
+
+        // 스펠 모달이 열려있다면 닫기
+        setShowSpellModal(false);
+        setHoveredSpellId(null);
     };
 
     const handleItemHoverEnd = () => {
-        // 기존 타이머가 있다면 취소
         if (hideTimeoutRef.current) {
             clearTimeout(hideTimeoutRef.current);
         }
 
-        // 새로운 타이머 설정
         hideTimeoutRef.current = setTimeout(() => {
             setShowItemModal(false);
             setHoveredItemId(null);
@@ -196,8 +202,35 @@ const GameHistoryItem = ({ game }) => {
         }, 100);
     };
 
+    // 스펠 호버 핸들러
+    const handleSpellHover = (spellId, event) => {
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+            hideTimeoutRef.current = null;
+        }
+
+        setHoveredSpellId(spellId);
+        setMousePosition({ x: event.clientX, y: event.clientY });
+        setShowSpellModal(true);
+
+        // 아이템 모달이 열려있다면 닫기
+        setShowItemModal(false);
+        setHoveredItemId(null);
+    };
+
+    const handleSpellHoverEnd = () => {
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+        }
+
+        hideTimeoutRef.current = setTimeout(() => {
+            setShowSpellModal(false);
+            setHoveredSpellId(null);
+            hideTimeoutRef.current = null;
+        }, 100);
+    };
+
     const handleModalClose = () => {
-        // 타이머 취소
         if (hideTimeoutRef.current) {
             clearTimeout(hideTimeoutRef.current);
             hideTimeoutRef.current = null;
@@ -205,6 +238,8 @@ const GameHistoryItem = ({ game }) => {
 
         setShowItemModal(false);
         setHoveredItemId(null);
+        setShowSpellModal(false);
+        setHoveredSpellId(null);
     };
 
     // 컴포넌트 언마운트 시 타이머 정리
@@ -238,9 +273,11 @@ const GameHistoryItem = ({ game }) => {
                     primaryRuneTree={game.primaryRuneTree}
                     secondaryRuneTree={game.secondaryRuneTree}
                     statRunes={game.statRunes}
+                    onSpellHover={handleSpellHover}
+                    onSpellHoverEnd={handleSpellHoverEnd}
                 />
 
-                {/* 아이템 빌드 - 호버 핸들러 추가 */}
+                {/* 아이템 빌드 */}
                 <ItemSection>
                     <ItemBuild
                         items={game.items || []}
@@ -298,10 +335,18 @@ const GameHistoryItem = ({ game }) => {
                 </ResultBadge>
             </GameCard>
 
-            {/* 아이템 상세 모달 - 마우스 위치 전달 */}
+            {/* 아이템 상세 모달 */}
             <ItemDetailModal
                 itemId={hoveredItemId}
                 isVisible={showItemModal}
+                mousePosition={mousePosition}
+                onClose={handleModalClose}
+            />
+
+            {/* 스펠 상세 모달 */}
+            <SpellDetailModal
+                spellId={hoveredSpellId}
+                isVisible={showSpellModal}
                 mousePosition={mousePosition}
                 onClose={handleModalClose}
             />

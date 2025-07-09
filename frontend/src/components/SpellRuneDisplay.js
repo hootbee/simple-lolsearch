@@ -12,6 +12,7 @@ import {
     getRuneTreeImageUrl
 } from '../utils/RuneUtils';
 
+
 /* ---------- Styled Components ---------- */
 const SpellRuneContainer = styled.div`
     display: flex;
@@ -78,7 +79,9 @@ const SpellRuneDisplay = ({
                               keystoneId,
                               primaryRuneTree,
                               secondaryRuneTree,
-                              statRunes = []  // 사용하지 않지만 props는 유지
+                              statRunes = [],
+                              onSpellHover,  // 부모에서 받을 핸들러
+                              onSpellHoverEnd // 부모에서 받을 핸들러
                           }) => {
     const spell1Info = getSummonerSpellInfo(summonerSpell1Id);
     const spell2Info = getSummonerSpellInfo(summonerSpell2Id);
@@ -88,12 +91,13 @@ const SpellRuneDisplay = ({
 
     return (
         <SpellRuneContainer>
-            {/* 소환사 주문 */}
+            {/* 소환사 주문 - 부모 핸들러 사용 */}
             <SpellsContainer>
                 <SpellImage
                     src={getSummonerSpellImageUrl(summonerSpell1Id)}
                     alt={spell1Info.name}
-                    title={`${spell1Info.name} - ${spell1Info.description}`}
+                    onMouseEnter={(e) => onSpellHover && onSpellHover(summonerSpell1Id, e)}
+                    onMouseLeave={() => onSpellHoverEnd && onSpellHoverEnd()}
                     onError={(e) => {
                         e.target.src = getSummonerSpellImageUrl(4);
                     }}
@@ -101,7 +105,8 @@ const SpellRuneDisplay = ({
                 <SpellImage
                     src={getSummonerSpellImageUrl(summonerSpell2Id)}
                     alt={spell2Info.name}
-                    title={`${spell2Info.name} - ${spell2Info.description}`}
+                    onMouseEnter={(e) => onSpellHover && onSpellHover(summonerSpell2Id, e)}
+                    onMouseLeave={() => onSpellHoverEnd && onSpellHoverEnd()}
                     onError={(e) => {
                         e.target.src = getSummonerSpellImageUrl(4);
                     }}
@@ -110,14 +115,13 @@ const SpellRuneDisplay = ({
 
             {/* 룬 정보 - 키스톤 + 보조 룬 트리만 */}
             <RunesContainer>
-                {/* 키스톤 룬 이미지 (감전, 정복자 등) */}
                 <KeystoneImage
                     src={getKeystoneImageUrl(keystoneId)}
                     alt={keystoneInfo.name}
                     borderColor={primaryTreeInfo.color}
                     title={`${keystoneInfo.name} (${primaryTreeInfo.name})\n${keystoneInfo.description}`}
                     onError={(e) => {
-                        e.target.src = getKeystoneImageUrl(8021); // 기본값: 정복자
+                        e.target.src = getKeystoneImageUrl(8021);
                     }}
                 />
                 <RuneTreeImage
@@ -125,7 +129,7 @@ const SpellRuneDisplay = ({
                     alt={secondaryTreeInfo.name}
                     title={`보조 룬: ${secondaryTreeInfo.name} - ${secondaryTreeInfo.description}`}
                     onError={(e) => {
-                        e.target.src = getRuneTreeImageUrl(8300); // 기본값: 결의
+                        e.target.src = getRuneTreeImageUrl(8300);
                     }}
                 />
             </RunesContainer>
