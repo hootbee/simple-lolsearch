@@ -112,4 +112,88 @@ public class RiotApiServiceImpl implements RiotApiService {
             throw new RuntimeException("소환사 정보를 조회할 수 없습니다: " + puuid, e);
         }
     }
+
+    @Override
+    public RankInfo getRankInfo(String puuid) {
+        log.debug("PUUID로 랭크 정보 조회: {}", puuid);
+
+        try {
+            List<LeagueEntryDto> leagueEntries = getLeagueEntries(puuid);
+
+            if (leagueEntries == null || leagueEntries.isEmpty()) {
+                return createUnrankedInfo();
+            }
+
+            // 솔로랭크 우선 조회
+            LeagueEntryDto soloRank = leagueEntries.stream()
+                    .filter(entry -> "RANKED_SOLO_5x5".equals(entry.getQueueType()))
+                    .findFirst()
+                    .orElse(null);
+
+            // 솔로랭크가 없으면 자유랭크 조회
+            if (soloRank == null) {
+                soloRank = leagueEntries.stream()
+                        .filter(entry -> "RANKED_FLEX_SR".equals(entry.getQueueType()))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (soloRank == null) {
+                return createUnrankedInfo();
+            }
+
+            return RankInfo.builder()
+                    .tier(soloRank.getTier())
+                    .rank(soloRank.getRank())
+                    .leaguePoints(soloRank.getLeaguePoints())
+                    .queueType(soloRank.getQueueType())
+                    .fullRankString(formatRankString(soloRank))
+                    .build();
+
+        } catch (Exception e) {
+            log.error("랭크 정보 조회 실패: {}", e.getMessage());
+            return createUnrankedInfo();
+        }
+    }
+
+    @Override
+    public String getRankString(String puuid) {
+        RankInfo rankInfo = getRankInfo(puuid);
+        return rankInfo.getFullRankString();
+    }
+
+    private RankInfo createUnrankedInfo() {
+        return RankInfo.builder()
+                .tier("UNRANKED")
+                .rank("")
+                .leaguePoints(0)
+                .queueType("")
+                .fullRankString("언랭크")
+                .build();
+    }
+
+    private String formatRankString(LeagueEntryDto leagueEntry) {
+        String tierKorean = translateTierToKorean(leagueEntry.getTier());
+        String rankRoman = leagueEntry.getRank();
+        int lp = leagueEntry.getLeaguePoints();
+
+        return String.format("%s %s %dLP", tierKorean, rankRoman, lp);
+    }
+
+    private String translateTierToKorean(String tier) {
+        switch (tier.toUpperCase()) {
+            case "IRON": return "아이언";
+            case "BRONZE": return "브론즈";
+            case "SILVER": return "실버";
+            case "GOLD": return "골드";
+            case "PLATINUM": return "플래티넘";
+            case "EMERALD": return "에메랄드";
+            case "DIAMOND": return "다이아몬드";
+            case "MASTER": return "마스터";
+            case "GRANDMASTER": return "그랜드마스터";
+            case "CHALLENGER": return "챌린저";
+            default: return "언랭크";
+        }
+    }
+
 }

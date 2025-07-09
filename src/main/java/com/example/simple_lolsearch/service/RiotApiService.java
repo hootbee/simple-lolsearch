@@ -9,4 +9,7 @@ public interface RiotApiService {
     MatchDetailDto getMatchDetail(String matchId);
     List<LeagueEntryDto> getLeagueEntries(String puuid);
     SummonerDto getSummoner(String puuid);
+
+    RankInfo getRankInfo(String puuid);
+    String getRankString(String puuid);
 }

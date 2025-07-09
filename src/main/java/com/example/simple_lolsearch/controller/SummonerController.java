@@ -4,6 +4,7 @@ import com.example.simple_lolsearch.dto.*;
 import com.example.simple_lolsearch.service.SummonerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -142,6 +143,22 @@ public class SummonerController {
             return ResponseEntity.badRequest().build();
         }
     }
+    @GetMapping("/game-detail/{matchId}")
+    public ResponseEntity<ApiResponse<GameDetailDto>> getGameDetail(@PathVariable String matchId) {
+        log.info("게임 상세 분석 조회 요청: {}", matchId);
 
+        try {
+            GameDetailDto gameDetail = summonerService.getGameDetail(matchId);
+            return ResponseEntity.ok(ApiResponse.success(gameDetail));
+        } catch (RuntimeException e) {
+            log.error("게임 상세 분석 조회 실패: {}", matchId, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("게임 정보를 찾을 수 없습니다: " + matchId));
+        } catch (Exception e) {
+            log.error("게임 상세 분석 조회 중 예상치 못한 오류: {}", matchId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("서버 오류가 발생했습니다"));
+        }
+    }
 
 }

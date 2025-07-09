@@ -37,7 +37,7 @@ public class GameDetailDto {
     }
 
     @Data
-    @Builder
+    @Builder(toBuilder = true)
     public static class PlayerDetailDto {
         private String puuid;
         private String summonerName;

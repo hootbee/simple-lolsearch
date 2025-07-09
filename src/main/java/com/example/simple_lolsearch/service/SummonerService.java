@@ -15,5 +15,6 @@ public interface SummonerService {
 
     List<LeagueEntryDto> getLeagueEntriesByPuuid(String puuid);
     SummonerDto getSummonerByPuuid(String puuid);
+    GameDetailDto getGameDetail(String matchId);
 
 }
