@@ -1,8 +1,7 @@
 /* src/components/ItemSlot.jsx */
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { getItemImageUrl, getItemName } from '../utils/ItemUtils';
-import {useRef} from "react";
 
 const ItemSlotContainer = styled.div`
     width: ${props => props.size}px;
