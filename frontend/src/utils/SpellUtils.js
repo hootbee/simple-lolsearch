@@ -23,14 +23,3 @@ export const getSummonerSpellInfo = (id) => {
 export const getSummonerSpellImageUrl = (id) =>
     `${SPELL_IMAGE_BASE_URL}${getSummonerSpellInfo(id).img}`;
 
-export const analyzeSpellCombination = (id1, id2) => {
-    // 간단 예시 분석 ☞ 필요 시 확장
-    const comboKey = [id1, id2].sort((a, b) => a - b).join('-');
-    const meta = {
-        '4-7':  'ADC/서포터 메타',
-        '4-14': '미드/탑 메타',
-        '4-11': '정글 메타',
-        '4-12': '탑 메타'
-    };
-    return meta[comboKey] || '비표준 조합';
-};

@@ -50,29 +50,6 @@ const STATS = {
     5013: { name: '적응형 능력치', icon: '⚔️', value: '+9 적응형',      description: '높은 쪽 능력치 증가' }
 };
 
-// 룬 조합 분석 데이터
-const POPULAR_COMBOS = {
-    'precision_domination': {
-        roles: ['ADC', '정글', '탑'],
-        style: '공격적',
-        description: '딜링 + 기동성 극대화'
-    },
-    'sorcery_domination': {
-        roles: ['미드', 'AP 캐리'],
-        style: '폭발적',
-        description: '순간 폭딜에 최적화'
-    },
-    'resolve_precision': {
-        roles: ['탱커', '서포터'],
-        style: '균형',
-        description: '생존 + 지속딜'
-    },
-    'inspiration_resolve': {
-        roles: ['서포터', '유틸'],
-        style: '팀 기여',
-        description: '효용성 극대화'
-    }
-};
 
 // =================== EXPORT 함수들 ===================
 

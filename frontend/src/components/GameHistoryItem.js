@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, {useRef, useState} from 'react';
 import styled from 'styled-components';
 import ChampionImage from './ChampionImage';
 import ItemBuild from './ItemBuild';
 import SpellRuneDisplay from './SpellRuneDisplay';
 import { calculateBuildCost, getTotalItems } from '../utils/ItemUtils';
+import ItemDetailModal from './ItemDetailModal';
+import {useEffect} from "react";
 
 /* ---------- Styled Components ---------- */
 const GameCard = styled.div`
@@ -136,9 +138,15 @@ const ResultBadge = styled.div`
     font-size: 1.1rem;
 `;
 
-/* ---------- Component ---------- */
 const GameHistoryItem = ({ game }) => {
     const [showTooltip, setShowTooltip] = useState(false);
+    // 아이템 호버 상태 추가
+    const [hoveredItemId, setHoveredItemId] = useState(null);
+    const [showItemModal, setShowItemModal] = useState(false);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 }); // 마우스 위치 추가
+
+    // 타이머 관리를 위한 ref 추가
+    const hideTimeoutRef = useRef(null);
 
     // 게임 시간 포맷팅
     const formatDuration = (seconds) => {
@@ -161,84 +169,143 @@ const GameHistoryItem = ({ game }) => {
     const itemCount = getTotalItems(game.items || []);
     const buildCost = calculateBuildCost(game.items || []);
 
+    // 아이템 호버 핸들러 - 타이머 취소 로직 추가
+    const handleItemHover = (itemId, event) => {
+        // 기존 타이머가 있다면 취소
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+            hideTimeoutRef.current = null;
+        }
+
+        setHoveredItemId(itemId);
+        setMousePosition({ x: event.clientX, y: event.clientY });
+        setShowItemModal(true);
+    };
+
+    const handleItemHoverEnd = () => {
+        // 기존 타이머가 있다면 취소
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+        }
+
+        // 새로운 타이머 설정
+        hideTimeoutRef.current = setTimeout(() => {
+            setShowItemModal(false);
+            setHoveredItemId(null);
+            hideTimeoutRef.current = null;
+        }, 100);
+    };
+
+    const handleModalClose = () => {
+        // 타이머 취소
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+            hideTimeoutRef.current = null;
+        }
+
+        setShowItemModal(false);
+        setHoveredItemId(null);
+    };
+
+    // 컴포넌트 언마운트 시 타이머 정리
+    useEffect(() => {
+        return () => {
+            if (hideTimeoutRef.current) {
+                clearTimeout(hideTimeoutRef.current);
+            }
+        };
+    }, []);
+
     return (
-        <GameCard win={game.win}>
-            {/* 챔피언 정보 */}
-            <ChampionSection>
-                <ChampionImage championName={game.championName} size="48px" />
-                <ChampionInfo>
-                    <ChampionName>{game.championName}</ChampionName>
-                    <KDAInfo>
-                        {game.kills}/{game.deaths}/{game.assists} · {game.kda} KDA
-                    </KDAInfo>
-                </ChampionInfo>
-            </ChampionSection>
+        <>
+            <GameCard win={game.win}>
+                {/* 챔피언 정보 */}
+                <ChampionSection>
+                    <ChampionImage championName={game.championName} size="48px" />
+                    <ChampionInfo>
+                        <ChampionName>{game.championName}</ChampionName>
+                        <KDAInfo>
+                            {game.kills}/{game.deaths}/{game.assists} · {game.kda} KDA
+                        </KDAInfo>
+                    </ChampionInfo>
+                </ChampionSection>
 
-            {/* 스펠 & 룬 */}
-            <SpellRuneDisplay
-                summonerSpell1Id={game.summonerSpell1Id}
-                summonerSpell2Id={game.summonerSpell2Id}
-                keystoneId={game.keystoneId}
-                primaryRuneTree={game.primaryRuneTree}
-                secondaryRuneTree={game.secondaryRuneTree}
-                statRunes={game.statRunes}
-            />
-
-            {/* 아이템 빌드 */}
-            <ItemSection>
-                <ItemBuild
-                    items={game.items || []}
-                    trinket={game.trinket || 0}
-                    size={26}
+                {/* 스펠 & 룬 */}
+                <SpellRuneDisplay
+                    summonerSpell1Id={game.summonerSpell1Id}
+                    summonerSpell2Id={game.summonerSpell2Id}
+                    keystoneId={game.keystoneId}
+                    primaryRuneTree={game.primaryRuneTree}
+                    secondaryRuneTree={game.secondaryRuneTree}
+                    statRunes={game.statRunes}
                 />
-                <ItemStats>
-                    {itemCount}/6 아이템 · {buildCost.toLocaleString()}G
-                </ItemStats>
-            </ItemSection>
 
-            {/* 게임 스탯 */}
-            <StatsSection>
-                <StatItem>
-                    <b>CS</b>
-                    <span>{game.cs}</span>
-                </StatItem>
-                <StatItem>
-                    <b>골드</b>
-                    <span>{game.goldEarned?.toLocaleString()}</span>
-                </StatItem>
-                <StatItem>
-                    <b>시야</b>
-                    <span>{game.visionScore}</span>
-                </StatItem>
-                <StatItem>
-                    <b>시간</b>
-                    <span>{formatDuration(game.gameDuration)}</span>
-                </StatItem>
-            </StatsSection>
+                {/* 아이템 빌드 - 호버 핸들러 추가 */}
+                <ItemSection>
+                    <ItemBuild
+                        items={game.items || []}
+                        trinket={game.trinket || 0}
+                        size={26}
+                        onItemHover={handleItemHover}
+                        onItemHoverEnd={handleItemHoverEnd}
+                    />
+                    <ItemStats>
+                        {itemCount}/6 아이템 · {buildCost.toLocaleString()}G
+                    </ItemStats>
+                </ItemSection>
 
-            {/* 시간 정보 */}
-            <TimeSection>
-                <RelativeTime
-                    onMouseEnter={() => setShowTooltip(true)}
-                    onMouseLeave={() => setShowTooltip(false)}
-                >
-                    {getRelativeTime()}
-                </RelativeTime>
+                {/* 게임 스탯 */}
+                <StatsSection>
+                    <StatItem>
+                        <b>CS</b>
+                        <span>{game.cs}</span>
+                    </StatItem>
+                    <StatItem>
+                        <b>골드</b>
+                        <span>{game.goldEarned?.toLocaleString()}</span>
+                    </StatItem>
+                    <StatItem>
+                        <b>시야</b>
+                        <span>{game.visionScore}</span>
+                    </StatItem>
+                    <StatItem>
+                        <b>시간</b>
+                        <span>{formatDuration(game.gameDuration)}</span>
+                    </StatItem>
+                </StatsSection>
 
-                {showTooltip && (
-                    <Tooltip>
-                        {getDetailedTime()}
-                    </Tooltip>
-                )}
+                {/* 시간 정보 */}
+                <TimeSection>
+                    <RelativeTime
+                        onMouseEnter={() => setShowTooltip(true)}
+                        onMouseLeave={() => setShowTooltip(false)}
+                    >
+                        {getRelativeTime()}
+                    </RelativeTime>
 
-                <GameMode>{game.gameMode}</GameMode>
-            </TimeSection>
+                    {showTooltip && (
+                        <Tooltip>
+                            {getDetailedTime()}
+                        </Tooltip>
+                    )}
 
-            {/* 게임 결과 */}
-            <ResultBadge win={game.win}>
-                {game.win ? '승리' : '패배'}
-            </ResultBadge>
-        </GameCard>
+                    <GameMode>{game.gameMode}</GameMode>
+                </TimeSection>
+
+                {/* 게임 결과 */}
+                <ResultBadge win={game.win}>
+                    {game.win ? '승리' : '패배'}
+                </ResultBadge>
+            </GameCard>
+
+            {/* 아이템 상세 모달 - 마우스 위치 전달 */}
+            <ItemDetailModal
+                itemId={hoveredItemId}
+                isVisible={showItemModal}
+                mousePosition={mousePosition}
+                onClose={handleModalClose}
+            />
+        </>
     );
 };
 

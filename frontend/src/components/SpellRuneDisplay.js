@@ -120,20 +120,6 @@ const SpellRuneDisplay = ({
                         e.target.src = getKeystoneImageUrl(8021); // 기본값: 정복자
                     }}
                 />
-
-                {/* 주 룬 트리 이미지 제거 - 이 부분을 삭제 */}
-                {/*
-                <RuneTreeImage
-                    src={getRuneTreeImageUrl(primaryRuneTree)}
-                    alt={primaryTreeInfo.name}
-                    title={`주 룬: ${primaryTreeInfo.name} - ${primaryTreeInfo.description}`}
-                    onError={(e) => {
-                        e.target.src = getRuneTreeImageUrl(8000);
-                    }}
-                />
-                */}
-
-                {/* 보조 룬 트리 이미지만 유지 (결의, 영감 등) */}
                 <RuneTreeImage
                     src={getRuneTreeImageUrl(secondaryRuneTree)}
                     alt={secondaryTreeInfo.name}
@@ -143,25 +129,6 @@ const SpellRuneDisplay = ({
                     }}
                 />
             </RunesContainer>
-
-            {/* 스탯 룬 완전 제거 */}
-            {/*
-            {statRunes.length > 0 && (
-                <StatRunes>
-                    {statRunes.map((statId, index) => {
-                        const statInfo = getStatRuneInfo(statId);
-                        return (
-                            <StatRune
-                                key={index}
-                                title={`${statInfo.name} - ${statInfo.value}`}
-                            >
-                                {statInfo.icon}
-                            </StatRune>
-                        );
-                    })}
-                </StatRunes>
-            )}
-            */}
         </SpellRuneContainer>
     );
 };

@@ -163,12 +163,12 @@ export const getItemName = (itemId) => {
         3142: '요우무의 유령검',
         3143: '란두인의 예언',
         3144: '빌지워터 해적검',
-        3145: '헥스테크 총검',
-        3146: '헥스테크 총검',
+        3145: '마법공학 총검',
+        3146: '마법공학 총검',
         3147: '시간 왜곡 물약',
-        3152: '헥스테크 로켓 벨트',
+        3152: '마법 공학 로켓 벨트',
         3153: '몰락한 왕의 검',
-        3155: '헥스테크 건블레이드',
+        3155: '마법공학 총검',
         3156: '헤르메스의 시미터',
         3157: '존야의 모래시계',
         3158: '이오니아의 장화',
@@ -419,22 +419,64 @@ export const isActiveItem = (itemId) => {
     return activeItems.includes(itemId);
 };
 
-/**
- * 아이템 설명 (간단한 효과 설명)
- */
-export const getItemDescription = (itemId) => {
-    const descriptions = {
-        3031: '치명타 확률 +20%, 공격력 +70. 치명타 피해량 +35% 증가',
-        3078: '공격력, 공격속도, 마나, 체력, 이동속도 증가. 주문 검 효과',
-        3089: '주문력 +120. 주문력 +35% 증가',
-        3153: '공격력 +40, 공격속도 +25%. 적 현재 체력의 12% 물리 피해',
-        3157: '주문력 +65, 방어력 +45. 사용 시 2.5초간 무적',
-        6653: '주문력 +80, 체력 +300. 적에게 지속 피해 부여',
-        6655: '주문력 +80, 마나 +600. 스킬 사용 시 추가 피해',
-        6671: '공격력 +55, 공격속도 +20%. 치명타 확률 +20%',
-        6672: '공격력 +65, 공격속도 +25%. 세 번째 공격 시 추가 피해',
-        6673: '공격력 +70, 공격속도 +25%. 방어막 생성',
+export const getItemDetails = async (itemId) => {
+    if (!itemId || itemId === 0) return null;
+
+    try {
+        const response = await fetch(
+            `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/ko_KR/item.json`
+        );
+        const data = await response.json();
+        const item = data.data[itemId];
+
+        if (!item) return null;
+
+        return {
+            id: itemId,
+            name: item.name,
+            description: item.description,
+            plaintext: item.plaintext,
+            stats: item.stats,
+            gold: item.gold,
+            tags: item.tags,
+            image: `${ITEM_IMAGE_BASE_URL}${itemId}.png`
+        };
+    } catch (error) {
+        console.error('아이템 정보 로드 실패:', error);
+        return null;
+    }
+};
+
+export const cleanDescription = (description) => {
+    if (!description) return '';
+    return description
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .trim();
+};
+
+export const formatItemStats = (stats) => {
+    if (!stats) return [];
+
+    const statNames = {
+        FlatHPPoolMod: '체력',
+        FlatMPPoolMod: '마나',
+        FlatPhysicalDamageMod: '공격력',
+        FlatMagicDamageMod: '주문력',
+        FlatArmorMod: '방어력',
+        FlatSpellBlockMod: '마법 저항력',
+        FlatCritChanceMod: '치명타 확률',
+        FlatAttackSpeedMod: '공격속도',
+        FlatMovementSpeedMod: '이동속도',
+        PercentLifeStealMod: '생명력 흡수'
     };
 
-    return descriptions[itemId] || '아이템 효과 정보가 없습니다.';
+    return Object.entries(stats)
+        .map(([key, value]) => {
+            const name = statNames[key] || key;
+            const formattedValue = key.includes('Percent') ? `${(value * 100).toFixed(1)}%` : `+${value}`;
+            return { name, value: formattedValue };
+        });
 };
