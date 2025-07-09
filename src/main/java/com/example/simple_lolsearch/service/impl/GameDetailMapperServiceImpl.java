@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class GameDetailMapperServiceImpl implements GameDetailMapperService {
 
     private final TimeFormatterService timeFormatterService;
-    private final RiotApiService riotApiService;
 
     @Override
     public GameDetailDto mapToGameDetail(MatchDetailDto match) {
@@ -102,9 +101,6 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
         // 룬 정보 추출
         RuneInfo runeInfo = extractRuneInfo(participant.getPerks());
 
-        // 랭크 정보 조회
-        RankInfo rankInfo = getRankInfoSafely(participant.getPuuid());
-
         // 아이템 정보 추출
         List<Integer> items = extractItems(participant);
 
@@ -117,11 +113,11 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
                 .deaths(participant.getDeaths())
                 .assists(participant.getAssists())
                 .kda(calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists()))
-                .killParticipation(0.0) // 팀 정보 없이는 계산 불가, 별도 메서드 필요
+                .killParticipation(0.0)
                 .cs(participant.getTotalMinionsKilled() + participant.getNeutralMinionsKilled())
                 .goldEarned(participant.getGoldEarned())
                 .totalDamageDealtToChampions(participant.getTotalDamageDealtToChampions())
-                .totalDamageTaken(0) // DTO에 해당 필드가 없으면 0
+                .totalDamageTaken(0)
                 .visionScore(participant.getVisionScore())
                 .items(items)
                 .trinket(participant.getItem6())
@@ -134,6 +130,19 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
                 .statRunes(runeInfo.getStatRunes())
                 .lane(participant.getLane())
                 .role(participant.getRole())
+                // 랭크 정보는 기본값으로 설정
+                .tier("UNRANKED")
+                .rank("")
+                .leaguePoints(0)
+                .build();
+    }
+    public GameDetailDto.PlayerDetailDto mapToPlayerDetailWithRank(
+            MatchDetailDto.ParticipantDto participant,
+            RankInfo rankInfo
+    ) {
+        GameDetailDto.PlayerDetailDto basePlayer = mapToPlayerDetail(participant);
+
+        return basePlayer.toBuilder()
                 .tier(rankInfo.getTier())
                 .rank(rankInfo.getRank())
                 .leaguePoints(rankInfo.getLeaguePoints())
@@ -287,23 +296,7 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
         return String.format("%.2f", kda);
     }
 
-    /**
-     * 안전한 랭크 정보 조회
-     */
-    private RankInfo getRankInfoSafely(String puuid) {
-        try {
-            return riotApiService.getRankInfo(puuid);
-        } catch (Exception e) {
-            log.warn("랭크 정보 조회 실패 (PUUID: {}): {}", puuid, e.getMessage());
-            return RankInfo.builder()
-                    .tier("UNRANKED")
-                    .rank("")
-                    .leaguePoints(0)
-                    .queueType("")
-                    .fullRankString("언랭크")
-                    .build();
-        }
-    }
+
 
     // 기존 헬퍼 메서드들 (extractRuneInfo, extractItems, calculateKDA, getRankInfoSafely)
     // ... 이전 구현과 동일

@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class GameDetailDto {
     // 게임 기본 정보
     private String matchId;
@@ -26,7 +26,7 @@ public class GameDetailDto {
     private GameStatsDto gameStats;
 
     @Data
-    @Builder
+    @Builder(toBuilder = true)
     public static class TeamDetailDto {
         private int teamId;
         private boolean win;
