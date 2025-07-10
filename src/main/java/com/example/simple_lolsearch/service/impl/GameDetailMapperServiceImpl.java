@@ -295,9 +295,4 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
         double kda = (double)(kills + assists) / deaths;
         return String.format("%.2f", kda);
     }
-
-
-
-    // 기존 헬퍼 메서드들 (extractRuneInfo, extractItems, calculateKDA, getRankInfoSafely)
-    // ... 이전 구현과 동일
 }

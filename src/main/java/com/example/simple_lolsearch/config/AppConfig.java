@@ -71,12 +71,18 @@ public class AppConfig {
         return new GameDetailMapperServiceImpl(timeFormatterService);
     }
 
+    @Bean
+    public GameDetailEnhancementService gameDetailEnhancementService(
+            RiotApiService riotApiService,
+            GameDetailMapperService gameDetailMapperService) {
+        return new GameDetailEnhancementServiceImpl(riotApiService, gameDetailMapperService);
+    }
     // ✅ 수정된 코드: Spring이 관리하는 빈을 주입받음
     @Bean
     public SummonerService summonerService(
             RiotApiService riotApiService,
             GameDataMapperService gameDataMapperService,
-            GameDetailMapperService gameDetailMapperService) { // 파라미터로 주입받음
-        return new SummonerServiceImpl(riotApiService, gameDataMapperService, gameDetailMapperService);
+            GameDetailMapperService gameDetailMapperService,GameDetailEnhancementService gameDetailEnhancementService) { // 파라미터로 주입받음
+        return new SummonerServiceImpl(riotApiService, gameDataMapperService, gameDetailMapperService,gameDetailEnhancementService);
     }
 }

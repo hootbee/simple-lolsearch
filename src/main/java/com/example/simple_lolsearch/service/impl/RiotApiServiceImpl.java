@@ -159,10 +159,19 @@ public class RiotApiServiceImpl implements RiotApiService {
         }
     }
 
-    @Override
-    public String getRankString(String puuid) {
-        RankInfo rankInfo = getRankInfo(puuid);
-        return rankInfo.getFullRankString();
+    public RankInfo getRankInfoSafely(String puuid) {
+        try {
+            return getRankInfo(puuid);
+        } catch (Exception e) {
+            log.warn("랭크 정보 조회 실패 (PUUID: {}): {}", puuid, e.getMessage());
+            return RankInfo.builder()
+                    .tier("UNRANKED")
+                    .rank("")
+                    .leaguePoints(0)
+                    .queueType("")
+                    .fullRankString("언랭크")
+                    .build();
+        }
     }
 
 }

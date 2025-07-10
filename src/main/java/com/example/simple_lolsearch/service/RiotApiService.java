@@ -11,5 +11,5 @@ public interface RiotApiService {
     SummonerDto getSummoner(String puuid);
 
     RankInfo getRankInfo(String puuid);
-    String getRankString(String puuid);
+    RankInfo getRankInfoSafely(String puuid);
 }
