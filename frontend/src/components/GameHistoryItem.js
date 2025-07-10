@@ -6,6 +6,8 @@ import SpellRuneDisplay from './SpellRuneDisplay';
 import ItemDetailModal from './ItemDetailModal';
 import SpellDetailModal from './SpellDetailModal';
 import { calculateBuildCost, getTotalItems } from '../utils/ItemUtils';
+import GameDetailView from "./GameDetailView";
+import {getGameDetail} from "../services/api";
 
 /* ---------- Styled Components ---------- */
 const GameCard = styled.div`
@@ -138,6 +140,56 @@ const ResultBadge = styled.div`
     font-size: 1.1rem;
 `;
 
+const GameDetailContainer = styled.div`
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    
+    ${({ isExpanded }) => !isExpanded && `
+        max-height: 0;
+        border: none;
+        margin-bottom: 0;
+    `}
+`;
+
+const LoadingSpinner = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    color: #666;
+    
+    &::after {
+        content: '';
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+
+const ErrorMessage = styled.div`
+    padding: 20px;
+    text-align: center;
+    color: #dc3545;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    margin: 10px;
+    border-radius: 4px;
+`;
+
+
 /* ---------- Component ---------- */
 const GameHistoryItem = ({ game }) => {
     const [showTooltip, setShowTooltip] = useState(false);
@@ -152,6 +204,11 @@ const GameHistoryItem = ({ game }) => {
 
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const hideTimeoutRef = useRef(null);
+
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [gameDetail, setGameDetail] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     // 게임 시간 포맷팅
     const formatDuration = (seconds) => {
@@ -251,9 +308,43 @@ const GameHistoryItem = ({ game }) => {
         };
     }, []);
 
+    const handleGameCardClick = async (e) => {
+        // 아이템이나 스펠 호버 시에는 게임 상세 내역을 열지 않음
+        if (e.target.closest('[data-hover-element]')) {
+            return;
+        }
+
+        if (!isExpanded) {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const result = await getGameDetail(game.matchId);
+
+                if (result.success) {
+                    setGameDetail(result.data);
+                    setIsExpanded(true);
+                } else {
+                    setError(result.error || '게임 상세 정보를 불러올 수 없습니다.');
+                }
+            } catch (err) {
+                setError('네트워크 오류가 발생했습니다.');
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            setIsExpanded(false);
+            setGameDetail(null);
+        }
+    };
+
     return (
         <>
-            <GameCard win={game.win}>
+            <GameCard
+                win={game.win}
+                isExpanded={isExpanded}
+                onClick={handleGameCardClick}
+            >
                 {/* 챔피언 정보 */}
                 <ChampionSection>
                     <ChampionImage championName={game.championName} size="48px" />
@@ -266,26 +357,30 @@ const GameHistoryItem = ({ game }) => {
                 </ChampionSection>
 
                 {/* 스펠 & 룬 */}
-                <SpellRuneDisplay
-                    summonerSpell1Id={game.summonerSpell1Id}
-                    summonerSpell2Id={game.summonerSpell2Id}
-                    keystoneId={game.keystoneId}
-                    primaryRuneTree={game.primaryRuneTree}
-                    secondaryRuneTree={game.secondaryRuneTree}
-                    statRunes={game.statRunes}
-                    onSpellHover={handleSpellHover}
-                    onSpellHoverEnd={handleSpellHoverEnd}
-                />
+                <div data-hover-element>
+                    <SpellRuneDisplay
+                        summonerSpell1Id={game.summonerSpell1Id}
+                        summonerSpell2Id={game.summonerSpell2Id}
+                        keystoneId={game.keystoneId}
+                        primaryRuneTree={game.primaryRuneTree}
+                        secondaryRuneTree={game.secondaryRuneTree}
+                        statRunes={game.statRunes}
+                        onSpellHover={handleSpellHover}
+                        onSpellHoverEnd={handleSpellHoverEnd}
+                    />
+                </div>
 
                 {/* 아이템 빌드 */}
                 <ItemSection>
-                    <ItemBuild
-                        items={game.items || []}
-                        trinket={game.trinket || 0}
-                        size={26}
-                        onItemHover={handleItemHover}
-                        onItemHoverEnd={handleItemHoverEnd}
-                    />
+                    <div data-hover-element>
+                        <ItemBuild
+                            items={game.items || []}
+                            trinket={game.trinket || 0}
+                            size={26}
+                            onItemHover={handleItemHover}
+                            onItemHoverEnd={handleItemHoverEnd}
+                        />
+                    </div>
                     <ItemStats>
                         {itemCount}/6 아이템 · {buildCost.toLocaleString()}G
                     </ItemStats>
@@ -335,7 +430,14 @@ const GameHistoryItem = ({ game }) => {
                 </ResultBadge>
             </GameCard>
 
-            {/* 아이템 상세 모달 */}
+            {/* 게임 상세 내역 컨테이너 */}
+            <GameDetailContainer isExpanded={isExpanded}>
+                {loading && <LoadingSpinner />}
+                {error && <ErrorMessage>{error}</ErrorMessage>}
+                {gameDetail && <GameDetailView gameDetail={gameDetail} />}
+            </GameDetailContainer>
+
+            {/* 기존 모달들 */}
             <ItemDetailModal
                 itemId={hoveredItemId}
                 isVisible={showItemModal}
@@ -343,7 +445,6 @@ const GameHistoryItem = ({ game }) => {
                 onClose={handleModalClose}
             />
 
-            {/* 스펠 상세 모달 */}
             <SpellDetailModal
                 spellId={hoveredSpellId}
                 isVisible={showSpellModal}

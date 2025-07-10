@@ -55,3 +55,7 @@ export const getGameHistory = async (gameName, tagLine, count = 20) => {
     });
     return response.data;
 };
+export const getGameDetail = async (matchId) => {
+    const response = await api.get(`/summoner/game-detail/${matchId}`);
+    return response.data;
+};
