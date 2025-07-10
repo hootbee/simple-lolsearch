@@ -35,7 +35,8 @@ public class MatchDetailDto {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ParticipantDto {
         private String puuid;
-        private String summonerName;
+        private String riotIdGameName;
+        private String riotIdTagline;
         private String championName;
         private int championId;
         private int kills;

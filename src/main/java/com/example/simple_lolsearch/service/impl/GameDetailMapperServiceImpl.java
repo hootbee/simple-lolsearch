@@ -104,9 +104,11 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
         // 아이템 정보 추출
         List<Integer> items = extractItems(participant);
 
+        String displayName=getDisplayName(participant);
+
         return GameDetailDto.PlayerDetailDto.builder()
                 .puuid(participant.getPuuid())
-                .summonerName(participant.getSummonerName())
+                .riotIdGameName(displayName)
                 .championName(participant.getChampionName())
                 .championId(participant.getChampionId())
                 .kills(participant.getKills())
@@ -295,4 +297,24 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
         double kda = (double)(kills + assists) / deaths;
         return String.format("%.2f", kda);
     }
+    private String getDisplayName(MatchDetailDto.ParticipantDto participant) {
+        // 2. Riot ID가 있으면 사용
+        if (participant.getRiotIdGameName() != null &&
+                !participant.getRiotIdGameName().trim().isEmpty()) {
+            String tagline = participant.getRiotIdTagline();
+            if (tagline != null && !tagline.trim().isEmpty()) {
+                return participant.getRiotIdGameName() + "#" + tagline;
+            }
+            return participant.getRiotIdGameName();
+        }
+
+        // 3. 둘 다 없으면 PUUID의 일부 사용
+        String puuid = participant.getPuuid();
+        if (puuid != null && puuid.length() > 8) {
+            return "Player_" + puuid.substring(0, 8);
+        }
+
+        return "Unknown Player";
+    }
+
 }

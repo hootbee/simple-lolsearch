@@ -40,7 +40,7 @@ public class GameDetailDto {
     @Builder(toBuilder = true)
     public static class PlayerDetailDto {
         private String puuid;
-        private String summonerName;
+        private String riotIdGameName;
         private String championName;
         private int championId;
 
