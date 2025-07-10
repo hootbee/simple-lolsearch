@@ -41,6 +41,7 @@ public class GameDetailDto {
     public static class PlayerDetailDto {
         private String puuid;
         private String riotIdGameName;
+        private String riotIdTagline;
         private String championName;
         private int championId;
 
