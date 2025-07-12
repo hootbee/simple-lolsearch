@@ -8,7 +8,7 @@ public interface RiotApiService {
     List<String> getMatchIds(String puuid, int count);
     MatchDetailDto getMatchDetail(String matchId);
     List<LeagueEntryDto> getLeagueEntries(String puuid);
-    SummonerDto getSummoner(String puuid);
+    PlayerProfileDto getSummoner(String puuid);
 
     RankInfo getRankInfo(String puuid);
     RankInfo getRankInfoSafely(String puuid);

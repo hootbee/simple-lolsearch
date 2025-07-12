@@ -45,7 +45,7 @@ public class SummonerServiceImpl implements SummonerService {
     }
 
     @Override
-    public SummonerDto getSummonerByPuuid(String puuid) {
+    public PlayerProfileDto getSummonerByPuuid(String puuid) {
         return riotApiService.getSummoner(puuid);
     }
     @Override

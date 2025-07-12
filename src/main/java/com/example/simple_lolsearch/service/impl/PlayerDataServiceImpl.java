@@ -3,7 +3,7 @@ package com.example.simple_lolsearch.service.impl;
 import com.example.simple_lolsearch.dto.AccountDto;
 import com.example.simple_lolsearch.dto.LeagueEntryDto;
 import com.example.simple_lolsearch.dto.PlayerProfileDto;
-import com.example.simple_lolsearch.dto.SummonerDto;
+import com.example.simple_lolsearch.dto.PlayerProfileDto;
 import com.example.simple_lolsearch.entity.PlayerEntity;
 import com.example.simple_lolsearch.entity.PlayerRankEntity;
 import com.example.simple_lolsearch.repository.PlayerRankRepository;
@@ -72,7 +72,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
             AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
             String puuid = account.getPuuid();
 
-            SummonerDto summoner = summonerService.getSummonerByPuuid(puuid);
+            PlayerProfileDto summoner = summonerService.getSummonerByPuuid(puuid);
             List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
 
             // 2. 데이터베이스에 저장
@@ -86,7 +86,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
             throw new RuntimeException("플레이어 프로필 처리 중 오류가 발생했습니다", e);
         }
     }
-    private PlayerEntity saveOrUpdatePlayer(AccountDto account, SummonerDto summoner, List<LeagueEntryDto> leagueEntries) {
+    private PlayerEntity saveOrUpdatePlayer(AccountDto account, PlayerProfileDto summoner, List<LeagueEntryDto> leagueEntries) {
         // 1. 플레이어 정보 저장/업데이트
         PlayerEntity player = playerRepository.findByGameNameAndTagLine(account.getGameName(), account.getTagLine())
                 .orElse(PlayerEntity.builder()

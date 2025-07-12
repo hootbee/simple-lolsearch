@@ -101,14 +101,14 @@ public class RiotApiServiceImpl implements RiotApiService {
     }
 
     @Override
-    public SummonerDto getSummoner(String puuid) {
+    public PlayerProfileDto getSummoner(String puuid) {
         log.debug("PUUID로 소환사 정보 조회: {}", puuid);
 
         try {
             return riotKrWebClient.get()
                     .uri("/lol/summoner/v4/summoners/by-puuid/{puuid}", puuid)
                     .retrieve()
-                    .bodyToMono(SummonerDto.class)
+                    .bodyToMono(PlayerProfileDto.class)
                     .block();
         } catch (Exception e) {
             log.error("소환사 정보 조회 실패: {}", e.getMessage());
