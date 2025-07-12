@@ -78,7 +78,7 @@ class GameDetailMapperServiceRealDataTest {
         assertThat(firstPlayer.getPuuid()).isNotEmpty();
 
         // 소환사 이름 검증 - 수정됨 (안전한 검증)
-        assertThat(firstPlayer.getSummonerName()).isNotNull();
+        assertThat(firstPlayer.getRiotIdGameName()).isNotNull();
 
         assertThat(firstPlayer.getChampionName()).isNotEmpty();
         assertThat(firstPlayer.getChampionId()).isGreaterThan(0);
@@ -108,7 +108,7 @@ class GameDetailMapperServiceRealDataTest {
         assertThat(firstPlayer.getSecondaryRuneTree()).isGreaterThan(0);
 
         System.out.println("=== 첫 번째 플레이어 정보 ===");
-        System.out.println("소환사명: " + firstPlayer.getSummonerName());
+        System.out.println("소환사명: " + firstPlayer.getRiotIdGameName());
         System.out.println("챔피언: " + firstPlayer.getChampionName());
         System.out.println("KDA: " + firstPlayer.getKills() + "/" + firstPlayer.getDeaths() + "/" + firstPlayer.getAssists());
         System.out.println("KDA 비율: " + firstPlayer.getKda());

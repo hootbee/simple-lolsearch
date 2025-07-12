@@ -1,23 +1,23 @@
 package com.example.simple_lolsearch.entity;
 
+import com.example.simple_lolsearch.entity.PlayerRankEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.Id;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name="players")
+@Table(name = "players")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = "ranks")
+@ToString(exclude = "ranks")
 public class PlayerEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,29 +25,42 @@ public class PlayerEntity {
     @Column(name = "puuid", unique = true, nullable = false, length = 78)
     private String puuid;
 
-    @Column(name = "game_name", nullable = false, length = 16)
+    @Column(name = "game_name", nullable = false)
     private String gameName;
 
-    @Column(name = "tag_line", nullable = false, length = 5)
+    @Column(name = "tag_line", nullable = false)
     private String tagLine;
 
-    @Column(name = "summoner_id", nullable = false, length = 63)
+    @Column(name = "summoner_id")
     private String summonerId;
 
-    @Column(name = "profile_icon_id", nullable = false)
-    private Integer profileIconId = 0;
+    @Column(name = "summoner_level")
+    private Integer summonerLevel;
 
-    @Column(name = "summoner_level", nullable = false)
-    private Integer summonerLevel = 1;
+    @Column(name = "profile_icon_id")
+    private Integer profileIconId;
 
-    @Column(name = "revision_date", nullable = false)
+    @Column(name = "revision_date")
     private Long revisionDate;
 
-    @CreationTimestamp
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "playerEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlayerRankEntity> ranks = new ArrayList<>();
+
+    @PrePersist
+    private void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

@@ -1,10 +1,12 @@
 package com.example.simple_lolsearch.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
 public class LeagueEntryDto {
     private String leagueId;
     private String queueType;
@@ -19,5 +21,6 @@ public class LeagueEntryDto {
     private boolean inactive;
     private boolean freshBlood;
     private boolean hotStreak;
+
 
 }

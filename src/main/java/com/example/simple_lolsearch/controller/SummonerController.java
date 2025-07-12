@@ -1,6 +1,8 @@
 package com.example.simple_lolsearch.controller;
 
 import com.example.simple_lolsearch.dto.*;
+import com.example.simple_lolsearch.repository.PlayerRankRepository;
+import com.example.simple_lolsearch.service.PlayerDataService;
 import com.example.simple_lolsearch.service.SummonerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class SummonerController {
 
     private final SummonerService summonerService;
+    private final PlayerDataService playerDataService;
 
     @GetMapping("/account")
     public ResponseEntity<AccountDto> getAccount(
@@ -109,40 +112,80 @@ public class SummonerController {
             return ResponseEntity.badRequest().build();
         }
     }
-    @GetMapping("/profile")
-    public ResponseEntity<PlayerProfileDto> getPlayerProfile(
+//    @GetMapping("/profile")
+//    public ResponseEntity<PlayerProfileDto> getPlayerProfile(
+//            @RequestParam String gameName,
+//            @RequestParam String tagLine) {
+//
+//        log.info("플레이어 프로필 조회 요청: {}#{}", gameName, tagLine);
+//
+//        try {
+//            // 1. 계정 정보 조회
+//            AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
+//            String puuid = account.getPuuid();
+//
+//            // 2. 소환사 정보 조회 (새로 추가)
+//            SummonerDto summoner = summonerService.getSummonerByPuuid(puuid);
+//
+//            // 3. 리그 정보 조회
+//            List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
+//
+//            // 4. 통합 프로필 생성
+//            PlayerProfileDto profile = PlayerProfileDto.builder()
+//                    .account(account)
+//                    .leagueEntries(leagueEntries)
+//                    .summonerId(summoner.getId())
+//                    .profileIconId(summoner.getProfileIconId())
+//                    .revisionDate(summoner.getRevisionDate())
+//                    .summonerLevel(summoner.getSummonerLevel())
+//                    .build();
+//
+//            return ResponseEntity.ok(profile);
+//        } catch (Exception e) {
+//            log.error("플레이어 프로필 조회 실패: {}#{}", gameName, tagLine, e);
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
+@GetMapping("/profile")
+public ResponseEntity<ApiResponse<PlayerProfileDto>> getPlayerProfile(
+        @RequestParam String gameName,
+        @RequestParam String tagLine) {
+
+    log.info("플레이어 프로필 조회 요청: {}#{}", gameName, tagLine);
+
+    try {
+        PlayerProfileDto profile = playerDataService.getPlayerProfile(gameName, tagLine);
+        return ResponseEntity.ok(ApiResponse.success(profile));
+
+    } catch (RuntimeException e) {
+        log.error("플레이어 프로필 조회 실패: {}#{}", gameName, tagLine, e);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("플레이어를 찾을 수 없습니다: " + gameName + "#" + tagLine));
+    } catch (Exception e) {
+        log.error("플레이어 프로필 조회 중 예상치 못한 오류: {}#{}", gameName, tagLine, e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("서버 오류가 발생했습니다"));
+    }
+}
+    @PostMapping("/profile/refresh")
+    public ResponseEntity<ApiResponse<PlayerProfileDto>> refreshPlayerProfile(
             @RequestParam String gameName,
             @RequestParam String tagLine) {
 
-        log.info("플레이어 프로필 조회 요청: {}#{}", gameName, tagLine);
+        log.info("플레이어 프로필 강제 갱신 요청: {}#{}", gameName, tagLine);
 
         try {
-            // 1. 계정 정보 조회
-            AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
-            String puuid = account.getPuuid();
+            PlayerProfileDto profile = playerDataService.refreshPlayerProfile(gameName, tagLine);
+            return ResponseEntity.ok(ApiResponse.success(profile));
 
-            // 2. 소환사 정보 조회 (새로 추가)
-            SummonerDto summoner = summonerService.getSummonerByPuuid(puuid);
-
-            // 3. 리그 정보 조회
-            List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
-
-            // 4. 통합 프로필 생성
-            PlayerProfileDto profile = PlayerProfileDto.builder()
-                    .account(account)
-                    .leagueEntries(leagueEntries)
-                    .summonerId(summoner.getId())
-                    .profileIconId(summoner.getProfileIconId())
-                    .revisionDate(summoner.getRevisionDate())
-                    .summonerLevel(summoner.getSummonerLevel())
-                    .build();
-
-            return ResponseEntity.ok(profile);
         } catch (Exception e) {
-            log.error("플레이어 프로필 조회 실패: {}#{}", gameName, tagLine, e);
-            return ResponseEntity.badRequest().build();
+            log.error("플레이어 프로필 갱신 실패: {}#{}", gameName, tagLine, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("프로필 갱신 중 오류가 발생했습니다"));
         }
     }
+
+
     @GetMapping("/game-detail/{matchId}")
     public ResponseEntity<ApiResponse<GameDetailDto>> getGameDetail(@PathVariable String matchId) {
         log.info("게임 상세 분석 조회 요청: {}", matchId);
