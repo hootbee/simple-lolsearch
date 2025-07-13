@@ -58,12 +58,6 @@ public class AppConfig {
             @Qualifier("riotKrWebClient") WebClient riotKrWebClient) {
         return new RiotApiServiceImpl(riotAsiaWebClient, riotKrWebClient);
     }
-
-    @Bean
-    public GameDataMapperService gameDataMapperService(TimeFormatterService timeFormatterService) {
-        return new GameDataMapperServiceImpl(timeFormatterService);
-    }
-
     @Bean
     public GameDetailMapperService gameDetailMapperService(
             TimeFormatterService timeFormatterService
@@ -80,9 +74,15 @@ public class AppConfig {
     // ✅ 수정된 코드: Spring이 관리하는 빈을 주입받음
     @Bean
     public SummonerService summonerService(
-            RiotApiService riotApiService,
-            GameDataMapperService gameDataMapperService,
-            GameDetailMapperService gameDetailMapperService,GameDetailEnhancementService gameDetailEnhancementService) { // 파라미터로 주입받음
-        return new SummonerServiceImpl(riotApiService, gameDataMapperService, gameDetailMapperService,gameDetailEnhancementService);
+            RiotApiService riotApiService) { // 파라미터로 주입받음
+        return new SummonerServiceImpl(riotApiService);
     }
+//    @Bean
+//    public MatchDetailServiceImpl matchDetailService(
+//            RiotApiService riotApiService,
+//            GameDetailMapperService gameDetailMapperService,
+//            GameDetailEnhancementService gameDetailEnhancementService
+//    ) {
+//        return new MatchDetailServiceImpl(riotApiService, gameDetailMapperService, gameDetailEnhancementService
+//    )
 }

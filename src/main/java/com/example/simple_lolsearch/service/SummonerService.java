@@ -11,10 +11,10 @@ public interface SummonerService {
 
     MatchDetailDto getMatchDetail(String matchId);
 
-    GameSummaryDto convertToGameSummary(MatchDetailDto match, String puuid);
+
 
     List<LeagueEntryDto> getLeagueEntriesByPuuid(String puuid);
     PlayerProfileDto getSummonerByPuuid(String puuid);
-    GameDetailDto getGameDetail(String matchId);
+//    GameDetailDto getGameDetail(String matchId);
 
 }
