@@ -24,5 +24,8 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
     List<PlayerEntity> findPlayersNeedingUpdate(@Param("threshold") LocalDateTime threshold);
 
     boolean existsByGameNameAndTagLine(String gameName, String tagLine);
+    Optional<PlayerEntity> findByPuuid(String puuid);
 
+    @Query("SELECT p FROM PlayerEntity p LEFT JOIN FETCH p.ranks WHERE p.puuid = :puuid")
+    Optional<PlayerEntity> findByPuuidWithRanks(@Param("puuid") String puuid);
 }

@@ -41,20 +41,5 @@ public class SummonerServiceImpl implements SummonerService {
     public PlayerProfileDto getSummonerByPuuid(String puuid) {
         return riotApiService.getSummoner(puuid);
     }
-//    @Override
-//    public GameDetailDto getGameDetail(String matchId) {
-//        log.debug("게임 상세 분석 요청: {}", matchId);
-//
-//        try {
-//            MatchDetailDto matchDetail = riotApiService.getMatchDetail(matchId);
-//            GameDetailDto gameDetail = gameDetailMapperService.mapToGameDetail(matchDetail);
-//
-//            // 복잡한 로직을 별도 서비스로 위임
-//            return gameDetailEnhancementService.enhanceWithRankInfo(gameDetail, matchDetail);
-//
-//        } catch (Exception e) {
-//            log.error("게임 상세 분석 실패: {}", matchId, e);
-//            throw new RuntimeException("게임 상세 분석 중 오류가 발생했습니다: " + matchId, e);
-//        }
-//    }
+
 }

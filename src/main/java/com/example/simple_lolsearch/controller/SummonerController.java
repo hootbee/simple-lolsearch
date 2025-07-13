@@ -1,7 +1,7 @@
 package com.example.simple_lolsearch.controller;
 
 import com.example.simple_lolsearch.dto.*;
-import com.example.simple_lolsearch.repository.PlayerRankRepository;
+import com.example.simple_lolsearch.service.MatchDetailService;
 import com.example.simple_lolsearch.service.PlayerDataService;
 import com.example.simple_lolsearch.service.SummonerService;
 import lombok.RequiredArgsConstructor;
@@ -11,197 +11,120 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/summoner")
-@RequiredArgsConstructor
+@Slf4j
 public class SummonerController {
 
     private final SummonerService summonerService;
     private final PlayerDataService playerDataService;
+    private final MatchDetailService matchDetailService;
 
+    /* 1. 계정 정보 */
     @GetMapping("/account")
     public ResponseEntity<AccountDto> getAccount(
             @RequestParam String gameName,
             @RequestParam String tagLine) {
 
         log.info("계정 조회 요청: {}#{}", gameName, tagLine);
-
-        try {
-            AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
-            return ResponseEntity.ok(account);
-        } catch (Exception e) {
-            log.error("계정 조회 실패: {}#{}", gameName, tagLine, e);
-            return ResponseEntity.notFound().build();
-        }
+        return wrap(() -> summonerService.getAccountByRiotId(gameName, tagLine));
     }
 
+    /* 2. 최근 매치 ID */
     @GetMapping("/matches")
     public ResponseEntity<List<String>> getRecentMatches(
             @RequestParam String puuid,
             @RequestParam(defaultValue = "10") int count) {
 
-        log.info("최근 매치 조회 요청: {}, count: {}", puuid, count);
-
-        try {
-            List<String> matchIds = summonerService.getRecentMatchIds(puuid, count);
-            return ResponseEntity.ok(matchIds);
-        } catch (Exception e) {
-            log.error("매치 조회 실패: {}", puuid, e);
-            return ResponseEntity.badRequest().build();
-        }
+        log.info("최근 매치 조회 요청: {}, count={}", puuid, count);
+        return wrap(() -> summonerService.getRecentMatchIds(puuid, count));
     }
 
-    @GetMapping("/match/{matchId}")
-    public ResponseEntity<MatchDetailDto> getMatchDetail(@PathVariable String matchId) {
-
-        log.info("매치 상세 조회 요청: {}", matchId);
-
-        try {
-            MatchDetailDto matchDetail = summonerService.getMatchDetail(matchId);
-            return ResponseEntity.ok(matchDetail);
-        } catch (Exception e) {
-            log.error("매치 상세 조회 실패: {}", matchId, e);
-            return ResponseEntity.notFound().build();
-        }
-    }
-
+    /* 3. 게임 요약(히스토리) : 캐싱 + 매핑 서비스 사용 */
     @GetMapping("/game-history")
     public ResponseEntity<List<GameSummaryDto>> getGameHistory(
             @RequestParam String gameName,
             @RequestParam String tagLine,
             @RequestParam(defaultValue = "10") int count) {
 
-        log.info("게임 기록 조회 요청: {}#{}, count: {}", gameName, tagLine, count);
+        log.info("게임 기록 조회 요청: {}#{}, count={}", gameName, tagLine, count);
 
-        try {
-            // 1. 계정 정보 조회
-            AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
-            String puuid = account.getPuuid();
+        return wrap(() -> {
+            String puuid = summonerService
+                    .getAccountByRiotId(gameName, tagLine)
+                    .getPuuid();
 
-            // 2. 최근 매치 ID 조회
             List<String> matchIds = summonerService.getRecentMatchIds(puuid, count);
-
-            // 3. 각 매치의 상세 정보를 게임 요약으로 변환
-            List<GameSummaryDto> gameHistory = matchIds.stream()
-                    .map(matchId -> {
-                        MatchDetailDto matchDetail = summonerService.getMatchDetail(matchId);
-                        return summonerService.convertToGameSummary(matchDetail, puuid);
-                    })
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(gameHistory);
-
-        } catch (Exception e) {
-            log.error("게임 기록 조회 실패: {}#{}", gameName, tagLine, e);
-            return ResponseEntity.badRequest().build();
-        }
+            return matchDetailService.getGameSummaries(matchIds, puuid);
+        });
     }
-    @GetMapping("/league")
-    public ResponseEntity<List<LeagueEntryDto>> getLeagueEntries(@RequestParam String puuid) {
 
-        log.info("리그 정보 조회 요청: {}", puuid);
-
-        try {
-            List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
-            return ResponseEntity.ok(leagueEntries);
-        } catch (Exception e) {
-            log.error("리그 정보 조회 실패: {}", puuid, e);
-            return ResponseEntity.badRequest().build();
-        }
+    @GetMapping("/game-detail/{matchId}")
+    public ResponseEntity<GameDetailDto> getGameDetail(@PathVariable String matchId) {
+        log.info("게임 상세 분석 조회 요청: {}", matchId);
+        return wrap(() -> matchDetailService.getGameDetail(matchId));
     }
-//    @GetMapping("/profile")
-//    public ResponseEntity<PlayerProfileDto> getPlayerProfile(
-//            @RequestParam String gameName,
-//            @RequestParam String tagLine) {
-//
-//        log.info("플레이어 프로필 조회 요청: {}#{}", gameName, tagLine);
-//
-//        try {
-//            // 1. 계정 정보 조회
-//            AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
-//            String puuid = account.getPuuid();
-//
-//            // 2. 소환사 정보 조회 (새로 추가)
-//            SummonerDto summoner = summonerService.getSummonerByPuuid(puuid);
-//
-//            // 3. 리그 정보 조회
-//            List<LeagueEntryDto> leagueEntries = summonerService.getLeagueEntriesByPuuid(puuid);
-//
-//            // 4. 통합 프로필 생성
-//            PlayerProfileDto profile = PlayerProfileDto.builder()
-//                    .account(account)
-//                    .leagueEntries(leagueEntries)
-//                    .summonerId(summoner.getId())
-//                    .profileIconId(summoner.getProfileIconId())
-//                    .revisionDate(summoner.getRevisionDate())
-//                    .summonerLevel(summoner.getSummonerLevel())
-//                    .build();
-//
-//            return ResponseEntity.ok(profile);
-//        } catch (Exception e) {
-//            log.error("플레이어 프로필 조회 실패: {}#{}", gameName, tagLine, e);
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
-@GetMapping("/profile")
-public ResponseEntity<ApiResponse<PlayerProfileDto>> getPlayerProfile(
-        @RequestParam String gameName,
-        @RequestParam String tagLine) {
 
-    log.info("플레이어 프로필 조회 요청: {}#{}", gameName, tagLine);
 
-    try {
-        PlayerProfileDto profile = playerDataService.getPlayerProfile(gameName, tagLine);
-        return ResponseEntity.ok(ApiResponse.success(profile));
+    /* 5. 프로필 조회(캐싱) */
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<PlayerProfileDto>> getProfile(
+            @RequestParam String gameName,
+            @RequestParam String tagLine) {
 
-    } catch (RuntimeException e) {
-        log.error("플레이어 프로필 조회 실패: {}#{}", gameName, tagLine, e);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error("플레이어를 찾을 수 없습니다: " + gameName + "#" + tagLine));
-    } catch (Exception e) {
-        log.error("플레이어 프로필 조회 중 예상치 못한 오류: {}#{}", gameName, tagLine, e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("서버 오류가 발생했습니다"));
+        log.info("플레이어 프로필 조회 요청: {}#{}", gameName, tagLine);
+        return wrapApi(() -> playerDataService.getPlayerProfile(gameName, tagLine));
     }
-}
+
+    /* 6. 프로필 강제 갱신 */
     @PostMapping("/profile/refresh")
-    public ResponseEntity<ApiResponse<PlayerProfileDto>> refreshPlayerProfile(
+    public ResponseEntity<ApiResponse<PlayerProfileDto>> refreshProfile(
             @RequestParam String gameName,
             @RequestParam String tagLine) {
 
         log.info("플레이어 프로필 강제 갱신 요청: {}#{}", gameName, tagLine);
+        return wrapApi(() -> playerDataService.refreshPlayerProfile(gameName, tagLine));
+    }
 
+    /* 7. 리그 정보 */
+    @GetMapping("/league")
+    public ResponseEntity<List<LeagueEntryDto>> getLeagues(@RequestParam String puuid) {
+        log.info("리그 정보 조회 요청: {}", puuid);
+        return wrap(() -> summonerService.getLeagueEntriesByPuuid(puuid));
+    }
+
+    /* ---------- 공통 래퍼 ---------- */
+
+    private <T> ResponseEntity<T> wrap(ServiceCall<T> call) {
         try {
-            PlayerProfileDto profile = playerDataService.refreshPlayerProfile(gameName, tagLine);
-            return ResponseEntity.ok(ApiResponse.success(profile));
-
+            return ResponseEntity.ok(call.exec());
+        } catch (RuntimeException e) {
+            log.error("요청 처리 실패", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
-            log.error("플레이어 프로필 갱신 실패: {}#{}", gameName, tagLine, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("프로필 갱신 중 오류가 발생했습니다"));
+            log.error("서버 오류", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-
-    @GetMapping("/game-detail/{matchId}")
-    public ResponseEntity<ApiResponse<GameDetailDto>> getGameDetail(@PathVariable String matchId) {
-        log.info("게임 상세 분석 조회 요청: {}", matchId);
-
+    private <T> ResponseEntity<ApiResponse<T>> wrapApi(ServiceCall<T> call) {
         try {
-            GameDetailDto gameDetail = summonerService.getGameDetail(matchId);
-            return ResponseEntity.ok(ApiResponse.success(gameDetail));
+            return ResponseEntity.ok(ApiResponse.success(call.exec()));
         } catch (RuntimeException e) {
-            log.error("게임 상세 분석 조회 실패: {}", matchId, e);
+            log.error("요청 처리 실패", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("게임 정보를 찾을 수 없습니다: " + matchId));
+                    .body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
-            log.error("게임 상세 분석 조회 중 예상치 못한 오류: {}", matchId, e);
+            log.error("서버 오류", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("서버 오류가 발생했습니다"));
         }
     }
 
+    @FunctionalInterface
+    private interface ServiceCall<T> {
+        T exec() throws Exception;
+    }
 }

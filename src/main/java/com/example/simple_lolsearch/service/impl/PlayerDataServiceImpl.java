@@ -163,6 +163,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
                 .build();
     }
 
+
     @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void cleanupOldCache() {
         LocalDateTime threshold = LocalDateTime.now().minus(Duration.ofDays(7));

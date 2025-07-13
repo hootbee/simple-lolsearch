@@ -67,9 +67,9 @@ public class AppConfig {
 
     @Bean
     public GameDetailEnhancementService gameDetailEnhancementService(
-            RiotApiService riotApiService,
+            PlayerService playerService,
             GameDetailMapperService gameDetailMapperService) {
-        return new GameDetailEnhancementServiceImpl(riotApiService, gameDetailMapperService);
+        return new GameDetailEnhancementServiceImpl(playerService, gameDetailMapperService);
     }
     // ✅ 수정된 코드: Spring이 관리하는 빈을 주입받음
     @Bean

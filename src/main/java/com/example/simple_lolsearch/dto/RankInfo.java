@@ -11,6 +11,14 @@ public class RankInfo {
     private int leaguePoints;     // LP
     private String queueType;     // "RANKED_SOLO_5x5", "RANKED_FLEX_SR"
     private String fullRankString; // "골드 II 45LP"
+
+    // 🔥 추가: wins, losses 필드
+    @Builder.Default
+    private int wins = 0;
+
+    @Builder.Default
+    private int losses = 0;
+
     public static RankInfo createUnrankedInfo() {
         return RankInfo.builder()
                 .tier("UNRANKED")
@@ -18,6 +26,8 @@ public class RankInfo {
                 .leaguePoints(0)
                 .queueType("")
                 .fullRankString("언랭크")
+                .wins(0)
+                .losses(0)
                 .build();
     }
 

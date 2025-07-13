@@ -13,7 +13,7 @@ public class PlayerProfileDto {
     private AccountDto account;
     private List<LeagueEntryDto> leagueEntries;
     private String summonerId;
-    private int profileIconId;
-    private long revisionDate;
-    private int summonerLevel;
+    private Integer profileIconId;
+    private Long revisionDate;
+    private Integer summonerLevel;
 }

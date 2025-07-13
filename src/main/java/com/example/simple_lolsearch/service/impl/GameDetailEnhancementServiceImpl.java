@@ -4,6 +4,7 @@ import com.example.simple_lolsearch.dto.MatchDetailDto;
 import com.example.simple_lolsearch.dto.RankInfo;
 import com.example.simple_lolsearch.service.GameDetailEnhancementService;
 import com.example.simple_lolsearch.service.GameDetailMapperService;
+import com.example.simple_lolsearch.service.PlayerService;
 import com.example.simple_lolsearch.service.RiotApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,13 +12,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameDetailEnhancementServiceImpl implements GameDetailEnhancementService {
 
-    private final RiotApiService riotApiService;
+    private final PlayerService playerService; // 🔥 RiotApiService 대신 PlayerService 사용
     private final GameDetailMapperService gameDetailMapperService;
 
     public GameDetailDto enhanceWithRankInfo(GameDetailDto gameDetail, MatchDetailDto matchDetail) {
@@ -64,7 +64,8 @@ public class GameDetailEnhancementServiceImpl implements GameDetailEnhancementSe
                             .orElse(null);
 
                     if (participant != null) {
-                        RankInfo rankInfo = riotApiService.getRankInfoSafely(participant.getPuuid());
+                        // 🔥 DB 우선 조회로 변경
+                        RankInfo rankInfo = playerService.getRankInfoFromDbOrApi(participant.getPuuid());
                         return gameDetailMapperService.mapToPlayerDetailWithRank(participant, rankInfo);
                     }
 

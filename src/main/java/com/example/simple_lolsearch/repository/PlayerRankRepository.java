@@ -28,6 +28,11 @@ public interface PlayerRankRepository extends JpaRepository<PlayerRankEntity, Lo
     // 검증용 메서드
     @Query("SELECT COUNT(pr) FROM PlayerRankEntity pr WHERE pr.playerEntity.puuid = :puuid")
     long countByPlayerEntityPuuid(@Param("puuid") String puuid);
+    @Query("SELECT pr FROM PlayerRankEntity pr WHERE pr.playerEntity.puuid = :puuid")
+    List<PlayerRankEntity> findByPlayerEntityPuuid(@Param("puuid") String puuid);
+
+    @Query("SELECT pr FROM PlayerRankEntity pr WHERE pr.playerEntity.puuid = :puuid AND pr.queueType = :queueType")
+    Optional<PlayerRankEntity> findByPlayerEntityPuuidAndQueueType(@Param("puuid") String puuid, @Param("queueType") String queueType);
 }
 
 

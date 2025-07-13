@@ -12,4 +12,6 @@ public interface RiotApiService {
 
     RankInfo getRankInfo(String puuid);
     RankInfo getRankInfoSafely(String puuid);
+    AccountDto getAccountByPuuid(String puuid);
+
 }

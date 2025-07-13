@@ -173,5 +173,21 @@ public class RiotApiServiceImpl implements RiotApiService {
                     .build();
         }
     }
+    @Override
+    public AccountDto getAccountByPuuid(String puuid) {
+        log.debug("PUUID로 계정 정보 조회: {}", puuid);
+
+        try {
+            return riotAsiaWebClient.get()
+                    .uri("/riot/account/v1/accounts/by-puuid/{puuid}", puuid)
+                    .retrieve()
+                    .bodyToMono(AccountDto.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("계정 정보 조회 실패: {}", e.getMessage());
+            return null; // 실패 시 null 반환하여 기본값 사용
+        }
+    }
+
 
 }
