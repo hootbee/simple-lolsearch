@@ -43,7 +43,82 @@ const FilterButton = styled.button`
     }
 `;
 
-const GameHistory = ({ gameHistory }) => {
+const LoadMoreSection = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+`;
+
+const LoadMoreButton = styled.button`
+    padding: 12px 32px;
+    background: ${props => props.loading ? '#f8f9fa' : '#007bff'};
+    color: ${props => props.loading ? '#666' : 'white'};
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: ${props => props.loading ? 'not-allowed' : 'pointer'};
+    transition: all 0.2s ease;
+    min-width: 120px;
+
+    &:hover {
+        background: ${props => props.loading ? '#f8f9fa' : '#0056b3'};
+        transform: ${props => props.loading ? 'none' : 'translateY(-1px)'};
+    }
+
+    &:disabled {
+        background: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+`;
+
+const LoadingSpinner = styled.div`
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #666;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+
+const ErrorMessage = styled.div`
+    text-align: center;
+    color: #dc3545;
+    font-size: 0.9rem;
+    margin-top: 12px;
+    padding: 8px;
+    background: #f8d7da;
+    border-radius: 6px;
+`;
+
+const NoMoreGames = styled.div`
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+`;
+
+const GameHistory = ({
+                         gameHistory,
+                         onLoadMore,
+                         loading = false,
+                         hasMore = true,
+                         error = null,
+                         gameName,
+                         tagLine
+                     }) => {
     const [filter, setFilter] = useState('all');
 
     if (!gameHistory || gameHistory.length === 0) {
@@ -78,6 +153,34 @@ const GameHistory = ({ gameHistory }) => {
     };
 
     const filteredGames = filterGames(gameHistory, filter);
+
+    // 더보기 버튼 클릭 핸들러
+    const handleLoadMore = () => {
+        if (loading || !hasMore || !onLoadMore) return;
+
+        // 마지막 게임의 시간 추출
+        const lastGame = gameHistory[gameHistory.length - 1];
+        if (lastGame && lastGame.gameCreation) {
+            onLoadMore({
+                gameName,
+                tagLine,
+                lastGameTime: lastGame.gameCreation,
+                count: 5
+            });
+        }
+    };
+
+    // 더보기 버튼 렌더링 조건
+    const shouldShowLoadMore = () => {
+        // 필터가 'all'일 때만 더보기 버튼 표시
+        if (filter !== 'all') return false;
+
+        // 에러가 있거나 더 이상 게임이 없으면 표시하지 않음
+        if (error || !hasMore) return false;
+
+        // 최소 게임 수가 있어야 더보기 표시
+        return gameHistory.length >= 5;
+    };
 
     return (
         <GameHistoryContainer>
@@ -116,6 +219,52 @@ const GameHistory = ({ gameHistory }) => {
             {filteredGames.map((game, index) => (
                 <GameHistoryItem key={`${game.matchId}-${index}`} game={game} />
             ))}
+
+            {/* 더보기 섹션 */}
+            {shouldShowLoadMore() && (
+                <LoadMoreSection>
+                    <LoadMoreButton
+                        onClick={handleLoadMore}
+                        loading={loading}
+                        disabled={loading || !hasMore}
+                    >
+                        {loading && <LoadingSpinner />}
+                        {loading ? '로딩 중...' : '이전 경기 보기'}
+                    </LoadMoreButton>
+                </LoadMoreSection>
+            )}
+
+            {/* 에러 메시지 */}
+            {error && filter === 'all' && (
+                <LoadMoreSection>
+                    <ErrorMessage>
+                        이전 경기를 불러오는 중 오류가 발생했습니다.
+                        <br />
+                        <button
+                            onClick={handleLoadMore}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#007bff',
+                                textDecoration: 'underline',
+                                cursor: 'pointer',
+                                marginTop: '4px'
+                            }}
+                        >
+                            다시 시도
+                        </button>
+                    </ErrorMessage>
+                </LoadMoreSection>
+            )}
+
+            {/* 더 이상 게임이 없을 때 */}
+            {!hasMore && filter === 'all' && gameHistory.length > 10 && (
+                <LoadMoreSection>
+                    <NoMoreGames>
+                        모든 경기를 불러왔습니다.
+                    </NoMoreGames>
+                </LoadMoreSection>
+            )}
         </GameHistoryContainer>
     );
 };

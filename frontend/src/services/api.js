@@ -2,12 +2,10 @@ import axios from 'axios';
 
 // 환경변수 우선, 없으면 NODE_ENV 기반 자동 설정
 const getApiBaseUrl = () => {
-    // 환경변수가 있으면 우선 사용
     if (process.env.REACT_APP_API_BASE_URL) {
         return process.env.REACT_APP_API_BASE_URL;
     }
 
-    // 환경변수가 없으면 NODE_ENV 기반 자동 설정
     if (process.env.NODE_ENV === 'production') {
         return 'http://3.27.207.48:8080/api';
     } else {
@@ -19,7 +17,7 @@ const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 10000,
+    timeout: 30000,
 });
 
 // 개발 시 현재 설정 확인용 로그
@@ -28,34 +26,140 @@ if (process.env.NODE_ENV === 'development') {
     console.log('🌍 Environment:', process.env.NODE_ENV);
 }
 
+// API 응답 처리 헬퍼 함수
+const handleApiResponse = (response) => {
+    if (response.data.success) {
+        return response.data.data;
+    } else {
+        throw new Error(response.data.message || '요청 처리 중 오류가 발생했습니다.');
+    }
+};
+
+// 에러 처리 헬퍼 함수
+const handleApiError = (error) => {
+    if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+    }
+    throw error;
+};
+
+// 1. 계정 정보 조회
 export const searchSummoner = async (gameName, tagLine) => {
-    const response = await api.get('/summoner/account', {
-        params: { gameName, tagLine }
-    });
-    return response.data;
+    try {
+        const response = await api.get('/summoner/account', {
+            params: { gameName, tagLine }
+        });
+        return response.data;
+    } catch (error) {
+        handleApiError(error);
+    }
 };
 
+// 2. 최근 매치 ID 조회 (누락된 엔드포인트 추가)
+export const getRecentMatches = async (puuid, count = 10) => {
+    try {
+        const response = await api.get('/summoner/matches', {
+            params: { puuid, count }
+        });
+        return response.data;
+    } catch (error) {
+        handleApiError(error);
+    }
+};
+
+// 3. 플레이어 프로필 조회
 export const getPlayerProfile = async (gameName, tagLine) => {
-    const response = await api.get('/summoner/profile', {
-        params: { gameName, tagLine }
-    });
-    return response.data;
+    try {
+        const response = await api.get('/summoner/profile', {
+            params: { gameName, tagLine }
+        });
+        return handleApiResponse(response);
+    } catch (error) {
+        handleApiError(error);
+    }
 };
 
+// 4. 리그 정보 조회
 export const getLeagueEntries = async (puuid) => {
-    const response = await api.get('/summoner/league', {
-        params: { puuid }
-    });
-    return response.data;
+    try {
+        const response = await api.get('/summoner/league', {
+            params: { puuid }
+        });
+        return response.data;
+    } catch (error) {
+        handleApiError(error);
+    }
 };
 
+// 5. 게임 히스토리 조회
 export const getGameHistory = async (gameName, tagLine, count = 20) => {
-    const response = await api.get('/summoner/game-history', {
-        params: { gameName, tagLine, count }
-    });
-    return response.data;
+    try {
+        console.log('🎮 게임 히스토리 API 호출:', { gameName, tagLine, count });
+        const response = await api.get('/summoner/game-history', {
+            params: { gameName, tagLine, count }
+        });
+        console.log('✅ 게임 히스토리 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ 게임 히스토리 조회 실패:', error);
+        handleApiError(error);
+    }
 };
+
+// 6. 게임 상세 조회
 export const getGameDetail = async (matchId) => {
-    const response = await api.get(`/summoner/game-detail/${matchId}`);
-    return response.data;
+    try {
+        console.log('🔍 게임 상세 API 호출:', matchId);
+        const response = await api.get(`/summoner/game-detail/${matchId}`);
+        console.log('✅ 게임 상세 응답:', response.data);
+        return response.data; // 컨트롤러에서 ApiResponse 사용하지 않음
+    } catch (error) {
+        console.error('❌ 게임 상세 조회 실패:', error);
+        handleApiError(error);
+    }
+};
+
+// 7. 프로필 갱신
+export const refreshPlayerProfile = async (gameName, tagLine) => {
+    try {
+        console.log('🔄 프로필 갱신 API 호출:', { gameName, tagLine });
+        const response = await api.post('/summoner/profile/refresh', null, {
+            params: { gameName, tagLine }
+        });
+        console.log('✅ 프로필 갱신 응답:', response.data);
+        return handleApiResponse(response);
+    } catch (error) {
+        console.error('❌ 프로필 갱신 실패:', error);
+        handleApiError(error);
+    }
+};
+
+// 8. 이전 경기 더보기 (gameName + tagLine 방식)
+export const loadMoreGameHistory = async (gameName, tagLine, lastGameTime, count = 5) => {
+    try {
+        console.log('📜 이전 경기 더보기 API 호출:', { gameName, tagLine, lastGameTime, count });
+        const response = await api.get('/summoner/game-history/load-more', {
+            params: { gameName, tagLine, lastGameTime, count }
+        });
+        console.log('✅ 이전 경기 더보기 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ 이전 경기 더보기 실패:', error);
+        handleApiError(error);
+    }
+};
+
+// 9. 이전 경기 더보기 (PUUID 직접 방식 - 성능 최적화)
+export const loadMoreGameHistoryByPuuid = async (puuid, lastGameTime, count = 5) => {
+    try {
+        console.log('🚀 PUUID 기반 이전 경기 더보기 API 호출:', { puuid, lastGameTime, count });
+        const response = await api.get('/summoner/game-history/load-more-by-puuid', {
+            params: { puuid, lastGameTime, count }
+        });
+        console.log('✅ PUUID 기반 이전 경기 더보기 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ PUUID 기반 이전 경기 더보기 실패:', error);
+        handleApiError(error);
+    }
 };

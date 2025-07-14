@@ -311,32 +311,99 @@ const GameHistoryItem = ({ game }) => {
     const handleGameCardClick = async (e) => {
         // 아이템이나 스펠 호버 시에는 게임 상세 내역을 열지 않음
         if (e.target.closest('[data-hover-element]')) {
+            console.log('🚫 호버 요소 클릭 - 게임 상세 조회 취소');
             return;
         }
 
+        console.log('🎮 게임 카드 클릭됨!');
+        console.log('매치 ID:', game.matchId);
+        console.log('현재 확장 상태:', isExpanded);
+
         if (!isExpanded) {
+            console.log('📡 게임 상세 정보 조회 시작...');
             setLoading(true);
             setError(null);
 
             try {
+                console.log('🔍 API 호출 중:', game.matchId);
                 const result = await getGameDetail(game.matchId);
 
-                if (result.success) {
-                    setGameDetail(result.data);
+                console.log('✅ API 응답 받음:');
+                console.log('전체 응답:', result);
+                console.log('응답 타입:', typeof result);
+                console.log('응답 구조:', Object.keys(result || {}));
+
+                // 이전 대화에서 확인된 바로는 getGameDetail이 직접 데이터를 반환
+                // result.success 체크 대신 직접 데이터 사용
+                if (result) {
+                    console.log('🎯 게임 상세 데이터:');
+                    console.log('- 매치 ID:', result.matchId);
+                    console.log('- 게임 모드:', result.gameMode);
+                    console.log('- 게임 지속시간:', result.gameDuration);
+                    console.log('- 게임 날짜:', result.gameDate);
+
+                    if (result.blueTeam) {
+                        console.log('🔵 블루팀 정보:');
+                        console.log('- 승리 여부:', result.blueTeam.win);
+                        console.log('- 플레이어 수:', result.blueTeam.players?.length || 0);
+                        console.log('- 팀 스탯:', result.blueTeam.teamStats);
+
+                        if (result.blueTeam.players) {
+                            console.log('- 블루팀 플레이어들:');
+                            result.blueTeam.players.forEach((player, index) => {
+                                console.log(`  ${index + 1}. ${player.riotIdGameName || 'Unknown'} (${player.championName}) - ${player.kills}/${player.deaths}/${player.assists}`);
+                            });
+                        }
+                    }
+
+                    if (result.redTeam) {
+                        console.log('🔴 레드팀 정보:');
+                        console.log('- 승리 여부:', result.redTeam.win);
+                        console.log('- 플레이어 수:', result.redTeam.players?.length || 0);
+                        console.log('- 팀 스탯:', result.redTeam.teamStats);
+
+                        if (result.redTeam.players) {
+                            console.log('- 레드팀 플레이어들:');
+                            result.redTeam.players.forEach((player, index) => {
+                                console.log(`  ${index + 1}. ${player.riotIdGameName || 'Unknown'} (${player.championName}) - ${player.kills}/${player.deaths}/${player.assists}`);
+                            });
+                        }
+                    }
+
+                    console.log('📊 전체 게임 상세 데이터 (JSON):');
+                    console.log(JSON.stringify(result, null, 2));
+
+                    setGameDetail(result);
                     setIsExpanded(true);
+                    console.log('✅ 게임 상세 정보 표시 완료');
                 } else {
-                    setError(result.error || '게임 상세 정보를 불러올 수 없습니다.');
+                    console.error('❌ 응답 데이터가 비어있음');
+                    setError('게임 상세 정보를 불러올 수 없습니다.');
                 }
             } catch (err) {
-                setError('네트워크 오류가 발생했습니다.');
+                console.error('❌ 게임 상세 조회 실패:');
+                console.error('에러 객체:', err);
+                console.error('에러 메시지:', err.message);
+                console.error('에러 스택:', err.stack);
+
+                if (err.response) {
+                    console.error('HTTP 응답 에러:');
+                    console.error('- 상태 코드:', err.response.status);
+                    console.error('- 응답 데이터:', err.response.data);
+                }
+
+                setError(err.message || '네트워크 오류가 발생했습니다.');
             } finally {
                 setLoading(false);
+                console.log('🏁 게임 상세 조회 프로세스 완료');
             }
         } else {
+            console.log('📦 게임 상세 정보 닫기');
             setIsExpanded(false);
             setGameDetail(null);
         }
     };
+
 
     return (
         <>
