@@ -1,8 +1,8 @@
 package com.example.simple_lolsearch.service;
 
 import com.example.simple_lolsearch.dto.GameDetailDto;
+import com.example.simple_lolsearch.dto.LeagueEntryDto;
 import com.example.simple_lolsearch.dto.MatchDetailDto;
-import com.example.simple_lolsearch.dto.RankInfo;
 
 import java.util.List;
 
@@ -13,5 +13,5 @@ public interface GameDetailMapperService {
 
     GameDetailDto.PlayerDetailDto mapToPlayerDetail(MatchDetailDto.ParticipantDto participantDto);
 
-    GameDetailDto.PlayerDetailDto mapToPlayerDetailWithRank(MatchDetailDto.ParticipantDto participant, RankInfo rankInfo);
+    GameDetailDto.PlayerDetailDto mapToPlayerDetailWithRank(MatchDetailDto.ParticipantDto participant, LeagueEntryDto leagueEntryDto);
 }

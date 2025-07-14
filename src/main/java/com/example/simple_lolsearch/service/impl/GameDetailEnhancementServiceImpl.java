@@ -1,7 +1,7 @@
 package com.example.simple_lolsearch.service.impl;
 import com.example.simple_lolsearch.dto.GameDetailDto;
+import com.example.simple_lolsearch.dto.LeagueEntryDto;
 import com.example.simple_lolsearch.dto.MatchDetailDto;
-import com.example.simple_lolsearch.dto.RankInfo;
 import com.example.simple_lolsearch.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +62,7 @@ public class GameDetailEnhancementServiceImpl implements GameDetailEnhancementSe
 
                     if (participant != null) {
                         // 🔥 DB 우선 조회로 변경
-                        RankInfo rankInfo = playerDataService.getRankInfoFromDbOrApi(participant.getPuuid());
+                        LeagueEntryDto rankInfo = playerDataService.getRankInfoFromDbOrApi(participant.getPuuid());
                         return gameDetailMapperService.mapToPlayerDetailWithRank(participant, rankInfo);
                     }
 

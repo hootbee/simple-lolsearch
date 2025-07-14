@@ -136,7 +136,7 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
     }
     public GameDetailDto.PlayerDetailDto mapToPlayerDetailWithRank(
             MatchDetailDto.ParticipantDto participant,
-            RankInfo rankInfo
+            LeagueEntryDto rankInfo
     ) {
         GameDetailDto.PlayerDetailDto basePlayer = mapToPlayerDetail(participant);
 

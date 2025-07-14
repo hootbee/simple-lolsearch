@@ -57,7 +57,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
     }
 
     @Override
-    public RankInfo getRankInfoFromDbOrApi(String puuid) {
+    public LeagueEntryDto getRankInfoFromDbOrApi(String puuid) {
         log.debug("랭크 정보 조회 시작: puuid={}", puuid);
 
         Optional<PlayerEntity> playerOpt = playerRepository.findByPuuidWithRanks(puuid);
@@ -71,7 +71,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
         }
 
         // API에서 최신 정보 조회
-        RankInfo apiRankInfo = riotApiService.getRankInfoSafely(puuid);
+        LeagueEntryDto apiRankInfo = riotApiService.getRankInfoSafely(puuid);
         saveOrUpdatePlayerByPuuid(puuid, apiRankInfo);
 
         return apiRankInfo;
@@ -113,7 +113,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
         }
     }
 
-    private PlayerEntity saveOrUpdatePlayerByPuuid(String puuid, RankInfo rankInfo) {
+    private PlayerEntity saveOrUpdatePlayerByPuuid(String puuid, LeagueEntryDto rankInfo) {
         try {
             // API에서 전체 정보 조회
             AccountDto account = getAccountSafely(puuid);
@@ -259,7 +259,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
     /**
      * RankInfo를 LeagueEntryDto 리스트로 변환
      */
-    private List<LeagueEntryDto> convertRankInfoToLeagueEntries(RankInfo rankInfo) {
+    private List<LeagueEntryDto> convertRankInfoToLeagueEntries(LeagueEntryDto rankInfo) {
         if (rankInfo == null || "UNRANKED".equals(rankInfo.getTier())) {
             return new ArrayList<>();
         }
@@ -350,7 +350,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
         return LocalDateTime.now().isAfter(cacheExpiry);
     }
 
-    private RankInfo convertToRankInfo(PlayerEntity player) {
+    private LeagueEntryDto convertToRankInfo(PlayerEntity player) {
         Optional<PlayerRankEntity> soloRankOpt = player.getRanks().stream()
                 .filter(rank -> RANKED_SOLO_5x5.equals(rank.getQueueType()))
                 .findFirst();
@@ -359,7 +359,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
             PlayerRankEntity soloRank = soloRankOpt.get();
             String fullRankString = createFullRankString(soloRank.getTier(), soloRank.getRankDivision(), soloRank.getLeaguePoints());
 
-            return RankInfo.builder()
+            return LeagueEntryDto.builder()
                     .tier(soloRank.getTier())
                     .rank(soloRank.getRankDivision())
                     .leaguePoints(soloRank.getLeaguePoints())
@@ -370,7 +370,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
                     .build();
         }
 
-        return RankInfo.createUnrankedInfo();
+        return LeagueEntryDto.createUnrankedInfo();
     }
 
     /**
@@ -381,7 +381,7 @@ public class PlayerDataServiceImpl implements PlayerDataService {
             return "언랭크";
         }
 
-        String tierKorean = RankInfo.translateTierToKorean(tier);
+        String tierKorean = LeagueEntryDto.translateTierToKorean(tier);
         int lp = leaguePoints != null ? leaguePoints : 0;
 
         if (rank == null || rank.isEmpty()) {

@@ -11,8 +11,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import java.util.List;
 
-import static com.example.simple_lolsearch.dto.RankInfo.createUnrankedInfo;
-import static com.example.simple_lolsearch.dto.RankInfo.formatRankString;
+import static com.example.simple_lolsearch.dto.LeagueEntryDto.createUnrankedInfo;
+import static com.example.simple_lolsearch.dto.LeagueEntryDto.formatRankString;
+
 
 @Slf4j
 @Service
@@ -117,7 +118,7 @@ public class RiotApiServiceImpl implements RiotApiService {
     }
 
     @Override
-    public RankInfo getRankInfo(String puuid) {
+    public LeagueEntryDto getRankInfo(String puuid) {
         log.debug("PUUID로 랭크 정보 조회: {}", puuid);
 
         try {
@@ -145,7 +146,7 @@ public class RiotApiServiceImpl implements RiotApiService {
                 return createUnrankedInfo();
             }
 
-            return RankInfo.builder()
+            return LeagueEntryDto.builder()
                     .tier(soloRank.getTier())
                     .rank(soloRank.getRank())
                     .leaguePoints(soloRank.getLeaguePoints())
@@ -159,12 +160,12 @@ public class RiotApiServiceImpl implements RiotApiService {
         }
     }
 
-    public RankInfo getRankInfoSafely(String puuid) {
+    public LeagueEntryDto getRankInfoSafely(String puuid) {
         try {
             return getRankInfo(puuid);
         } catch (Exception e) {
             log.warn("랭크 정보 조회 실패 (PUUID: {}): {}", puuid, e.getMessage());
-            return RankInfo.builder()
+            return LeagueEntryDto.builder()
                     .tier("UNRANKED")
                     .rank("")
                     .leaguePoints(0)
