@@ -2,6 +2,7 @@ package com.example.simple_lolsearch.config;
 
 import com.example.simple_lolsearch.service.*;
 import com.example.simple_lolsearch.service.impl.*;
+import com.example.simple_lolsearch.util.RuneExtractorUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -60,16 +61,16 @@ public class AppConfig {
     }
     @Bean
     public GameDetailMapperService gameDetailMapperService(
-            TimeFormatterService timeFormatterService
-    ) {
-        return new GameDetailMapperServiceImpl(timeFormatterService);
+            TimeFormatterService timeFormatterService, RuneExtractorUtil runeExtractorUtil
+            ) {
+        return new GameDetailMapperServiceImpl(timeFormatterService,runeExtractorUtil);
     }
 
     @Bean
     public GameDetailEnhancementService gameDetailEnhancementService(
-            PlayerService playerService,
+            PlayerDataService playerDataService,
             GameDetailMapperService gameDetailMapperService) {
-        return new GameDetailEnhancementServiceImpl(playerService, gameDetailMapperService);
+        return new GameDetailEnhancementServiceImpl(playerDataService, gameDetailMapperService);
     }
     // ✅ 수정된 코드: Spring이 관리하는 빈을 주입받음
     @Bean
@@ -77,12 +78,4 @@ public class AppConfig {
             RiotApiService riotApiService) { // 파라미터로 주입받음
         return new SummonerServiceImpl(riotApiService);
     }
-//    @Bean
-//    public MatchDetailServiceImpl matchDetailService(
-//            RiotApiService riotApiService,
-//            GameDetailMapperService gameDetailMapperService,
-//            GameDetailEnhancementService gameDetailEnhancementService
-//    ) {
-//        return new MatchDetailServiceImpl(riotApiService, gameDetailMapperService, gameDetailEnhancementService
-//    )
 }

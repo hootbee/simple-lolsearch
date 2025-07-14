@@ -19,9 +19,6 @@ import java.util.List;
 public class PlayerEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(name = "puuid", unique = true, nullable = false, length = 78)
     private String puuid;
 

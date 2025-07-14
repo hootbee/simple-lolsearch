@@ -19,12 +19,6 @@ public interface PlayerRankRepository extends JpaRepository<PlayerRankEntity, Lo
     @Query("DELETE FROM PlayerRankEntity pr WHERE pr.playerEntity.puuid = :puuid")
     void deleteByPlayerEntityPuuid(@Param("puuid") String puuid);
 
-    // 또는 더 안전한 방법
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM PlayerRankEntity pr WHERE pr.playerEntity.id = :playerId")
-    void deleteByPlayerEntityId(@Param("playerId") Long playerId);
-
     // 검증용 메서드
     @Query("SELECT COUNT(pr) FROM PlayerRankEntity pr WHERE pr.playerEntity.puuid = :puuid")
     long countByPlayerEntityPuuid(@Param("puuid") String puuid);

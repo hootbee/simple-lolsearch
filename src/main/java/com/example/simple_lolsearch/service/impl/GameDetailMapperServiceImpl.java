@@ -1,19 +1,14 @@
 package com.example.simple_lolsearch.service.impl;
-
-import com.example.simple_lolsearch.service.GameDataMapperService;
-import com.example.simple_lolsearch.service.RiotApiService;
 import com.example.simple_lolsearch.service.TimeFormatterService;
+import com.example.simple_lolsearch.util.GameDataUtils;
+import com.example.simple_lolsearch.util.RuneExtractorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
 import com.example.simple_lolsearch.dto.*;
 import com.example.simple_lolsearch.service.GameDetailMapperService;
-import com.example.simple_lolsearch.service.TimeFormatterService;
-import com.example.simple_lolsearch.service.RiotApiService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +20,7 @@ import java.util.stream.Collectors;
 public class GameDetailMapperServiceImpl implements GameDetailMapperService {
 
     private final TimeFormatterService timeFormatterService;
+    private final RuneExtractorUtil runeExtractorUtil;
 
     @Override
     public GameDetailDto mapToGameDetail(MatchDetailDto match) {
@@ -99,10 +95,10 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
     @Override
     public GameDetailDto.PlayerDetailDto mapToPlayerDetail(MatchDetailDto.ParticipantDto participant) {
         // 룬 정보 추출
-        RuneInfo runeInfo = extractRuneInfo(participant.getPerks());
+        RuneInfo runeInfo = runeExtractorUtil.extractRuneInfo(participant.getPerks());
 
         // 아이템 정보 추출
-        List<Integer> items = extractItems(participant);
+        List<Integer> items = GameDataUtils.extractItems(participant);
 
         String displayName=getDisplayName(participant);
 
@@ -114,9 +110,9 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
                 .kills(participant.getKills())
                 .deaths(participant.getDeaths())
                 .assists(participant.getAssists())
-                .kda(calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists()))
+                .kda(GameDataUtils.calculateKDA(participant.getKills(),participant.getDeaths(),participant.getAssists()))
                 .killParticipation(0.0)
-                .cs(participant.getTotalMinionsKilled() + participant.getNeutralMinionsKilled())
+                .cs(GameDataUtils.calculateCS(participant))
                 .goldEarned(participant.getGoldEarned())
                 .totalDamageDealtToChampions(participant.getTotalDamageDealtToChampions())
                 .totalDamageTaken(0)
@@ -226,77 +222,8 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
         return Math.round(participation * 10.0) / 10.0;
     }
 
-    private RuneInfo extractRuneInfo(MatchDetailDto.PerksDto perks) {
-        int keystoneId = 0;
-        int primaryRuneTree = 0;
-        int secondaryRuneTree = 0;
-        List<Integer> runes = Arrays.asList(0, 0, 0, 0, 0, 0);
-        List<Integer> statRunes = Arrays.asList(0, 0, 0);
 
-        if (perks != null && perks.getStyles() != null && perks.getStyles().size() >= 2) {
-            // 주 룬 트리
-            MatchDetailDto.PerkStyleDto primaryStyle = perks.getStyles().get(0);
-            primaryRuneTree = primaryStyle.getStyle();
 
-            // 보조 룬 트리
-            MatchDetailDto.PerkStyleDto secondaryStyle = perks.getStyles().get(1);
-            secondaryRuneTree = secondaryStyle.getStyle();
-
-            // 키스톤 룬
-            if (primaryStyle.getSelections() != null && !primaryStyle.getSelections().isEmpty()) {
-                keystoneId = primaryStyle.getSelections().get(0).getPerk();
-            }
-
-            // 전체 룬 ID 추출
-            runes = perks.getStyles().stream()
-                    .flatMap(style -> style.getSelections().stream())
-                    .map(MatchDetailDto.PerkStyleSelectionDto::getPerk)
-                    .collect(Collectors.toList());
-
-            // 스탯 룬 정보
-            if (perks.getStatPerks() != null) {
-                MatchDetailDto.PerkStatsDto statPerks = perks.getStatPerks();
-                statRunes = Arrays.asList(
-                        statPerks.getOffense(),
-                        statPerks.getFlex(),
-                        statPerks.getDefense()
-                );
-            }
-        }
-
-        return RuneInfo.builder()
-                .keystoneId(keystoneId)
-                .primaryRuneTree(primaryRuneTree)
-                .secondaryRuneTree(secondaryRuneTree)
-                .runes(runes)
-                .statRunes(statRunes)
-                .build();
-    }
-
-    /**
-     * 아이템 정보 추출
-     */
-    private List<Integer> extractItems(MatchDetailDto.ParticipantDto participant) {
-        return Arrays.asList(
-                participant.getItem0(),
-                participant.getItem1(),
-                participant.getItem2(),
-                participant.getItem3(),
-                participant.getItem4(),
-                participant.getItem5()
-        );
-    }
-
-    /**
-     * KDA 계산
-     */
-    private String calculateKDA(int kills, int deaths, int assists) {
-        if (deaths == 0) {
-            return "Perfect";
-        }
-        double kda = (double)(kills + assists) / deaths;
-        return String.format("%.2f", kda);
-    }
     private String getDisplayName(MatchDetailDto.ParticipantDto participant) {
         // 2. Riot ID가 있으면 사용
         if (participant.getRiotIdGameName() != null &&

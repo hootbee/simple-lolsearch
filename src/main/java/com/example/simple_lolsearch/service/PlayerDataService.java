@@ -1,6 +1,7 @@
 package com.example.simple_lolsearch.service;
 
 import com.example.simple_lolsearch.dto.PlayerProfileDto;
+import com.example.simple_lolsearch.dto.RankInfo;
 
 public interface PlayerDataService {
         /**
@@ -38,4 +39,5 @@ public interface PlayerDataService {
          * @Scheduled 어노테이션에 의해 1시간마다 자동 실행
          */
         void cleanupOldCache();
+        RankInfo getRankInfoFromDbOrApi(String puuid);
 }
