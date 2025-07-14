@@ -71,10 +71,33 @@ public class PlayerDataServiceImpl implements PlayerDataService {
         }
 
         // API에서 최신 정보 조회
-        LeagueEntryDto apiRankInfo = riotApiService.getRankInfoSafely(puuid);
-        saveOrUpdatePlayerByPuuid(puuid, apiRankInfo);
+        List<LeagueEntryDto> allRanks = riotApiService.getLeagueEntries(puuid);
+        LeagueEntryDto primaryRank=selectPrimaryRank(allRanks);
 
-        return apiRankInfo;
+        saveOrUpdatePlayerByPuuid(puuid, allRanks);
+
+        return primaryRank;
+    }
+
+    private LeagueEntryDto selectPrimaryRank(List<LeagueEntryDto> ranks) {
+        if (ranks == null || ranks.isEmpty()) {
+            return LeagueEntryDto.createUnrankedInfo();
+        }
+        Optional<LeagueEntryDto> soloRank = ranks.stream()
+                .filter(rank -> RANKED_SOLO_5x5.equals(rank.getQueueType()))
+                .findFirst();
+        if (soloRank.isPresent()) {
+            return soloRank.get();
+        }
+
+        Optional<LeagueEntryDto> flexRank = ranks.stream()
+                .filter(rank -> "RANKED_FLEX_SR".equals(rank.getQueueType()))
+                .findFirst();
+
+        if (flexRank.isPresent()) {
+            return flexRank.get();
+        }
+        return ranks.get(0);
     }
 
     private Optional<PlayerEntity> getCachedPlayerIfValid(String gameName, String tagLine) {
@@ -113,15 +136,14 @@ public class PlayerDataServiceImpl implements PlayerDataService {
         }
     }
 
-    private PlayerEntity saveOrUpdatePlayerByPuuid(String puuid, LeagueEntryDto rankInfo) {
+    private PlayerEntity saveOrUpdatePlayerByPuuid(String puuid, List<LeagueEntryDto> allRanks) {
         try {
             // API에서 전체 정보 조회
             AccountDto account = getAccountSafely(puuid);
             PlayerProfileDto summoner = getSummonerSafely(puuid);
 
             // RankInfo를 LeagueEntryDto로 변환
-            List<LeagueEntryDto> leagueEntries = convertRankInfoToLeagueEntries(rankInfo);
-            return saveOrUpdatePlayerWithRanks(account, summoner, leagueEntries);
+            return saveOrUpdatePlayerWithRanks(account, summoner, allRanks);
 
         } catch (Exception e) {
             log.error("PUUID 기반 플레이어 저장 실패: {}", puuid, e);

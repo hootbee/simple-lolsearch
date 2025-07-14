@@ -10,8 +10,6 @@ public interface RiotApiService {
     List<LeagueEntryDto> getLeagueEntries(String puuid);
     PlayerProfileDto getSummoner(String puuid);
 
-    LeagueEntryDto getRankInfo(String puuid);
-    LeagueEntryDto getRankInfoSafely(String puuid);
     AccountDto getAccountByPuuid(String puuid);
 
 }

@@ -118,63 +118,6 @@ public class RiotApiServiceImpl implements RiotApiService {
     }
 
     @Override
-    public LeagueEntryDto getRankInfo(String puuid) {
-        log.debug("PUUID로 랭크 정보 조회: {}", puuid);
-
-        try {
-            List<LeagueEntryDto> leagueEntries = getLeagueEntries(puuid);
-
-            if (leagueEntries == null || leagueEntries.isEmpty()) {
-                return createUnrankedInfo();
-            }
-
-            // 솔로랭크 우선 조회
-            LeagueEntryDto soloRank = leagueEntries.stream()
-                    .filter(entry -> "RANKED_SOLO_5x5".equals(entry.getQueueType()))
-                    .findFirst()
-                    .orElse(null);
-
-            // 솔로랭크가 없으면 자유랭크 조회
-            if (soloRank == null) {
-                soloRank = leagueEntries.stream()
-                        .filter(entry -> "RANKED_FLEX_SR".equals(entry.getQueueType()))
-                        .findFirst()
-                        .orElse(null);
-            }
-
-            if (soloRank == null) {
-                return createUnrankedInfo();
-            }
-
-            return LeagueEntryDto.builder()
-                    .tier(soloRank.getTier())
-                    .rank(soloRank.getRank())
-                    .leaguePoints(soloRank.getLeaguePoints())
-                    .queueType(soloRank.getQueueType())
-                    .fullRankString(formatRankString(soloRank))
-                    .build();
-
-        } catch (Exception e) {
-            log.error("랭크 정보 조회 실패: {}", e.getMessage());
-            return createUnrankedInfo();
-        }
-    }
-
-    public LeagueEntryDto getRankInfoSafely(String puuid) {
-        try {
-            return getRankInfo(puuid);
-        } catch (Exception e) {
-            log.warn("랭크 정보 조회 실패 (PUUID: {}): {}", puuid, e.getMessage());
-            return LeagueEntryDto.builder()
-                    .tier("UNRANKED")
-                    .rank("")
-                    .leaguePoints(0)
-                    .queueType("")
-                    .fullRankString("언랭크")
-                    .build();
-        }
-    }
-    @Override
     public AccountDto getAccountByPuuid(String puuid) {
         log.debug("PUUID로 계정 정보 조회: {}", puuid);
 
