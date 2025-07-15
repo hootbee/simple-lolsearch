@@ -134,20 +134,6 @@ export const refreshPlayerProfile = async (gameName, tagLine) => {
     }
 };
 
-// 8. 이전 경기 더보기 (gameName + tagLine 방식)
-// export const loadMoreGameHistory = async (gameName, tagLine, lastGameTime, count = 5) => {
-//     try {
-//         console.log('📜 이전 경기 더보기 API 호출:', { gameName, tagLine, lastGameTime, count });
-//         const response = await api.get('/summoner/game-history/load-more', {
-//             params: { gameName, tagLine, lastGameTime, count }
-//         });
-//         console.log('✅ 이전 경기 더보기 응답:', response.data);
-//         return response.data;
-//     } catch (error) {
-//         console.error('❌ 이전 경기 더보기 실패:', error);
-//         handleApiError(error);
-//     }
-// };
 
 // 9. 이전 경기 더보기 (PUUID 직접 방식 - 성능 최적화)
 export const loadMoreGameHistoryByPuuid = async (puuid, lastGameTime, count = 5) => {
@@ -160,6 +146,36 @@ export const loadMoreGameHistoryByPuuid = async (puuid, lastGameTime, count = 5)
         return response.data;
     } catch (error) {
         console.error('❌ PUUID 기반 이전 경기 더보기 실패:', error);
+        handleApiError(error);
+    }
+};
+
+// services/api.js에서 추가
+export const getAccountByPuuid = async (puuid) => {
+    try {
+        console.log('🔍 PUUID로 계정 정보 조회:', puuid);
+        const response = await api.get('/summoner/account/by-puuid', {
+            params: { puuid }
+        });
+        console.log('✅ PUUID 계정 조회 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ PUUID 계정 조회 실패:', error);
+        handleApiError(error);
+    }
+};
+
+// 🔥 새로 추가: PUUID 기반 게임 히스토리 조회
+export const getGameHistoryByPuuid = async (puuid, count = 20) => {
+    try {
+        console.log('🚀 PUUID 기반 게임 히스토리 API 호출:', { puuid, count });
+        const response = await api.get('/summoner/game-history/by-puuid', {
+            params: { puuid, count }
+        });
+        console.log('✅ PUUID 게임 히스토리 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ PUUID 게임 히스토리 조회 실패:', error);
         handleApiError(error);
     }
 };

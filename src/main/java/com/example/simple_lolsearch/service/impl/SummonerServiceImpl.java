@@ -50,4 +50,10 @@ public class SummonerServiceImpl implements SummonerService {
         return riotApiService.getSummoner(puuid);
     }
 
+    @Override
+    public AccountDto getAccountByPuuid(String puuid) {
+        return riotApiService.getAccountByPuuid(puuid);
+    }
+
+
 }

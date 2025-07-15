@@ -13,7 +13,7 @@ export const getTierImageUrl = (tier, rank) => {
     const tierLower = tier.toLowerCase();
 
     // 검색 결과에서 확인한 올바른 경로
-    const url = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/${tierLower}.png`;
+    const url = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/${tierLower}.svg`;
     console.log('Generated URL:', url);
     return url;
 };

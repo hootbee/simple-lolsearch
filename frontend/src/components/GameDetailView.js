@@ -1,9 +1,10 @@
-/* src/components/GameDetailView.jsx */
 import React from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import ChampionImage from './ChampionImage';
 import ItemBuild from './ItemBuild';
 import SpellRuneDisplay from './SpellRuneDisplay';
+import { getAccountByPuuid } from '../services/api';
 
 const DetailContainer = styled.div`
     padding: 20px;
@@ -34,7 +35,7 @@ const GameMeta = styled.div`
 const TeamsContainer = styled.div`
     display: flex;
     gap: 20px;
-    
+
     @media (max-width: 768px) {
         flex-direction: column;
     }
@@ -96,12 +97,23 @@ const PlayerRow = styled.div`
     }
 `;
 
+// 🔥 클릭 가능한 플레이어 이름 스타일 추가
 const PlayerName = styled.div`
     font-weight: bold;
-    color: #333;
+    color: #0066cc;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: #004499;
+        text-decoration: underline;
+        background: #f0f7ff;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
 `;
 
 const PlayerKDA = styled.div`
@@ -133,7 +145,7 @@ const ObjectiveStats = styled.div`
 
 const ObjectiveItem = styled.div`
     color: #666;
-    
+
     strong {
         display: block;
         color: #333;
@@ -142,11 +154,84 @@ const ObjectiveItem = styled.div`
 `;
 
 const GameDetailView = ({ gameDetail }) => {
+    const navigate = useNavigate();
+
     const formatDuration = (seconds) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
+
+    // 🔥 플레이어 클릭 핸들러
+    const handlePlayerClick = async (player) => {
+        try {
+            console.log('🔍 플레이어 클릭:', player);
+
+            // PUUID가 있으면 해당 PUUID로 계정 정보 조회
+            if (player.puuid) {
+                console.log('PUUID로 계정 정보 조회:', player.puuid);
+                const accountData = await getAccountByPuuid(player.puuid);
+
+                if (accountData && accountData.gameName && accountData.tagLine) {
+                    const encodedGameName = encodeURIComponent(accountData.gameName);
+                    const encodedTagLine = encodeURIComponent(accountData.tagLine);
+
+                    console.log('검색 페이지로 이동:', `${encodedGameName}#${encodedTagLine}`);
+                    navigate(`/search/${encodedGameName}/${encodedTagLine}`);
+                } else {
+                    console.warn('계정 정보를 찾을 수 없습니다');
+                    alert('해당 플레이어의 계정 정보를 찾을 수 없습니다.');
+                }
+            } else if (player.riotIdGameName && player.riotIdTagLine) {
+                // 백업: riotId 정보가 있으면 사용
+                const encodedGameName = encodeURIComponent(player.riotIdGameName);
+                const encodedTagLine = encodeURIComponent(player.riotIdTagLine);
+
+                console.log('backup: riotId로 검색 페이지 이동:', `${encodedGameName}#${encodedTagLine}`);
+                navigate(`/search/${encodedGameName}/${encodedTagLine}`);
+            } else {
+                console.warn('플레이어 정보가 부족합니다:', player);
+                alert('해당 플레이어의 정보가 부족합니다.');
+            }
+        } catch (error) {
+            console.error('플레이어 정보 조회 실패:', error);
+            alert('플레이어 정보를 불러오는 중 오류가 발생했습니다.');
+        }
+    };
+
+    // 🔥 플레이어 행 컴포넌트
+    const PlayerRowComponent = ({ player, index }) => (
+        <PlayerRow key={index}>
+            <ChampionImage
+                championName={player.championName}
+                size="32px"
+            />
+            <div>
+                <PlayerName onClick={() => handlePlayerClick(player)}>
+                    {player.riotIdGameName || 'Unknown'}
+                </PlayerName>
+                <div style={{fontSize: '0.75rem', color: '#888'}}>
+                    {player.championName}
+                </div>
+            </div>
+            <PlayerKDA>
+                {player.kills}/{player.deaths}/{player.assists}
+            </PlayerKDA>
+            <PlayerItems>
+                <ItemBuild
+                    items={player.items}
+                    trinket={player.trinket}
+                    size={16}
+                />
+            </PlayerItems>
+            <div style={{textAlign: 'center'}}>
+                CS: {player.cs}
+            </div>
+            <PlayerRank>
+                {player.tier} {player.rank}
+            </PlayerRank>
+        </PlayerRow>
+    );
 
     return (
         <DetailContainer>
@@ -174,34 +259,7 @@ const GameDetailView = ({ gameDetail }) => {
 
                     <PlayersGrid>
                         {gameDetail.blueTeam.players.map((player, index) => (
-                            <PlayerRow key={index}>
-                                <ChampionImage
-                                    championName={player.championName}
-                                    size="32px"
-                                />
-                                <div>
-                                    <PlayerName>{player.riotIdGameName || 'Unknown'}</PlayerName>
-                                    <div style={{fontSize: '0.75rem', color: '#888'}}>
-                                        {player.championName}
-                                    </div>
-                                </div>
-                                <PlayerKDA>
-                                    {player.kills}/{player.deaths}/{player.assists}
-                                </PlayerKDA>
-                                <PlayerItems>
-                                    <ItemBuild
-                                        items={player.items}
-                                        trinket={player.trinket}
-                                        size={16}
-                                    />
-                                </PlayerItems>
-                                <div style={{textAlign: 'center'}}>
-                                    CS: {player.cs}
-                                </div>
-                                <PlayerRank>
-                                    {player.tier} {player.rank}
-                                </PlayerRank>
-                            </PlayerRow>
+                            <PlayerRowComponent key={index} player={player} index={index} />
                         ))}
                     </PlayersGrid>
 
@@ -239,34 +297,7 @@ const GameDetailView = ({ gameDetail }) => {
 
                     <PlayersGrid>
                         {gameDetail.redTeam.players.map((player, index) => (
-                            <PlayerRow key={index}>
-                                <ChampionImage
-                                    championName={player.championName}
-                                    size="32px"
-                                />
-                                <div>
-                                    <PlayerName>{player.riotIdGameName|| 'Unknsdfdfaown'}</PlayerName>
-                                    <div style={{fontSize: '0.75rem', color: '#888'}}>
-                                        {player.championName}
-                                    </div>
-                                </div>
-                                <PlayerKDA>
-                                    {player.kills}/{player.deaths}/{player.assists}
-                                </PlayerKDA>
-                                <PlayerItems>
-                                    <ItemBuild
-                                        items={player.items}
-                                        trinket={player.trinket}
-                                        size={16}
-                                    />
-                                </PlayerItems>
-                                <div style={{textAlign: 'center'}}>
-                                    CS: {player.cs}
-                                </div>
-                                <PlayerRank>
-                                    {player.tier} {player.rank}
-                                </PlayerRank>
-                            </PlayerRow>
+                            <PlayerRowComponent key={index} player={player} index={index} />
                         ))}
                     </PlayersGrid>
 
