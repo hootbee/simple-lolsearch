@@ -15,6 +15,7 @@ public class GameSummaryDto {
     private boolean win;
     private long gameDuration;
     private String gameMode;
+    private Integer queueId;
     private String kda;
     private int cs;
     private int goldEarned;

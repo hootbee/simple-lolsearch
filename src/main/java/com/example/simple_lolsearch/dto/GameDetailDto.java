@@ -17,6 +17,7 @@ public class GameDetailDto {
     private String gameDate;
     private String relativeTime;
     private int mapId;
+    private Integer queueId;
 
     // 팀별 정보
     private TeamDetailDto blueTeam;  // 100팀
