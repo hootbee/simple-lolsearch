@@ -42,24 +42,7 @@ public class SummonerController {
         return wrap(() -> summonerService.getRecentMatchIds(puuid, count));
     }
 
-//    /* 3. 게임 요약(히스토리) : 캐싱 + 매핑 서비스 사용 */
-//    @GetMapping("/game-history")
-//    public ResponseEntity<List<GameSummaryDto>> getGameHistory(
-//            @RequestParam String gameName,
-//            @RequestParam String tagLine,
-//            @RequestParam(defaultValue = "10") int count) {
-//
-//        log.info("게임 기록 조회 요청: {}#{}, count={}", gameName, tagLine, count);
-//
-//        return wrap(() -> {
-//            String puuid = summonerService
-//                    .getAccountByRiotId(gameName, tagLine)
-//                    .getPuuid();
-//
-//            List<String> matchIds = summonerService.getRecentMatchIds(puuid, count);
-//            return matchDetailService.getGameSummaries(matchIds, puuid);
-//        });
-//    }
+
 // 초기 로드 (최신 게임들) - 기존 방식 유지
 @GetMapping("/game-history")
 public ResponseEntity<List<GameSummaryDto>> getGameHistory(
@@ -80,6 +63,17 @@ public ResponseEntity<List<GameSummaryDto>> getGameHistory(
     });
 }
 
+    // 🔥 새로 추가: PUUID 기반 게임 히스토리 조회
+//    @GetMapping("/game-history/by-puuid")
+//    public ResponseEntity<List<GameSummaryDto>> getGameHistoryByPuuid(
+//            @RequestParam String puuid,
+//            @RequestParam(defaultValue = "10") int count) {
+//
+//        log.info("PUUID 기반 게임 기록 조회 요청: puuid={}, count={}", puuid, count);
+//        return wrap(() -> matchDetailService.getGameHistory(puuid, null, count));
+//    }
+
+
 
     // 더보기 (시간 기반)
     @GetMapping("/game-history/load-more")
@@ -91,27 +85,6 @@ public ResponseEntity<List<GameSummaryDto>> getGameHistory(
         return wrap(() -> matchDetailService.getGameHistory(puuid, lastGameTime, count));
     }
 
-
-//    /* 3-3. 이전 게임 5개 더 불러오기 */
-//    @GetMapping("/game-history/load-more")
-//    public ResponseEntity<List<GameSummaryDto>> loadMoreGameHistory(
-//            @RequestParam String gameName,
-//            @RequestParam String tagLine,
-//            @RequestParam int currentCount) {
-//
-//        log.info("추가 게임 기록 조회 요청: {}#{}, currentCount={}",
-//                gameName, tagLine, currentCount);
-//
-//        return wrap(() -> {
-//            String puuid = summonerService
-//                    .getAccountByRiotId(gameName, tagLine)
-//                    .getPuuid();
-//
-//            // 현재까지 로드된 게임 수부터 5개 더 가져오기
-//            List<String> matchIds = summonerService.getRecentMatchIds(puuid, currentCount, 5);
-//            return matchDetailService.getGameSummaries(matchIds, puuid);
-//        });
-//    }
 
 
     @GetMapping("/game-detail/{matchId}")
@@ -174,7 +147,16 @@ public ResponseEntity<List<GameSummaryDto>> getGameHistory(
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("서버 오류가 발생했습니다"));
         }
+    }/* 8. PUUID로 계정 정보 조회 */
+    @GetMapping("/account/by-puuid")
+    public ResponseEntity<AccountDto> getAccountByPuuid(
+            @RequestParam String puuid) {
+
+        log.info("PUUID로 계정 조회 요청: {}", puuid);
+        return wrap(() -> summonerService.getAccountByPuuid(puuid));
     }
+
+
 
     @FunctionalInterface
     private interface ServiceCall<T> {
