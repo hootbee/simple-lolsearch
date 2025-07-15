@@ -381,7 +381,6 @@ function SearchResultPage() {
                                     fontSize: '18px',
                                     fontWeight: '600'
                                 }}>
-                                    🎮 최근 게임 기록 ({gameHistoryData.length}게임)
                                 </h3>
                                 <GameHistory
                                     gameHistory={gameHistoryData}
