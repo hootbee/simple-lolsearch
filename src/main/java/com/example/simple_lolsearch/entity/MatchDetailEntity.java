@@ -1,6 +1,7 @@
 package com.example.simple_lolsearch.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,6 +46,8 @@ public class MatchDetailEntity {
 
     @Column(name = "map_id")
     private Integer mapId;
+    @Column(name = "queue_id")
+    private Integer queueId;
 
     // 복잡한 데이터는 JSON으로 저장
     @Column(name = "participants_data", columnDefinition = "JSON")

@@ -27,6 +27,7 @@ public class MatchDetailDto {
         private String gameType;
         private String gameVersion;
         private int mapId;
+        private Integer queueId;
         private List<ParticipantDto> participants;
         private List<TeamDto> teams;
     }

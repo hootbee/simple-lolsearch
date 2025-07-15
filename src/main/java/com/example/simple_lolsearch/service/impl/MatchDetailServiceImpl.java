@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -161,6 +162,7 @@ public class MatchDetailServiceImpl implements MatchDetailService {
             match.setGameType(matchDetail.getInfo().getGameType());
             match.setGameVersion(matchDetail.getInfo().getGameVersion());
             match.setMapId(matchDetail.getInfo().getMapId());
+            match.setQueueId(matchDetail.getInfo().getQueueId());
             match.setParticipantsData(participantsDataJson);
             match.setTeamsData(teamsDataJson);
 
