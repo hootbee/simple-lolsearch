@@ -15,13 +15,18 @@ import {
 import UserInfo from '../components/UserInfo';
 import RankInfo from '../components/RankInfo';
 import GameHistory from '../components/GameHistory';
-import { getPlayerProfile, getGameHistory, refreshPlayerProfile, loadMoreGameHistory } from '../services/api';
+import {
+    getPlayerProfile,
+    getGameHistory,
+    refreshPlayerProfile,
+    loadMoreGameHistoryByPuuid
+} from '../services/api';
 
 function SearchResultPage() {
     const { gameName: urlGameName, tagLine: urlTagLine } = useParams();
     const navigate = useNavigate();
 
-    // 안전한 초기값 설정
+    // 기본 상태
     const [gameName, setGameName] = useState(urlGameName ? decodeURIComponent(urlGameName) : '');
     const [tagLine, setTagLine] = useState(urlTagLine || 'KR1');
     const [playerProfile, setPlayerProfile] = useState(null);
@@ -30,7 +35,10 @@ function SearchResultPage() {
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
 
-    // 🔥 무한 스크롤 관련 상태 추가
+    // 🔥 PUUID 상태 추가
+    const [userPuuid, setUserPuuid] = useState(null);
+
+    // 무한 스크롤 관련 상태
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMoreGames, setHasMoreGames] = useState(true);
     const [loadMoreError, setLoadMoreError] = useState(null);
@@ -62,13 +70,13 @@ function SearchResultPage() {
                     parsedState.tagLine === urlTagLine) {
                     setPlayerProfile(parsedState.playerProfile || null);
                     setGameHistoryData(parsedState.gameHistoryData || []);
-
-                    // 🔥 무한 스크롤 상태도 복원
+                    setUserPuuid(parsedState.userPuuid || null); // 🔥 PUUID 복원
                     setHasMoreGames(parsedState.hasMoreGames !== false);
 
                     console.log('=== 저장된 상태 복원 ===');
                     console.log('복원된 프로필:', parsedState.playerProfile);
                     console.log('복원된 게임 히스토리:', parsedState.gameHistoryData);
+                    console.log('복원된 PUUID:', parsedState.userPuuid);
                 }
             } catch (error) {
                 console.error('저장된 상태 복원 실패:', error);
@@ -79,14 +87,15 @@ function SearchResultPage() {
 
     // 상태 변경 시 로컬 스토리지에 저장
     useEffect(() => {
-        if (playerProfile && urlGameName && urlTagLine) {
+        if (playerProfile && urlGameName && urlTagLine && userPuuid) {
             try {
                 const stateToSave = {
                     gameName: decodeURIComponent(urlGameName),
                     tagLine: urlTagLine,
                     playerProfile,
                     gameHistoryData,
-                    hasMoreGames, // 🔥 무한 스크롤 상태도 저장
+                    userPuuid, // 🔥 PUUID 저장
+                    hasMoreGames,
                     timestamp: Date.now()
                 };
                 localStorage.setItem('lolSearchState', JSON.stringify(stateToSave));
@@ -96,7 +105,7 @@ function SearchResultPage() {
                 console.error('상태 저장 실패:', error);
             }
         }
-    }, [playerProfile, gameHistoryData, hasMoreGames, urlGameName, urlTagLine]);
+    }, [playerProfile, gameHistoryData, userPuuid, hasMoreGames, urlGameName, urlTagLine]);
 
     // 검색 실행 함수
     const performSearch = async (searchGameName, searchTagLine) => {
@@ -107,7 +116,6 @@ function SearchResultPage() {
 
         setLoading(true);
         setError(null);
-        // 🔥 무한 스크롤 상태 초기화
         setLoadMoreError(null);
         setHasMoreGames(true);
 
@@ -118,14 +126,20 @@ function SearchResultPage() {
             // 1. 프로필 조회
             const profileData = await getPlayerProfile(searchGameName, searchTagLine);
             setPlayerProfile(profileData);
+
+            // 🔥 PUUID 추출 및 저장
+            const puuid = profileData.account?.puuid;
+            if (!puuid) {
+                throw new Error('PUUID를 찾을 수 없습니다.');
+            }
+            setUserPuuid(puuid);
             console.log('✅ 프로필 조회 완료:', profileData);
+            console.log('🔑 PUUID 추출:', puuid);
 
             // 2. 게임 히스토리 조회
             console.log('=== 게임 히스토리 조회 시작 ===');
             const historyData = await getGameHistory(searchGameName, searchTagLine, 10);
             setGameHistoryData(historyData);
-
-            // 🔥 더보기 가능 여부 설정
             setHasMoreGames(historyData.length >= 10);
 
             console.log('✅ 게임 히스토리 조회 완료:', historyData);
@@ -137,6 +151,7 @@ function SearchResultPage() {
             setError(err.message || '플레이어를 찾을 수 없습니다.');
             setPlayerProfile(null);
             setGameHistoryData([]);
+            setUserPuuid(null);
             setHasMoreGames(false);
             localStorage.removeItem('lolSearchState');
         } finally {
@@ -144,18 +159,18 @@ function SearchResultPage() {
         }
     };
 
-    // 🔥 더보기 핸들러 함수 추가
-    const handleLoadMore = async ({ gameName, tagLine, lastGameTime, count }) => {
-        if (loadingMore || !hasMoreGames) return;
+    // 🔥 PUUID 기반 더보기 핸들러
+    const handleLoadMore = async ({ puuid, lastGameTime, count = 5 }) => {
+        if (loadingMore || !hasMoreGames || !puuid) return;
 
         setLoadingMore(true);
         setLoadMoreError(null);
 
         try {
-            console.log('=== 추가 게임 히스토리 로드 시작 ===');
-            console.log('요청 파라미터:', { gameName, tagLine, lastGameTime, count });
+            console.log('=== PUUID 기반 추가 게임 히스토리 로드 시작 ===');
+            console.log('요청 파라미터:', { puuid, lastGameTime, count });
 
-            const moreGames = await loadMoreGameHistory(gameName, tagLine, lastGameTime, count);
+            const moreGames = await loadMoreGameHistoryByPuuid(puuid, lastGameTime, count);
 
             if (moreGames.length > 0) {
                 setGameHistoryData(prev => [...prev, ...moreGames]);
@@ -184,7 +199,6 @@ function SearchResultPage() {
 
         setRefreshing(true);
         setError(null);
-        // 🔥 무한 스크롤 상태 초기화
         setLoadMoreError(null);
         setHasMoreGames(true);
 
@@ -197,6 +211,10 @@ function SearchResultPage() {
                 urlTagLine
             );
             setPlayerProfile(refreshedProfile);
+
+            // 🔥 PUUID 재추출
+            const puuid = refreshedProfile.account?.puuid;
+            setUserPuuid(puuid);
             console.log('✅ 프로필 갱신 완료:', refreshedProfile);
 
             // 2. 게임 히스토리 갱신
@@ -207,8 +225,6 @@ function SearchResultPage() {
                 20
             );
             setGameHistoryData(historyData);
-
-            // 🔥 더보기 가능 여부 재설정
             setHasMoreGames(historyData.length >= 20);
 
             console.log('✅ 게임 히스토리 갱신 완료:', historyData);
@@ -356,7 +372,7 @@ function SearchResultPage() {
                         <UserInfo playerProfile={playerProfile} />
                         <RankInfo leagueEntries={playerProfile.leagueEntries || []} />
 
-                        {/* 🔥 게임 히스토리 표시 - 무한 스크롤 지원 */}
+                        {/* 🔥 게임 히스토리 표시 - PUUID 기반 무한 스크롤 */}
                         {gameHistoryData.length > 0 && (
                             <div style={{ margin: '20px 0' }}>
                                 <h3 style={{
@@ -373,8 +389,7 @@ function SearchResultPage() {
                                     loading={loadingMore}
                                     hasMore={hasMoreGames}
                                     error={loadMoreError}
-                                    gameName={decodeURIComponent(urlGameName)}
-                                    tagLine={urlTagLine}
+                                    puuid={userPuuid} // 🔥 PUUID 전달
                                 />
                             </div>
                         )}
@@ -400,7 +415,7 @@ function SearchResultPage() {
                                         borderRadius: '4px',
                                         marginLeft: '8px'
                                     }}>
-                                        {playerProfile.account?.puuid || '정보 없음'}
+                                        {userPuuid || '정보 없음'}
                                     </span>
                                 </p>
                                 <p style={{ margin: 0, fontSize: '14px' }}>
@@ -415,7 +430,6 @@ function SearchResultPage() {
                                 <p style={{ margin: 0, fontSize: '14px' }}>
                                     <strong>프로필 아이콘 ID:</strong> {playerProfile.profileIconId || '정보 없음'}
                                 </p>
-                                {/* 🔥 무한 스크롤 상태 정보 추가 */}
                                 <p style={{ margin: 0, fontSize: '14px' }}>
                                     <strong>더보기 가능:</strong> {hasMoreGames ? '예' : '아니오'}
                                 </p>
@@ -427,10 +441,10 @@ function SearchResultPage() {
                                         ✅ 프로필 데이터가 DB에서 로드되었습니다.
                                     </p>
                                     <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: '#059669', fontWeight: '500' }}>
-                                        ✅ 게임 히스토리 데이터가 DB에서 로드되었습니다.
+                                        ✅ 게임 히스토리 데이터가 PUUID 기반으로 로드되었습니다.
                                     </p>
                                     <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: '#059669', fontWeight: '500' }}>
-                                        ✅ 무한 스크롤 기능이 활성화되었습니다.
+                                        ✅ PUUID 기반 무한 스크롤 기능이 활성화되었습니다.
                                     </p>
                                 </div>
                             </div>

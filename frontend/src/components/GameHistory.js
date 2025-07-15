@@ -116,8 +116,7 @@ const GameHistory = ({
                          loading = false,
                          hasMore = true,
                          error = null,
-                         gameName,
-                         tagLine
+                         puuid // 🔥 gameName, tagLine 대신 puuid 사용
                      }) => {
     const [filter, setFilter] = useState('all');
 
@@ -154,16 +153,15 @@ const GameHistory = ({
 
     const filteredGames = filterGames(gameHistory, filter);
 
-    // 더보기 버튼 클릭 핸들러
+    // 🔥 PUUID 기반 더보기 핸들러
     const handleLoadMore = () => {
-        if (loading || !hasMore || !onLoadMore) return;
+        if (loading || !hasMore || !onLoadMore || !puuid) return;
 
         // 마지막 게임의 시간 추출
         const lastGame = gameHistory[gameHistory.length - 1];
         if (lastGame && lastGame.gameCreation) {
             onLoadMore({
-                gameName,
-                tagLine,
+                puuid, // 🔥 PUUID 전달
                 lastGameTime: lastGame.gameCreation,
                 count: 5
             });
@@ -177,6 +175,9 @@ const GameHistory = ({
 
         // 에러가 있거나 더 이상 게임이 없으면 표시하지 않음
         if (error || !hasMore) return false;
+
+        // PUUID가 없으면 더보기 불가
+        if (!puuid) return false;
 
         // 최소 게임 수가 있어야 더보기 표시
         return gameHistory.length >= 5;
@@ -238,7 +239,7 @@ const GameHistory = ({
             {error && filter === 'all' && (
                 <LoadMoreSection>
                     <ErrorMessage>
-                        이전 경기를 불러오는 중 오류가 발생했습니다.
+                        {error}
                         <br />
                         <button
                             onClick={handleLoadMore}

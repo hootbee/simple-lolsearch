@@ -135,25 +135,25 @@ export const refreshPlayerProfile = async (gameName, tagLine) => {
 };
 
 // 8. 이전 경기 더보기 (gameName + tagLine 방식)
-export const loadMoreGameHistory = async (gameName, tagLine, lastGameTime, count = 5) => {
-    try {
-        console.log('📜 이전 경기 더보기 API 호출:', { gameName, tagLine, lastGameTime, count });
-        const response = await api.get('/summoner/game-history/load-more', {
-            params: { gameName, tagLine, lastGameTime, count }
-        });
-        console.log('✅ 이전 경기 더보기 응답:', response.data);
-        return response.data;
-    } catch (error) {
-        console.error('❌ 이전 경기 더보기 실패:', error);
-        handleApiError(error);
-    }
-};
+// export const loadMoreGameHistory = async (gameName, tagLine, lastGameTime, count = 5) => {
+//     try {
+//         console.log('📜 이전 경기 더보기 API 호출:', { gameName, tagLine, lastGameTime, count });
+//         const response = await api.get('/summoner/game-history/load-more', {
+//             params: { gameName, tagLine, lastGameTime, count }
+//         });
+//         console.log('✅ 이전 경기 더보기 응답:', response.data);
+//         return response.data;
+//     } catch (error) {
+//         console.error('❌ 이전 경기 더보기 실패:', error);
+//         handleApiError(error);
+//     }
+// };
 
 // 9. 이전 경기 더보기 (PUUID 직접 방식 - 성능 최적화)
 export const loadMoreGameHistoryByPuuid = async (puuid, lastGameTime, count = 5) => {
     try {
         console.log('🚀 PUUID 기반 이전 경기 더보기 API 호출:', { puuid, lastGameTime, count });
-        const response = await api.get('/summoner/game-history/load-more-by-puuid', {
+        const response = await api.get('/summoner/game-history/load-more', {
             params: { puuid, lastGameTime, count }
         });
         console.log('✅ PUUID 기반 이전 경기 더보기 응답:', response.data);
