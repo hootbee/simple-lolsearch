@@ -13,4 +13,8 @@ public interface MatchDetailService {
     GameDetailDto refreshGameDetail(String matchId);
 
     List<GameSummaryDto> getGameSummaries(List<String> matchIds, String puuid);
+
+    List<GameSummaryDto> getGameHistoryWithPagination(String puuid, int start, int count);
+
+    List<GameSummaryDto> getGameHistory(String puuid, Long lastGameTime, int count);
 }

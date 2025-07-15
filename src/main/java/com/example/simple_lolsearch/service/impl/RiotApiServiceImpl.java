@@ -8,11 +8,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
 import java.util.List;
 
-import static com.example.simple_lolsearch.dto.LeagueEntryDto.createUnrankedInfo;
-import static com.example.simple_lolsearch.dto.LeagueEntryDto.formatRankString;
 
 
 @Slf4j
@@ -66,6 +63,27 @@ public class RiotApiServiceImpl implements RiotApiService {
             throw new RuntimeException("매치 ID를 조회할 수 없습니다: " + puuid, e);
         }
     }
+    @Override
+    public List<String> getMatchIds(String puuid, int start, int count) {
+        log.debug("PUUID로 페이지네이션 매치 ID 조회: puuid={}, start={}, count={}",
+                puuid, start, count);
+
+        try {
+            return riotAsiaWebClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
+                            .queryParam("start", start)
+                            .queryParam("count", count)
+                            .build(puuid))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                    .block();
+        } catch (Exception e) {
+            log.error("페이지네이션 매치 ID 조회 실패: {}", e.getMessage());
+            throw new RuntimeException("매치 ID를 조회할 수 없습니다: " + puuid, e);
+        }
+    }
+
 
     @Override
     public MatchDetailDto getMatchDetail(String matchId) {

@@ -42,24 +42,77 @@ public class SummonerController {
         return wrap(() -> summonerService.getRecentMatchIds(puuid, count));
     }
 
-    /* 3. 게임 요약(히스토리) : 캐싱 + 매핑 서비스 사용 */
-    @GetMapping("/game-history")
-    public ResponseEntity<List<GameSummaryDto>> getGameHistory(
-            @RequestParam String gameName,
-            @RequestParam String tagLine,
-            @RequestParam(defaultValue = "10") int count) {
+//    /* 3. 게임 요약(히스토리) : 캐싱 + 매핑 서비스 사용 */
+//    @GetMapping("/game-history")
+//    public ResponseEntity<List<GameSummaryDto>> getGameHistory(
+//            @RequestParam String gameName,
+//            @RequestParam String tagLine,
+//            @RequestParam(defaultValue = "10") int count) {
+//
+//        log.info("게임 기록 조회 요청: {}#{}, count={}", gameName, tagLine, count);
+//
+//        return wrap(() -> {
+//            String puuid = summonerService
+//                    .getAccountByRiotId(gameName, tagLine)
+//                    .getPuuid();
+//
+//            List<String> matchIds = summonerService.getRecentMatchIds(puuid, count);
+//            return matchDetailService.getGameSummaries(matchIds, puuid);
+//        });
+//    }
+// 초기 로드 (최신 게임들) - 기존 방식 유지
+@GetMapping("/game-history")
+public ResponseEntity<List<GameSummaryDto>> getGameHistory(
+        @RequestParam String gameName,
+        @RequestParam String tagLine,
+        @RequestParam(defaultValue = "10") int count) {
 
-        log.info("게임 기록 조회 요청: {}#{}, count={}", gameName, tagLine, count);
+    log.info("게임 기록 조회 요청: {}#{}, count={}", gameName, tagLine, count);
 
-        return wrap(() -> {
-            String puuid = summonerService
-                    .getAccountByRiotId(gameName, tagLine)
-                    .getPuuid();
+    return wrap(() -> {
+        // 1. gameName, tagLine으로 PUUID 조회
+        String puuid = summonerService
+                .getAccountByRiotId(gameName, tagLine)
+                .getPuuid();
 
-            List<String> matchIds = summonerService.getRecentMatchIds(puuid, count);
-            return matchDetailService.getGameSummaries(matchIds, puuid);
-        });
+        // 2. 시간 기반 서비스 호출 (lastGameTime = null이면 최신 게임들)
+        return matchDetailService.getGameHistory(puuid, null, count);
+    });
+}
+
+
+    // 더보기 (시간 기반)
+    @GetMapping("/game-history/load-more")
+    public ResponseEntity<List<GameSummaryDto>> loadMoreGameHistory(
+            @RequestParam String puuid,
+            @RequestParam Long lastGameTime,
+            @RequestParam(defaultValue = "5") int count) {
+
+        return wrap(() -> matchDetailService.getGameHistory(puuid, lastGameTime, count));
     }
+
+
+//    /* 3-3. 이전 게임 5개 더 불러오기 */
+//    @GetMapping("/game-history/load-more")
+//    public ResponseEntity<List<GameSummaryDto>> loadMoreGameHistory(
+//            @RequestParam String gameName,
+//            @RequestParam String tagLine,
+//            @RequestParam int currentCount) {
+//
+//        log.info("추가 게임 기록 조회 요청: {}#{}, currentCount={}",
+//                gameName, tagLine, currentCount);
+//
+//        return wrap(() -> {
+//            String puuid = summonerService
+//                    .getAccountByRiotId(gameName, tagLine)
+//                    .getPuuid();
+//
+//            // 현재까지 로드된 게임 수부터 5개 더 가져오기
+//            List<String> matchIds = summonerService.getRecentMatchIds(puuid, currentCount, 5);
+//            return matchDetailService.getGameSummaries(matchIds, puuid);
+//        });
+//    }
+
 
     @GetMapping("/game-detail/{matchId}")
     public ResponseEntity<GameDetailDto> getGameDetail(@PathVariable String matchId) {

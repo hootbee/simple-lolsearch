@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,6 +23,15 @@ public class SummonerServiceImpl implements SummonerService {
     @Override
     public List<String> getRecentMatchIds(String puuid, int count) {
         return riotApiService.getMatchIds(puuid, count);
+    }
+
+    @Override
+    public List<String> getRecentMatchIds(String puuid, int start, int count) {
+        log.debug("PUUID로 페이지네이션 매치 ID 조회: puuid={}, start={}, count={}",
+                puuid, start, count);
+
+        // 🔥 RiotApiService를 통해 호출
+        return riotApiService.getMatchIds(puuid, start, count);
     }
 
     @Override

@@ -6,6 +6,9 @@ import java.util.List;
 public interface RiotApiService {
     AccountDto getAccount(String gameName, String tagLine);
     List<String> getMatchIds(String puuid, int count);
+
+    List<String> getMatchIds(String puuid, int start, int count);
+
     MatchDetailDto getMatchDetail(String matchId);
     List<LeagueEntryDto> getLeagueEntries(String puuid);
     PlayerProfileDto getSummoner(String puuid);

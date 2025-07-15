@@ -9,6 +9,8 @@ public interface SummonerService {
 
     List<String> getRecentMatchIds(String puuid,int count);
 
+    List<String> getRecentMatchIds(String puuid, int start, int count);
+
     MatchDetailDto getMatchDetail(String matchId);
 
 

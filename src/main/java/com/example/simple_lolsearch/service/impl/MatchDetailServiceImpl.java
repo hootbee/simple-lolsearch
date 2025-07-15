@@ -14,13 +14,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -304,5 +306,119 @@ public class MatchDetailServiceImpl implements MatchDetailService {
         return matchIds.stream()
                 .map(matchId -> getGameSummary(matchId, puuid))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GameSummaryDto> getGameHistoryWithPagination(String puuid, int start, int count) {
+        return null;
+    }
+
+    @Override
+    public List<GameSummaryDto> getGameHistory(String puuid, Long lastGameTime, int count) {
+        log.debug("게임 히스토리 조회: puuid={}, lastGameTime={}, count={}",
+                puuid, lastGameTime, count);
+
+        // 1. DB에서 조회
+        List<MatchDetailEntity> cachedMatches = getMatchesFromDb(puuid, lastGameTime, count);
+
+        // 2. 충분한 데이터가 있는 경우
+        if (cachedMatches.size() >= count) {
+            return cachedMatches.stream()
+                    .map(match -> convertToGameSummary(match, puuid))
+                    .collect(Collectors.toList());
+        }
+
+        // 3. 부족한 경우 API에서 추가 조회
+        List<String> apiMatchIds;
+
+        if (lastGameTime == null) {
+            // 🔥 초기 로드: 최신 매치들 조회
+            apiMatchIds = summonerService.getRecentMatchIds(puuid, 0, count);
+        } else {
+            // 🔥 더보기: 시간 기반 필터링
+            apiMatchIds = getMatchIdsBeforeTime(puuid, lastGameTime, count);
+        }
+
+        return apiMatchIds.stream()
+                .map(matchId -> getGameSummary(matchId, puuid))
+                .sorted((a, b) -> Long.compare(b.getGameCreation(), a.getGameCreation()))
+                .collect(Collectors.toList());
+    }
+
+
+    private List<MatchDetailEntity> getMatchesFromDb(String puuid, Long lastGameTime, int count) {
+        Pageable pageable = PageRequest.of(0, count);
+
+        if (lastGameTime != null) {
+            // 특정 시간 이전 게임들
+            return matchDetailRepository.findByPuuidBeforeTimeOrderByGameCreationDesc(
+                    puuid, lastGameTime, pageable);
+        } else {
+            // 🔥 최신 게임들 (첫 로드)
+            return matchDetailRepository.findByPuuidOrderByGameCreationDesc(puuid, pageable);
+        }
+    }
+
+    private List<String> getMatchIdsBeforeTime(String puuid, Long lastGameTime, int count) {
+        try {
+            log.debug("시간 기반 매치 ID 조회: puuid={}, lastGameTime={}, count={}",
+                    puuid, lastGameTime, count);
+
+            // 🔥 null 체크 추가
+            if (lastGameTime == null) {
+                log.debug("lastGameTime이 null이므로 최신 매치 조회로 처리");
+                return summonerService.getRecentMatchIds(puuid, 0, count);
+            }
+
+            // 기존 시간 기반 필터링 로직
+            int fetchSize = Math.max(count * 3, 20);
+            List<String> allMatchIds = summonerService.getRecentMatchIds(puuid, 0, fetchSize);
+
+            List<String> filteredMatchIds = new ArrayList<>();
+
+            for (String matchId : allMatchIds) {
+                try {
+                    Long gameTime = getGameCreationTime(matchId);
+
+                    // 🔥 gameTime과 lastGameTime 모두 null 체크
+                    if (gameTime != null && gameTime < lastGameTime) {
+                        filteredMatchIds.add(matchId);
+
+                        if (filteredMatchIds.size() >= count) {
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("매치 시간 확인 실패: {}", matchId, e);
+                }
+            }
+
+            return filteredMatchIds;
+
+        } catch (Exception e) {
+            log.error("시간 기반 매치 ID 조회 실패: puuid={}, lastGameTime={}", puuid, lastGameTime, e);
+            return new ArrayList<>();
+        }
+    }
+
+
+    /**
+     * 매치의 게임 생성 시간 조회 (캐시 우선)
+     */
+    private Long getGameCreationTime(String matchId) {
+        // 1. 캐시된 데이터가 있으면 사용
+        Optional<MatchDetailEntity> cached = matchDetailRepository.findById(matchId);
+        if (cached.isPresent()) {
+            return cached.get().getGameCreation();
+        }
+
+        // 2. 캐시되지 않은 경우 API에서 조회
+        try {
+            MatchDetailDto matchDetail = summonerService.getMatchDetail(matchId);
+            return matchDetail.getInfo().getGameCreation();
+        } catch (Exception e) {
+            log.warn("매치 상세 정보 조회 실패: {}", matchId, e);
+            return null;
+        }
     }
 }
