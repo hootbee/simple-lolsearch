@@ -28,8 +28,8 @@ const SpellsContainer = styled.div`
 `;
 
 const SpellImage = styled.img`
-    width: 20px;
-    height: 20px;
+    width: 35px;
+    height: 35px;
     border-radius: 4px;
     border: 1px solid #ddd;
     cursor: help;

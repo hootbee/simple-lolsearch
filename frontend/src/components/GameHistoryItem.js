@@ -21,6 +21,7 @@ const GameCard = styled.div`
     align-items: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.2s ease;
+    cursor: pointer;  // 이 줄 추가
 
     &:hover {
         transform: translateY(-2px);
@@ -448,9 +449,9 @@ const GameHistoryItem = ({ game }) => {
                             onItemHoverEnd={handleItemHoverEnd}
                         />
                     </div>
-                    <ItemStats>
-                        {itemCount}/6 아이템 · {buildCost.toLocaleString()}G
-                    </ItemStats>
+                    {/*<ItemStats>*/}
+                    {/*    {itemCount}/6 아이템 · {buildCost.toLocaleString()}G*/}
+                    {/*</ItemStats>*/}
                 </ItemSection>
 
                 {/* 게임 스탯 */}

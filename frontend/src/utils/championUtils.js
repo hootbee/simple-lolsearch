@@ -5,7 +5,7 @@ export const getChampionImageUrl = (championName) => {
     }
 
     // 검색 결과에서 확인한 URL 패턴 사용
-    return `http://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/${championName}.png`;
+    return `https://ddragon.leagueoflegends.com/cdn/15.14.1/img/champion/${championName}.png`;
 };
 
 // 대체 챔피언 이미지 URL들
