@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -20,23 +22,35 @@ public class GameDetailEnhancementServiceImpl implements GameDetailEnhancementSe
 
     @Override
     public GameDetailDto enhanceWithRankInfo(GameDetailDto gameDetail, MatchDetailDto matchDetail) {
-        // 블루팀 플레이어 랭크 정보 업데이트
-        List<GameDetailDto.PlayerDetailDto> enhancedBluePlayers = enhancePlayersWithRank(
-                gameDetail.getBlueTeam().getPlayers(),
-                matchDetail.getInfo().getParticipants().stream()
-                        .filter(p -> p.getTeamId() == 100)
-                        .collect(Collectors.toList())
-        );
+        // 1. 모든 플레이어의 PUUID 수집
+        List<String> allPuuids = new ArrayList<>();
+        gameDetail.getBlueTeam().getPlayers().forEach(p -> allPuuids.add(p.getPlayerInfo().getPuuid()));
+        gameDetail.getRedTeam().getPlayers().forEach(p -> allPuuids.add(p.getPlayerInfo().getPuuid()));
 
-        // 레드팀 플레이어 랭크 정보 업데이트
-        List<GameDetailDto.PlayerDetailDto> enhancedRedPlayers = enhancePlayersWithRank(
-                gameDetail.getRedTeam().getPlayers(),
-                matchDetail.getInfo().getParticipants().stream()
-                        .filter(p -> p.getTeamId() == 200)
-                        .collect(Collectors.toList())
-        );
+        // 2. 한 번에 모든 플레이어의 랭크 정보 조회
+        Map<String, LeagueEntryDto> rankInfoMap = playerDataService.getRankInfoByPuuids(allPuuids);
 
-        // 업데이트된 플레이어 정보로 팀 정보 재구성
+        // 3. 블루팀 플레이어 랭크 정보 업데이트
+        List<GameDetailDto.PlayerDetailDto> enhancedBluePlayers =
+                gameDetail.getBlueTeam().getPlayers().stream()
+                        .map(player -> {
+                            String puuid = player.getPlayerInfo().getPuuid();
+                            LeagueEntryDto rankInfo = rankInfoMap.get(puuid);
+                            return updatePlayerWithRank(player, rankInfo);
+                        })
+                        .collect(Collectors.toList());
+
+        // 4. 레드팀 플레이어 랭크 정보 업데이트
+        List<GameDetailDto.PlayerDetailDto> enhancedRedPlayers =
+                gameDetail.getRedTeam().getPlayers().stream()
+                        .map(player -> {
+                            String puuid = player.getPlayerInfo().getPuuid();
+                            LeagueEntryDto rankInfo = rankInfoMap.get(puuid);
+                            return updatePlayerWithRank(player, rankInfo);
+                        })
+                        .collect(Collectors.toList());
+
+        // 5. 업데이트된 플레이어 정보로 팀 정보 재구성
         GameDetailDto.TeamDetailDto enhancedBlueTeam = gameDetail.getBlueTeam().toBuilder()
                 .players(enhancedBluePlayers)
                 .build();
@@ -51,35 +65,25 @@ public class GameDetailEnhancementServiceImpl implements GameDetailEnhancementSe
                 .build();
     }
 
-    @Override
-    public List<GameDetailDto.PlayerDetailDto> enhancePlayersWithRank(
-            List<GameDetailDto.PlayerDetailDto> players,
-            List<MatchDetailDto.ParticipantDto> participants
-    ) {
-        return players.stream()
-                .map(player -> {
-                    MatchDetailDto.ParticipantDto participant = participants.stream()
-                            .filter(p -> p.getPuuid().equals(player.getPlayerInfo().getPuuid()))
-                            .findFirst()
-                            .orElse(null);
 
-                    if (participant != null) {
-                        // DB 우선 조회로 랭크 정보 가져오기
-                        LeagueEntryDto rankInfo = playerDataService.getRankInfoFromDbOrApi(participant.getPuuid());
+    private GameDetailDto.PlayerDetailDto updatePlayerWithRank(
+            GameDetailDto.PlayerDetailDto player,
+            LeagueEntryDto rankInfo) {
 
-                        // 랭크 정보가 있는 경우에만 업데이트
-                        if (rankInfo != null) {
-                            return player.toBuilder()
-                                    .tier(rankInfo.getTier())
-                                    .rank(rankInfo.getRank())
-                                    .leaguePoints(rankInfo.getLeaguePoints())
-                                    .build();
-                        }
-                    }
+        if (rankInfo != null) {
+            return player.toBuilder()
+                    .tier(rankInfo.getTier())
+                    .rank(rankInfo.getRank())
+                    .leaguePoints(rankInfo.getLeaguePoints())
+                    .build();
+        }
 
-                    return player;
-                })
-                .collect(Collectors.toList());
+        // 랭크 정보가 없는 경우 기본값 유지
+        return player.toBuilder()
+                .tier("UNRANKED")
+                .rank("")
+                .leaguePoints(0)
+                .build();
     }
 
     /**

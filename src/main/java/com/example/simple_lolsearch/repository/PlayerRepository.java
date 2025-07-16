@@ -28,4 +28,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
 
     @Query("SELECT p FROM PlayerEntity p LEFT JOIN FETCH p.ranks WHERE p.puuid = :puuid")
     Optional<PlayerEntity> findByPuuidWithRanks(@Param("puuid") String puuid);
+
+    @Query("SELECT p FROM PlayerEntity p LEFT JOIN FETCH p.ranks WHERE p.puuid IN :puuids")
+    List<PlayerEntity> findByPuuidIn(@Param("puuids") List<String> puuids);
 }

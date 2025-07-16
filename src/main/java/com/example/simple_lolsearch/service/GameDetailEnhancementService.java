@@ -10,8 +10,4 @@ public interface GameDetailEnhancementService {
     GameDetailDto enhanceWithRankInfo(GameDetailDto gameDetail, MatchDetailDto matchDetail);
     GameDetailDto enhanceWithTeamStats(GameDetailDto gameDetail, MatchDetailDto matchDetail);
     GameDetailDto enhanceWithAllInfo(GameDetailDto gameDetail, MatchDetailDto matchDetail);
-    List<GameDetailDto.PlayerDetailDto> enhancePlayersWithRank(
-            List<GameDetailDto.PlayerDetailDto> players,
-            List<MatchDetailDto.ParticipantDto> participants
-    );
 }

@@ -423,4 +423,53 @@ public class PlayerDataServiceImpl implements PlayerDataService {
             playerRepository.deleteAll(oldPlayers);
         }
     }
+    @Override
+    public Map<String, LeagueEntryDto> getRankInfoByPuuids(List<String> puuids) {
+        if (puuids.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        log.debug("배치 랭크 정보 조회 시작: {} 건", puuids.size());
+
+        // 1. DB에서 플레이어 정보 조회
+        List<PlayerEntity> players = playerRepository.findByPuuidIn(puuids);
+
+        Map<String, LeagueEntryDto> resultMap = new HashMap<>();
+        List<String> puuidsNeedingUpdate = new ArrayList<>();
+
+        // 2. 각 플레이어의 랭크 정보 확인
+        for (String puuid : puuids) {
+            Optional<PlayerEntity> playerOpt = players.stream()
+                    .filter(p -> p.getPuuid().equals(puuid))
+                    .findFirst();
+
+            if (playerOpt.isPresent() && !isRankDataStale(playerOpt.get())) {
+                // 캐시된 데이터가 유효한 경우
+                resultMap.put(puuid, convertToRankInfo(playerOpt.get()));
+                log.debug("캐시된 랭크 정보 사용: {}", puuid);
+            } else {
+                // API에서 새로 조회해야 하는 경우
+                puuidsNeedingUpdate.add(puuid);
+            }
+        }
+
+        // 3. 업데이트가 필요한 플레이어들 처리
+        if (!puuidsNeedingUpdate.isEmpty()) {
+            log.debug("API에서 랭크 정보 업데이트 필요: {} 건", puuidsNeedingUpdate.size());
+
+            for (String puuid : puuidsNeedingUpdate) {
+                try {
+                    LeagueEntryDto rankInfo = getRankInfoFromDbOrApi(puuid);
+                    resultMap.put(puuid, rankInfo);
+                } catch (Exception e) {
+                    log.warn("랭크 정보 조회 실패, 기본값 사용: puuid={}", puuid, e);
+                    resultMap.put(puuid, LeagueEntryDto.createUnrankedInfo());
+                }
+            }
+        }
+
+        log.debug("배치 랭크 정보 조회 완료: 총 {} 건", resultMap.size());
+        return resultMap;
+}
+
 }

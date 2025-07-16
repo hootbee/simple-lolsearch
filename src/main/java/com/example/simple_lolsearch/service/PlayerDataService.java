@@ -3,6 +3,9 @@ package com.example.simple_lolsearch.service;
 import com.example.simple_lolsearch.dto.LeagueEntryDto;
 import com.example.simple_lolsearch.dto.PlayerProfileDto;
 
+import java.util.List;
+import java.util.Map;
+
 public interface PlayerDataService {
         /**
          * 플레이어 프로필 조회 (캐시 우선)
@@ -40,4 +43,6 @@ public interface PlayerDataService {
          */
         void cleanupOldCache();
         LeagueEntryDto getRankInfoFromDbOrApi(String puuid);
+
+        Map<String, LeagueEntryDto> getRankInfoByPuuids(List<String> puuids);
 }
