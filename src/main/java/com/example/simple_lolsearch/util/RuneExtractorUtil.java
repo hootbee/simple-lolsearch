@@ -1,8 +1,8 @@
 package com.example.simple_lolsearch.util;
 
 
-import com.example.simple_lolsearch.dto.MatchDetailDto;
-import com.example.simple_lolsearch.dto.RuneInfo;
+import com.example.simple_lolsearch.dto.match.MatchDetailDto;
+import com.example.simple_lolsearch.dto.common.RuneInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

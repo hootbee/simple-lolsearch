@@ -1,6 +1,6 @@
 package com.example.simple_lolsearch.util;
 
-import com.example.simple_lolsearch.dto.MatchDetailDto;
+import com.example.simple_lolsearch.dto.match.MatchDetailDto;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
