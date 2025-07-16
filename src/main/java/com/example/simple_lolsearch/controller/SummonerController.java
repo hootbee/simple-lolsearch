@@ -1,6 +1,8 @@
 package com.example.simple_lolsearch.controller;
 
 import com.example.simple_lolsearch.dto.*;
+import com.example.simple_lolsearch.dto.match.GameDetailDto;
+import com.example.simple_lolsearch.dto.match.GameSummaryDto;
 import com.example.simple_lolsearch.service.MatchDetailService;
 import com.example.simple_lolsearch.service.PlayerDataService;
 import com.example.simple_lolsearch.service.SummonerService;

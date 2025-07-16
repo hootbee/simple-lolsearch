@@ -1,6 +1,5 @@
 package com.example.simple_lolsearch.repository;
 
-import com.example.simple_lolsearch.dto.MatchDetailDto;
 import com.example.simple_lolsearch.entity.MatchDetailEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

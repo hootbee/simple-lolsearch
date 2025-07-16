@@ -1,15 +1,13 @@
 package com.example.simple_lolsearch.service;
 
-import com.example.simple_lolsearch.dto.GameDetailDto;
-import com.example.simple_lolsearch.dto.MatchDetailDto;
+import com.example.simple_lolsearch.dto.match.GameDetailDto;
+import com.example.simple_lolsearch.dto.match.MatchDetailDto;
 import com.example.simple_lolsearch.service.impl.GameDetailMapperServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat; // 수정된 import
 

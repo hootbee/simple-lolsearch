@@ -1,8 +1,8 @@
 package com.example.simple_lolsearch.service;
 
-import com.example.simple_lolsearch.dto.GameDetailDto;
+import com.example.simple_lolsearch.dto.match.GameDetailDto;
 import com.example.simple_lolsearch.dto.LeagueEntryDto;
-import com.example.simple_lolsearch.dto.MatchDetailDto;
+import com.example.simple_lolsearch.dto.match.MatchDetailDto;
 
 import java.util.List;
 

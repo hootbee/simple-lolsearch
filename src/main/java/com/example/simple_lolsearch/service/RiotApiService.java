@@ -1,6 +1,8 @@
 package com.example.simple_lolsearch.service;
 
 import com.example.simple_lolsearch.dto.*;
+import com.example.simple_lolsearch.dto.match.MatchDetailDto;
+
 import java.util.List;
 
 public interface RiotApiService {

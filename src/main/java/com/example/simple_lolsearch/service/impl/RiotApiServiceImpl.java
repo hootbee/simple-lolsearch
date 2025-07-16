@@ -1,6 +1,7 @@
 package com.example.simple_lolsearch.service.impl;
 
 import com.example.simple_lolsearch.dto.*;
+import com.example.simple_lolsearch.dto.match.MatchDetailDto;
 import com.example.simple_lolsearch.service.RiotApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
