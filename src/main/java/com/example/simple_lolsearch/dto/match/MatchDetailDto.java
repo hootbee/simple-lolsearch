@@ -1,4 +1,4 @@
-package com.example.simple_lolsearch.dto;
+package com.example.simple_lolsearch.dto.match;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

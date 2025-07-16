@@ -1,4 +1,4 @@
-package com.example.simple_lolsearch.dto;
+package com.example.simple_lolsearch.dto.common;
 
 import lombok.Builder;
 import lombok.Data;
