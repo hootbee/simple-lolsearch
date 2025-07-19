@@ -23,24 +23,22 @@ const GameCard = styled.div`
     transition: transform 0.2s ease;
 `;
 
-// 게임 카드의 메인 콘텐츠 영역 (토글 버튼 제외)
 const GameContent = styled.div`
     display: grid;
     align-items: center;
     flex: 1;
-    margin-right: 4px; // 승리 컨텐츠를 토글에 더 가깝게
+    margin-right: 4px;
 
-    // 모든 컨텐츠의 간격을 동일하게 설정합니다. 이 값을 조절하여 간격을 변경할 수 있습니다.
-    column-gap: -15px;
+    /* 컬럼 간의 간격을 일관되게 조정합니다. */
+    column-gap: 12px;
 
-    // 컬럼 너비는 기존 설정을 유지합니다.
-    grid-template-columns: 220px 130px 180px 225px 135px 110px;
+    /* 각 컬럼의 너비를 콘텐츠에 맞게 재조정합니다. */
+    grid-template-columns: 220px 100px 150px 225px 180px 120px;
 
     & > *:not(:last-child) {
         position: relative;
     }
 
-    // 미디어 쿼리 문법을 수정했습니다.
     @media (max-width: 768px) {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: repeat(3, auto);
@@ -48,7 +46,6 @@ const GameContent = styled.div`
         row-gap: 15px;
         margin-right: 8px;
 
-        // 모바일에서는 margin 제거
         & > * { margin-right: 0 !important; }
         & > *::after { display: none; }
     }
@@ -100,10 +97,9 @@ const ItemStats = styled.div`
 
 const StatsSection = styled.div`
     display: flex;
-    gap: 16px; // 12px에서 6px로 줄임
-    padding: 6px 8px; // 8px 12px에서 줄임
+    gap: 16px;
+    padding: 6px 8px;
     border-radius: 6px;
-    min-width: 220px; // 최소 너비 설정
 `;
 
 const StatItem = styled.div`
@@ -125,9 +121,8 @@ const StatItem = styled.div`
 const TimeSection = styled.div`
     text-align: center;
     position: relative;
-    padding: 6px 8px; // 8px 12px에서 줄임
+    padding: 6px 8px;
     border-radius: 6px;
-    min-width: 120px; // 최소 너비 설정
 `;
 
 const RelativeTime = styled.div`
