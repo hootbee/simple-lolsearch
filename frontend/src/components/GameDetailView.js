@@ -3,8 +3,23 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import ChampionImage from './ChampionImage';
 import ItemBuild from './ItemBuild';
-import SpellRuneDisplay from './SpellRuneDisplay';
 import { getAccountByPuuid } from '../services/api';
+
+const getRankBackgroundColor = (tier) => {
+    switch (tier ? tier.toUpperCase() : '') {
+        case 'IRON': return '#4a4a4a';
+        case 'BRONZE': return '#8b4513';
+        case 'SILVER': return '#c0c0c0';
+        case 'GOLD': return '#ffd700';
+        case 'PLATINUM': return '#e5e4e2';
+        case 'EMERALD': return '#50c878';
+        case 'DIAMOND': return '#b9f2ff';
+        case 'MASTER': return '#9932cc';
+        case 'GRANDMASTER': return '#ff4500';
+        case 'CHALLENGER': return '#00bfff';
+        default: return '#808080'; // UNRANKED 또는 기타
+    }
+};
 
 const DetailContainer = styled.div`
     padding: 20px;
@@ -80,14 +95,14 @@ const PlayersGrid = styled.div`
 
 const PlayerRow = styled.div`
     display: grid;
-    /* 챔피언 | 닉네임 | KDA | 아이템 | CS | 랭크 */
-    grid-template-columns: 35px 120px 70px 110px 45px 50px;
+    /* 챔피언 | 닉네임 | KDA | 아이템 | CS/골드 | 랭크 */
+    grid-template-columns: 35px 105px 65px 105px 50px 45px;
     align-items: center;
-    gap: 8px; /* 간격 재조정 */
-    padding: 10px;
+    gap: 8px; /* 간격 조금 더 벌림 */
+    padding: 8px;
     background: white;
     border-radius: 4px;
-    font-size: 0.8rem; /* 기본 폰트 크기 줄임 */
+    font-size: 0.8rem;
     
     &:hover {
         background: #f8f9fa;
@@ -132,12 +147,20 @@ const PlayerItems = styled.div`
 
 const PlayerRank = styled.div`
     text-align: center;
-    font-size: 0.75rem; /* 랭크 폰트 크기 줄임 */
-    color: #888;
+    font-size: 0.75rem;
+    color: #fff;
+    font-weight: bold;
+    padding: 2px 3px; /* 좌우 패딩 줄임 */
+    border-radius: 4px;
+    background-color: ${({ tier }) => getRankBackgroundColor(tier)};
 `;
 
-const PlayerCS = styled.div`
+const PlayerStats = styled.div`
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.7rem;
+    color: #666;
 `;
 
 const ObjectiveStats = styled.div`
@@ -207,6 +230,22 @@ const GameDetailView = ({ gameDetail }) => {
         return shortRank ? `${shortTier}${shortRank}` : shortTier;
     };
 
+    const getRankBackgroundColor = (tier) => {
+        switch (tier ? tier.toUpperCase() : '') {
+            case 'IRON': return '#4a4a4a';
+            case 'BRONZE': return '#8b4513';
+            case 'SILVER': return '#c0c0c0';
+            case 'GOLD': return '#ffd700';
+            case 'PLATINUM': return '#e5e4e2';
+            case 'EMERALD': return '#50c878';
+            case 'DIAMOND': return '#b9f2ff';
+            case 'MASTER': return '#9932cc';
+            case 'GRANDMASTER': return '#ff4500';
+            case 'CHALLENGER': return '#00bfff';
+            default: return '#808080'; // UNRANKED 또는 기타
+        }
+    };
+
         // 🔥 플레이어 클릭 핸들러
         const handlePlayerClick = async (player) => {
             try {
@@ -269,10 +308,13 @@ const GameDetailView = ({ gameDetail }) => {
                         size={16}
                     />
                 </PlayerItems>
-                <PlayerCS>
-                    CS: {player.cs}
-                </PlayerCS>
-                <PlayerRank>
+                <PlayerStats>
+                    <div>CS: {player.cs}</div>
+                    <div>골드: {player.goldEarned?.toLocaleString()}</div>
+                </PlayerStats>
+                <PlayerRank
+                    tier={player.tier}
+                >
                     {formatRank(player.tier, player.rank)}
                 </PlayerRank>
             </PlayerRow>
