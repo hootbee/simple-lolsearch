@@ -72,6 +72,7 @@ public class GameDetailDto {
         private int cs;
         private int totalDamageDealtToChampions;
         private int totalDamageTaken;
+        private Integer goldEarned;
 
         // 랭크 정보
         private String tier;
