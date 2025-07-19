@@ -80,13 +80,14 @@ const PlayersGrid = styled.div`
 
 const PlayerRow = styled.div`
     display: grid;
-    grid-template-columns: 40px 1fr 80px 100px 60px 80px;
+    /* 챔피언 | 닉네임 | KDA | 아이템 | CS | 랭크 */
+    grid-template-columns: 35px 120px 70px 110px 45px 50px;
     align-items: center;
-    gap: 10px;
-    padding: 12px;
+    gap: 8px; /* 간격 재조정 */
+    padding: 10px;
     background: white;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 0.8rem; /* 기본 폰트 크기 줄임 */
     
     &:hover {
         background: #f8f9fa;
@@ -95,7 +96,7 @@ const PlayerRow = styled.div`
     @media (max-width: 768px) {
         grid-template-columns: 30px 1fr 60px 80px;
         gap: 5px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 `;
 
@@ -108,6 +109,7 @@ const PlayerName = styled.div`
     white-space: nowrap;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-size: 0.75rem; /* 닉네임 크기 더 줄임 */
 
     &:hover {
         color: #004499;
@@ -130,8 +132,12 @@ const PlayerItems = styled.div`
 
 const PlayerRank = styled.div`
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem; /* 랭크 폰트 크기 줄임 */
     color: #888;
+`;
+
+const PlayerCS = styled.div`
+    text-align: center;
 `;
 
 const ObjectiveStats = styled.div`
@@ -263,9 +269,9 @@ const GameDetailView = ({ gameDetail }) => {
                         size={16}
                     />
                 </PlayerItems>
-                <div style={{textAlign: 'center'}}>
+                <PlayerCS>
                     CS: {player.cs}
-                </div>
+                </PlayerCS>
                 <PlayerRank>
                     {formatRank(player.tier, player.rank)}
                 </PlayerRank>
