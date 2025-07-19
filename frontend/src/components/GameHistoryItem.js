@@ -21,73 +21,68 @@ const GameCard = styled.div`
     align-items: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.2s ease;
-    // cursor: pointer; 제거
-
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
 `;
 
 // 게임 카드의 메인 콘텐츠 영역 (토글 버튼 제외)
 const GameContent = styled.div`
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    column-gap: 0;
     align-items: center;
     flex: 1;
-    margin-right: 10px;
+    margin-right: 4px; // 승리 컨텐츠를 토글에 더 가깝게
+
+    // 컬럼 너비 조금 줄임
+    grid-template-columns: 220px 130px 180px 225px 135px 110px;
+
+    // 간격을 조금 줄여서 설정
+    & > *:nth-child(1) { margin-right: 240px; } // 160px에서 130px로
+    & > *:nth-child(2) { margin-right: 230px; } // 150px에서 120px로
+    & > *:nth-child(3) { margin-right: 250px; } // 170px에서 140px로
+    & > *:nth-child(4) { margin-right: 235px; } // 155px에서 125px로
+    & > *:nth-child(5) { margin-right: 225px; } // 145px에서 115px로
+
+    & > *:not(:last-child) {
+        position: relative;
+
+        //&::after {
+        //    content: '';
+        //    position: absolute;
+        //    top: 50%;
+        //    transform: translateY(-50%);
+        //    width: 1px;
+        //    height: 60%;
+        //    background: rgba(0, 0, 0, 0.15);
+        //}
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(3, auto);
+        column-gap: 15px;
+        row-gap: 15px;
+        margin-right: 8px;
+
+        // 모바일에서는 margin 제거
+        & > * { margin-right: 0 !important; }
+        & > *::after { display: none; }
+    }
 `;
 
-// 🔥 토글 버튼 추가
-const ToggleButton = styled.button`
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    color: #666;
-    min-width: 32px;
-    height: 32px;
-    
-    &:hover {
-        background: rgba(0, 0, 0, 0.1);
-        color: #333;
-    }
-    
-    &:active {
-        transform: scale(0.95);
-    }
-    
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    
-    ${({ isLoading }) => isLoading && `
-        animation: spin 1s linear infinite;
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-    `}
-`;
 
-// 🔥 화살표 아이콘
-const ArrowIcon = styled.span`
-    font-size: 14px;
-    transition: transform 0.2s ease;
-    transform: rotate(${({ isExpanded }) => (isExpanded ? '180deg' : '0deg')});
-`;
+
+
+
+
+
 
 const ChampionSection = styled.div`
     display: flex;
-    gap: 16px;
+    gap: 8px;
     align-items: center;
+    padding: 6px 8px;
+    //background: rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    min-width: 200px; // 최소 너비 설정in
 `;
 
 const ChampionInfo = styled.div`
@@ -106,9 +101,19 @@ const KDAInfo = styled.div`
     color: #666;
 `;
 
+// 스펠&룬 영역
+const SpellRuneSection = styled.div`
+    padding: 6px 8px; // 8px 12px에서 줄임
+    //background: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+`;
+
+
 const ItemSection = styled.div`
-    min-width: 200px;
     text-align: center;
+    padding: 6px 8px; // 8px 12px에서 줄임
+    //background: rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
 `;
 
 const ItemStats = styled.div`
@@ -119,7 +124,11 @@ const ItemStats = styled.div`
 
 const StatsSection = styled.div`
     display: flex;
-    gap: 12px;
+    gap: 16px; // 12px에서 6px로 줄임
+    padding: 6px 8px; // 8px 12px에서 줄임
+    //background: rgba(0, 0, 0, 0.02);
+    border-radius: 6px;
+    min-width: 220px; // 최소 너비 설정
 `;
 
 const StatItem = styled.div`
@@ -140,8 +149,11 @@ const StatItem = styled.div`
 
 const TimeSection = styled.div`
     text-align: center;
-    min-width: 90px;
     position: relative;
+    padding: 6px 8px; // 8px 12px에서 줄임
+    //background: rgba(0, 123, 255, 0.05);
+    border-radius: 6px;
+    min-width: 120px; // 최소 너비 설정
 `;
 
 const RelativeTime = styled.div`
@@ -190,10 +202,64 @@ const Tooltip = styled.div`
     }
 `;
 
+// 결과 뱃지 영역
+const ResultSection = styled.div`
+    padding: 6px 8px; // 8px 12px에서 줄임
+    background: ${({ win }) => (win ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)')};
+    border-radius: 6px;
+`;
+
 const ResultBadge = styled.div`
     font-weight: bold;
     color: ${({ win }) => (win ? '#4caf50' : '#f44336')};
     font-size: 1.1rem;
+    text-align: center;
+`;
+
+// 🔥 토글 버튼 추가
+const ToggleButton = styled.button`
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    color: #666;
+    min-width: 32px;
+    height: 32px;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.1);
+        color: #333;
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    ${({ isLoading }) => isLoading && `
+        animation: spin 1s linear infinite;
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `}
+`;
+
+// 🔥 화살표 아이콘
+const ArrowIcon = styled.span`
+    font-size: 14px;
+    transition: transform 0.2s ease;
+    transform: rotate(${({ isExpanded }) => (isExpanded ? '180deg' : '0deg')});
 `;
 
 const GameDetailContainer = styled.div`
@@ -204,7 +270,7 @@ const GameDetailContainer = styled.div`
     margin-bottom: 12px;
     overflow: hidden;
     transition: all 0.3s ease;
-    
+
     ${({ isExpanded }) => !isExpanded && `
         max-height: 0;
         border: none;
@@ -244,6 +310,7 @@ const ErrorMessage = styled.div`
     margin: 10px;
     border-radius: 4px;
 `;
+
 
 
 /* ---------- Component ---------- */
@@ -403,11 +470,7 @@ const GameHistoryItem = ({ game }) => {
 
     return (
         <>
-            <GameCard
-                win={game.win}
-                isExpanded={isExpanded}
-                // onClick 제거 - 카드 클릭으로는 더 이상 토글되지 않음
-            >
+            <GameCard win={game.win} isExpanded={isExpanded}>
                 <GameContent>
                     {/* 챔피언 정보 */}
                     <ChampionSection>
@@ -421,7 +484,7 @@ const GameHistoryItem = ({ game }) => {
                     </ChampionSection>
 
                     {/* 스펠 & 룬 */}
-                    <div data-hover-element>
+                    <SpellRuneSection data-hover-element>
                         <SpellRuneDisplay
                             summonerSpell1Id={game.summonerSpell1Id}
                             summonerSpell2Id={game.summonerSpell2Id}
@@ -432,7 +495,7 @@ const GameHistoryItem = ({ game }) => {
                             onSpellHover={handleSpellHover}
                             onSpellHoverEnd={handleSpellHoverEnd}
                         />
-                    </div>
+                    </SpellRuneSection>
 
                     {/* 아이템 빌드 */}
                     <ItemSection>
@@ -486,12 +549,14 @@ const GameHistoryItem = ({ game }) => {
                     </TimeSection>
 
                     {/* 게임 결과 */}
-                    <ResultBadge win={game.win}>
-                        {game.win ? '승리' : '패배'}
-                    </ResultBadge>
+                    <ResultSection win={game.win}>
+                        <ResultBadge win={game.win}>
+                            {game.win ? '승리' : '패배'}
+                        </ResultBadge>
+                    </ResultSection>
                 </GameContent>
 
-                {/* 🔥 토글 버튼 - 오직 이 버튼만 클릭 시 토글됨 */}
+                {/* 🔥 토글 버튼 */}
                 <ToggleButton
                     onClick={handleToggleClick}
                     disabled={loading}
