@@ -336,6 +336,21 @@ const GameHistoryItem = ({ game }) => {
         return game.detailedTime || '';
     };
 
+    const getQueueTypeName = (queueId) => {
+        switch (queueId) {
+            case 420: return '솔로랭크';
+            case 440: return '자유랭크';
+            case 450: return '무작위 총력전';
+            case 400: return '일반';
+            case 430: return '일반';
+            case 700: return '격전';
+            case 1700: return '아레나';
+            case 900: return 'ARURF';
+            case 1400: return '궁극기 주문서';
+            default: return '기타 모드';
+        }
+    };
+
     // 아이템 관련 계산
     const itemCount = getTotalItems(game.items || []);
     const buildCost = calculateBuildCost(game.items || []);
@@ -467,7 +482,7 @@ const GameHistoryItem = ({ game }) => {
                             <ResultBadge win={game.win}>
                                 {game.win ? '승리' : '패배'}
                             </ResultBadge>
-                            <GameMode>{game.gameMode}</GameMode>
+                            <GameMode>{getQueueTypeName(game.queueId)}</GameMode>
                         </ResultSection>
                         <ChampionInfo>
                             <KDAInfo>{game.kda}</KDAInfo>

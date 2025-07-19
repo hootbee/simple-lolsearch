@@ -136,3 +136,4 @@ public class GameSummaryDto {
         return runeInfo != null ? runeInfo.getStatRunes() : null;
     }
 }
+
