@@ -189,11 +189,13 @@ const ResultSection = styled.div`
     justify-content: center;
     align-items: center;
     gap: 4px;
-    padding: 6px 8px; // 8px 12px에서 줄임
+    padding: 6px 8px;
     background: ${({ win }) => (win ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)')};
     border-radius: 6px;
-    position: relative; /* 또는 absolute. 상황에 따라 */
+    position: relative;
     top: -5px;
+    width: 90px; /* '무작위 총력전'에 맞춰 너비 고정 */
+    box-sizing: border-box; /* 패딩을 너비에 포함 */
 `;
 
 const ResultBadge = styled.div`
