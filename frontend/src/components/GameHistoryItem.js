@@ -26,35 +26,21 @@ const GameCard = styled.div`
 // 게임 카드의 메인 콘텐츠 영역 (토글 버튼 제외)
 const GameContent = styled.div`
     display: grid;
-    column-gap: 0;
     align-items: center;
     flex: 1;
     margin-right: 4px; // 승리 컨텐츠를 토글에 더 가깝게
 
-    // 컬럼 너비 조금 줄임
-    grid-template-columns: 220px 130px 180px 225px 135px 110px;
+    // 모든 컨텐츠의 간격을 동일하게 설정합니다. 이 값을 조절하여 간격을 변경할 수 있습니다.
+    column-gap: -15px;
 
-    // 간격을 조금 줄여서 설정
-    & > *:nth-child(1) { margin-right: 240px; } // 160px에서 130px로
-    & > *:nth-child(2) { margin-right: 230px; } // 150px에서 120px로
-    & > *:nth-child(3) { margin-right: 250px; } // 170px에서 140px로
-    & > *:nth-child(4) { margin-right: 235px; } // 155px에서 125px로
-    & > *:nth-child(5) { margin-right: 225px; } // 145px에서 115px로
+    // 컬럼 너비는 기존 설정을 유지합니다.
+    grid-template-columns: 220px 130px 180px 225px 135px 110px;
 
     & > *:not(:last-child) {
         position: relative;
-
-        //&::after {
-        //    content: '';
-        //    position: absolute;
-        //    top: 50%;
-        //    transform: translateY(-50%);
-        //    width: 1px;
-        //    height: 60%;
-        //    background: rgba(0, 0, 0, 0.15);
-        //}
     }
 
+    // 미디어 쿼리 문법을 수정했습니다.
     @media (max-width: 768px) {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: repeat(3, auto);
@@ -68,19 +54,11 @@ const GameContent = styled.div`
     }
 `;
 
-
-
-
-
-
-
-
 const ChampionSection = styled.div`
     display: flex;
     gap: 8px;
     align-items: center;
     padding: 6px 8px;
-    //background: rgba(255, 255, 255, 0.4);
     border-radius: 6px;
     min-width: 200px; // 최소 너비 설정in
 `;
@@ -104,7 +82,6 @@ const KDAInfo = styled.div`
 // 스펠&룬 영역
 const SpellRuneSection = styled.div`
     padding: 6px 8px; // 8px 12px에서 줄임
-    //background: rgba(0, 0, 0, 0.03);
     border-radius: 6px;
 `;
 
@@ -112,7 +89,6 @@ const SpellRuneSection = styled.div`
 const ItemSection = styled.div`
     text-align: center;
     padding: 6px 8px; // 8px 12px에서 줄임
-    //background: rgba(255, 255, 255, 0.5);
     border-radius: 6px;
 `;
 
@@ -126,7 +102,6 @@ const StatsSection = styled.div`
     display: flex;
     gap: 16px; // 12px에서 6px로 줄임
     padding: 6px 8px; // 8px 12px에서 줄임
-    //background: rgba(0, 0, 0, 0.02);
     border-radius: 6px;
     min-width: 220px; // 최소 너비 설정
 `;
@@ -151,7 +126,6 @@ const TimeSection = styled.div`
     text-align: center;
     position: relative;
     padding: 6px 8px; // 8px 12px에서 줄임
-    //background: rgba(0, 123, 255, 0.05);
     border-radius: 6px;
     min-width: 120px; // 최소 너비 설정
 `;
@@ -173,6 +147,11 @@ const RelativeTime = styled.div`
 `;
 
 const GameMode = styled.div`
+    font-size: 0.75rem;
+    color: #666;
+`;
+
+const GameDuration = styled.div`
     font-size: 0.75rem;
     color: #666;
     margin-top: 4px;
@@ -204,9 +183,16 @@ const Tooltip = styled.div`
 
 // 결과 뱃지 영역
 const ResultSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
     padding: 6px 8px; // 8px 12px에서 줄임
     background: ${({ win }) => (win ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)')};
     border-radius: 6px;
+    position: relative; /* 또는 absolute. 상황에 따라 */
+    top: -5px;
 `;
 
 const ResultBadge = styled.div`
@@ -214,6 +200,7 @@ const ResultBadge = styled.div`
     color: ${({ win }) => (win ? '#4caf50' : '#f44336')};
     font-size: 1.1rem;
     text-align: center;
+    
 `;
 
 // 🔥 토글 버튼 추가
@@ -483,6 +470,14 @@ const GameHistoryItem = ({ game }) => {
                         </ChampionInfo>
                     </ChampionSection>
 
+                    {/* 게임 결과 */}
+                    <ResultSection win={game.win}>
+                        <ResultBadge win={game.win}>
+                            {game.win ? '승리' : '패배'}
+                        </ResultBadge>
+                        <GameMode>{game.gameMode}</GameMode>
+                    </ResultSection>
+
                     {/* 스펠 & 룬 */}
                     <SpellRuneSection data-hover-element>
                         <SpellRuneDisplay
@@ -524,10 +519,6 @@ const GameHistoryItem = ({ game }) => {
                             <b>시야</b>
                             <span>{game.visionScore}</span>
                         </StatItem>
-                        <StatItem>
-                            <b>시간</b>
-                            <span>{formatDuration(game.gameDuration)}</span>
-                        </StatItem>
                     </StatsSection>
 
                     {/* 시간 정보 */}
@@ -544,16 +535,8 @@ const GameHistoryItem = ({ game }) => {
                                 {getDetailedTime()}
                             </Tooltip>
                         )}
-
-                        <GameMode>{game.gameMode}</GameMode>
+                        <GameDuration>{formatDuration(game.gameDuration)}</GameDuration>
                     </TimeSection>
-
-                    {/* 게임 결과 */}
-                    <ResultSection win={game.win}>
-                        <ResultBadge win={game.win}>
-                            {game.win ? '승리' : '패배'}
-                        </ResultBadge>
-                    </ResultSection>
                 </GameContent>
 
                 {/* 🔥 토글 버튼 */}
