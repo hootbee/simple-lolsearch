@@ -33,7 +33,7 @@ const GameContent = styled.div`
     column-gap: 12px;
 
     /* 각 컬럼의 너비를 콘텐츠에 맞게 재조정합니다. */
-    grid-template-columns: 220px 100px 150px 225px 180px 120px;
+    grid-template-columns: 300px 150px 225px 180px 120px;
 
     & > *:not(:last-child) {
         position: relative;
@@ -53,26 +53,32 @@ const GameContent = styled.div`
 
 const ChampionSection = styled.div`
     display: flex;
-    gap: 8px;
+    gap: 16px;
     align-items: center;
     padding: 6px 8px;
     border-radius: 6px;
-    min-width: 200px; // 최소 너비 설정in
+    min-width: 300px; /* 그리드에 맞게 너비 조정 */
 `;
 
 const ChampionInfo = styled.div`
     display: flex;
     flex-direction: column;
-`;
-
-const ChampionName = styled.div`
-    font-weight: bold;
-    font-size: 1.1rem;
-    color: #333;
+    align-items: center;
+    justify-content: center;
 `;
 
 const KDAInfo = styled.div`
     font-size: 0.9rem;
+    color: #333;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+`;
+
+const KDAStats = styled.div`
+    font-size: 1.05rem; /* Larger font size */
     color: #666;
 `;
 
@@ -454,24 +460,22 @@ const GameHistoryItem = ({ game }) => {
         <>
             <GameCard win={game.win} isExpanded={isExpanded}>
                 <GameContent>
-                    {/* 챔피언 정보 */}
+                    {/* 챔피언, 결과, KDA 정보 */}
                     <ChampionSection>
                         <ChampionImage championName={game.championName} size="48px" />
+                        <ResultSection win={game.win}>
+                            <ResultBadge win={game.win}>
+                                {game.win ? '승리' : '패배'}
+                            </ResultBadge>
+                            <GameMode>{game.gameMode}</GameMode>
+                        </ResultSection>
                         <ChampionInfo>
-                            <ChampionName>{game.championName}</ChampionName>
-                            <KDAInfo>
-                                {game.kills}/{game.deaths}/{game.assists} · {game.kda} KDA
-                            </KDAInfo>
+                            <KDAInfo>{game.kda}</KDAInfo>
+                            <KDAStats>
+                                {game.kills}/{game.deaths}/{game.assists}
+                            </KDAStats>
                         </ChampionInfo>
                     </ChampionSection>
-
-                    {/* 게임 결과 */}
-                    <ResultSection win={game.win}>
-                        <ResultBadge win={game.win}>
-                            {game.win ? '승리' : '패배'}
-                        </ResultBadge>
-                        <GameMode>{game.gameMode}</GameMode>
-                    </ResultSection>
 
                     {/* 스펠 & 룬 */}
                     <SpellRuneSection data-hover-element>
