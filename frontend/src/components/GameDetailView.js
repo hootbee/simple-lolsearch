@@ -35,6 +35,7 @@ const GameMeta = styled.div`
 const TeamsContainer = styled.div`
     display: flex;
     gap: 20px;
+    
 
     @media (max-width: 768px) {
         flex-direction: column;
@@ -43,6 +44,7 @@ const TeamsContainer = styled.div`
 
 const TeamSection = styled.div`
     flex: 1;
+    max-width:520px;
     background: ${({ win }) => (win ? '#f0f8f0' : '#f8f0f0')};
     border-radius: 8px;
     padding: 15px;
@@ -81,7 +83,7 @@ const PlayerRow = styled.div`
     grid-template-columns: 40px 1fr 80px 100px 60px 80px;
     align-items: center;
     gap: 10px;
-    padding: 8px;
+    padding: 12px;
     background: white;
     border-radius: 4px;
     font-size: 0.85rem;
@@ -162,167 +164,203 @@ const GameDetailView = ({ gameDetail }) => {
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
-    // 🔥 플레이어 클릭 핸들러
-    const handlePlayerClick = async (player) => {
-        try {
-            console.log('🔍 플레이어 클릭:', player);
+        // 🔥 랭크 축약 함수 추가
+    const formatRank = (tier, rank) => {
+        if (!tier || tier === 'UNRANKED') return 'UR';
 
-            // PUUID가 있으면 해당 PUUID로 계정 정보 조회
-            if (player.puuid) {
-                console.log('PUUID로 계정 정보 조회:', player.puuid);
-                const accountData = await getAccountByPuuid(player.puuid);
+        const tierMap = {
+            'IRON': 'I',
+            'BRONZE': 'B',
+            'SILVER': 'S',
+            'GOLD': 'G',
+            'PLATINUM': 'P',
+            'EMERALD': 'E',
+            'DIAMOND': 'D',
+            'MASTER': 'M',
+            'GRANDMASTER': 'GM',
+            'CHALLENGER': 'C'
+        };
 
-                if (accountData && accountData.gameName && accountData.tagLine) {
-                    const encodedGameName = encodeURIComponent(accountData.gameName);
-                    const encodedTagLine = encodeURIComponent(accountData.tagLine);
+        const rankMap = {
+            'I': '1',
+            'II': '2',
+            'III': '3',
+            'IV': '4',
+            'V': '5'
+        };
 
-                    console.log('검색 페이지로 이동:', `${encodedGameName}#${encodedTagLine}`);
-                    navigate(`/search/${encodedGameName}/${encodedTagLine}`);
-                } else {
-                    console.warn('계정 정보를 찾을 수 없습니다');
-                    alert('해당 플레이어의 계정 정보를 찾을 수 없습니다.');
-                }
-            } else if (player.riotIdGameName && player.riotIdTagLine) {
-                // 백업: riotId 정보가 있으면 사용
-                const encodedGameName = encodeURIComponent(player.riotIdGameName);
-                const encodedTagLine = encodeURIComponent(player.riotIdTagLine);
+        const shortTier = tierMap[tier.toUpperCase()] || tier.charAt(0);
 
-                console.log('backup: riotId로 검색 페이지 이동:', `${encodedGameName}#${encodedTagLine}`);
-                navigate(`/search/${encodedGameName}/${encodedTagLine}`);
-            } else {
-                console.warn('플레이어 정보가 부족합니다:', player);
-                alert('해당 플레이어의 정보가 부족합니다.');
-            }
-        } catch (error) {
-            console.error('플레이어 정보 조회 실패:', error);
-            alert('플레이어 정보를 불러오는 중 오류가 발생했습니다.');
+        // 마스터 이상은 앞에 1 붙이기
+        if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(tier.toUpperCase())) {
+            return `1${shortTier}`;
         }
+
+        // 일반 티어는 숫자 포함
+        const shortRank = rankMap[rank] || rank;
+        return shortRank ? `${shortTier}${shortRank}` : shortTier;
     };
 
-    // 🔥 플레이어 행 컴포넌트
-    const PlayerRowComponent = ({ player, index }) => (
-        <PlayerRow key={index}>
-            <ChampionImage
-                championName={player.championName}
-                size="32px"
-            />
-            <div>
-                <PlayerName onClick={() => handlePlayerClick(player)}>
-                    {player.riotIdGameName || 'Unknown'}
-                </PlayerName>
-                <div style={{fontSize: '0.75rem', color: '#888'}}>
-                    {player.championName}
-                </div>
-            </div>
-            <PlayerKDA>
-                {player.kills}/{player.deaths}/{player.assists}
-            </PlayerKDA>
-            <PlayerItems>
-                <ItemBuild
-                    items={player.items}
-                    trinket={player.trinket}
-                    size={16}
+        // 🔥 플레이어 클릭 핸들러
+        const handlePlayerClick = async (player) => {
+            try {
+                console.log('🔍 플레이어 클릭:', player);
+
+                // PUUID가 있으면 해당 PUUID로 계정 정보 조회
+                if (player.puuid) {
+                    console.log('PUUID로 계정 정보 조회:', player.puuid);
+                    const accountData = await getAccountByPuuid(player.puuid);
+
+                    if (accountData && accountData.gameName && accountData.tagLine) {
+                        const encodedGameName = encodeURIComponent(accountData.gameName);
+                        const encodedTagLine = encodeURIComponent(accountData.tagLine);
+
+                        console.log('검색 페이지로 이동:', `${encodedGameName}#${encodedTagLine}`);
+                        navigate(`/search/${encodedGameName}/${encodedTagLine}`);
+                    } else {
+                        console.warn('계정 정보를 찾을 수 없습니다');
+                        alert('해당 플레이어의 계정 정보를 찾을 수 없습니다.');
+                    }
+                } else if (player.riotIdGameName && player.riotIdTagLine) {
+                    // 백업: riotId 정보가 있으면 사용
+                    const encodedGameName = encodeURIComponent(player.riotIdGameName);
+                    const encodedTagLine = encodeURIComponent(player.riotIdTagLine);
+
+                    console.log('backup: riotId로 검색 페이지 이동:', `${encodedGameName}#${encodedTagLine}`);
+                    navigate(`/search/${encodedGameName}/${encodedTagLine}`);
+                } else {
+                    console.warn('플레이어 정보가 부족합니다:', player);
+                    alert('해당 플레이어의 정보가 부족합니다.');
+                }
+            } catch (error) {
+                console.error('플레이어 정보 조회 실패:', error);
+                alert('플레이어 정보를 불러오는 중 오류가 발생했습니다.');
+            }
+        };
+
+        // 🔥 플레이어 행 컴포넌트
+        const PlayerRowComponent = ({player, index}) => (
+            <PlayerRow key={index}>
+                <ChampionImage
+                    championName={player.championName}
+                    size="32px"
                 />
-            </PlayerItems>
-            <div style={{textAlign: 'center'}}>
-                CS: {player.cs}
-            </div>
-            <PlayerRank>
-                {player.tier} {player.rank}
-            </PlayerRank>
-        </PlayerRow>
-    );
+                <div>
+                    <PlayerName onClick={() => handlePlayerClick(player)}>
+                        {player.riotIdGameName || 'Unknown'}
+                    </PlayerName>
+                    <div style={{fontSize: '0.75rem', color: '#888'}}>
+                        {player.championName}
+                    </div>
+                </div>
+                <PlayerKDA>
+                    {player.kills}/{player.deaths}/{player.assists}
+                </PlayerKDA>
+                <PlayerItems>
+                    <ItemBuild
+                        items={player.items}
+                        trinket={player.trinket}
+                        size={16}
+                    />
+                </PlayerItems>
+                <div style={{textAlign: 'center'}}>
+                    CS: {player.cs}
+                </div>
+                <PlayerRank>
+                    {formatRank(player.tier, player.rank)}
+                </PlayerRank>
+            </PlayerRow>
+        );
 
-    return (
-        <DetailContainer>
-            <GameInfo>
-                <GameTitle>{gameDetail.gameMode}</GameTitle>
-                <GameMeta>
-                    게임 시간: {formatDuration(gameDetail.gameDuration)} |
-                    {gameDetail.gameDate} |
-                    매치 ID: {gameDetail.matchId}
-                </GameMeta>
-            </GameInfo>
+        return (
+            <DetailContainer>
+                <GameInfo>
+                    <GameTitle>{gameDetail.gameMode}</GameTitle>
+                    <GameMeta>
+                        게임 시간: {formatDuration(gameDetail.gameDuration)} |
+                        {gameDetail.gameDate} |
+                        매치 ID: {gameDetail.matchId}
+                    </GameMeta>
+                </GameInfo>
 
-            <TeamsContainer>
-                {/* 블루팀 */}
-                <TeamSection win={gameDetail.blueTeam.win}>
-                    <TeamHeader win={gameDetail.blueTeam.win}>
-                        <TeamTitle win={gameDetail.blueTeam.win}>
-                            블루팀 {gameDetail.blueTeam.win ? '(승리)' : '(패배)'}
-                        </TeamTitle>
-                        <TeamStats win={gameDetail.blueTeam.win}>
-                            <span>킬: {gameDetail.blueTeam.teamStats.totalKills}</span>
-                            <span>골드: {gameDetail.blueTeam.teamStats.totalGold.toLocaleString()}</span>
-                        </TeamStats>
-                    </TeamHeader>
+                <TeamsContainer>
+                    {/* 블루팀 */}
+                    <TeamSection win={gameDetail.blueTeam.win}>
+                        <TeamHeader win={gameDetail.blueTeam.win}>
+                            <TeamTitle win={gameDetail.blueTeam.win}>
+                                블루팀 {gameDetail.blueTeam.win ? '(승리)' : '(패배)'}
+                            </TeamTitle>
+                            <TeamStats win={gameDetail.blueTeam.win}>
+                                <span>킬: {gameDetail.blueTeam.teamStats.totalKills}</span>
+                                <span>골드: {gameDetail.blueTeam.teamStats.totalGold.toLocaleString()}</span>
+                            </TeamStats>
+                        </TeamHeader>
 
-                    <PlayersGrid>
-                        {gameDetail.blueTeam.players.map((player, index) => (
-                            <PlayerRowComponent key={index} player={player} index={index} />
-                        ))}
-                    </PlayersGrid>
+                        <PlayersGrid>
+                            {gameDetail.blueTeam.players.map((player, index) => (
+                                <PlayerRowComponent key={index} player={player} index={index}/>
+                            ))}
+                        </PlayersGrid>
 
-                    <ObjectiveStats>
-                        <ObjectiveItem>
-                            <strong>{gameDetail.blueTeam.teamStats.baronKills}</strong>
-                            바론
-                        </ObjectiveItem>
-                        <ObjectiveItem>
-                            <strong>{gameDetail.blueTeam.teamStats.dragonKills}</strong>
-                            드래곤
-                        </ObjectiveItem>
-                        <ObjectiveItem>
-                            <strong>{gameDetail.blueTeam.teamStats.towerKills}</strong>
-                            타워
-                        </ObjectiveItem>
-                        <ObjectiveItem>
-                            <strong>{gameDetail.blueTeam.teamStats.inhibitorKills}</strong>
-                            억제기
-                        </ObjectiveItem>
-                    </ObjectiveStats>
-                </TeamSection>
+                        <ObjectiveStats>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.blueTeam.teamStats.baronKills}</strong>
+                                바론
+                            </ObjectiveItem>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.blueTeam.teamStats.dragonKills}</strong>
+                                드래곤
+                            </ObjectiveItem>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.blueTeam.teamStats.towerKills}</strong>
+                                타워
+                            </ObjectiveItem>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.blueTeam.teamStats.inhibitorKills}</strong>
+                                억제기
+                            </ObjectiveItem>
+                        </ObjectiveStats>
+                    </TeamSection>
 
-                {/* 레드팀 */}
-                <TeamSection win={gameDetail.redTeam.win}>
-                    <TeamHeader win={gameDetail.redTeam.win}>
-                        <TeamTitle win={gameDetail.redTeam.win}>
-                            레드팀 {gameDetail.redTeam.win ? '(승리)' : '(패배)'}
-                        </TeamTitle>
-                        <TeamStats win={gameDetail.redTeam.win}>
-                            <span>킬: {gameDetail.redTeam.teamStats.totalKills}</span>
-                            <span>골드: {gameDetail.redTeam.teamStats.totalGold.toLocaleString()}</span>
-                        </TeamStats>
-                    </TeamHeader>
+                    {/* 레드팀 */}
+                    <TeamSection win={gameDetail.redTeam.win}>
+                        <TeamHeader win={gameDetail.redTeam.win}>
+                            <TeamTitle win={gameDetail.redTeam.win}>
+                                레드팀 {gameDetail.redTeam.win ? '(승리)' : '(패배)'}
+                            </TeamTitle>
+                            <TeamStats win={gameDetail.redTeam.win}>
+                                <span>킬: {gameDetail.redTeam.teamStats.totalKills}</span>
+                                <span>골드: {gameDetail.redTeam.teamStats.totalGold.toLocaleString()}</span>
+                            </TeamStats>
+                        </TeamHeader>
 
-                    <PlayersGrid>
-                        {gameDetail.redTeam.players.map((player, index) => (
-                            <PlayerRowComponent key={index} player={player} index={index} />
-                        ))}
-                    </PlayersGrid>
+                        <PlayersGrid>
+                            {gameDetail.redTeam.players.map((player, index) => (
+                                <PlayerRowComponent key={index} player={player} index={index}/>
+                            ))}
+                        </PlayersGrid>
 
-                    <ObjectiveStats>
-                        <ObjectiveItem>
-                            <strong>{gameDetail.redTeam.teamStats.baronKills}</strong>
-                            바론
-                        </ObjectiveItem>
-                        <ObjectiveItem>
-                            <strong>{gameDetail.redTeam.teamStats.dragonKills}</strong>
-                            드래곤
-                        </ObjectiveItem>
-                        <ObjectiveItem>
-                            <strong>{gameDetail.redTeam.teamStats.towerKills}</strong>
-                            타워
-                        </ObjectiveItem>
-                        <ObjectiveItem>
-                            <strong>{gameDetail.redTeam.teamStats.inhibitorKills}</strong>
-                            억제기
-                        </ObjectiveItem>
-                    </ObjectiveStats>
-                </TeamSection>
-            </TeamsContainer>
-        </DetailContainer>
-    );
-};
-
+                        <ObjectiveStats>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.redTeam.teamStats.baronKills}</strong>
+                                바론
+                            </ObjectiveItem>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.redTeam.teamStats.dragonKills}</strong>
+                                드래곤
+                            </ObjectiveItem>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.redTeam.teamStats.towerKills}</strong>
+                                타워
+                            </ObjectiveItem>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.redTeam.teamStats.inhibitorKills}</strong>
+                                억제기
+                            </ObjectiveItem>
+                        </ObjectiveStats>
+                    </TeamSection>
+                </TeamsContainer>
+            </DetailContainer>
+        );
+    };
 export default GameDetailView;
