@@ -30,10 +30,10 @@ const GameContent = styled.div`
     margin-right: 4px;
 
     /* 컬럼 간의 간격을 일관되게 조정합니다. */
-    column-gap: 12px;
+    column-gap: 8px;
 
     /* 각 컬럼의 너비를 콘텐츠에 맞게 재조정합니다. */
-    grid-template-columns: 300px 150px 225px 180px 120px;
+    grid-template-columns: 180px 100px 150px 225px 180px 120px;
 
     & > *:not(:last-child) {
         position: relative;
@@ -53,11 +53,11 @@ const GameContent = styled.div`
 
 const ChampionSection = styled.div`
     display: flex;
-    gap: 16px;
+    gap: 16px; /* 내부 간격 조정 */
     align-items: center;
     padding: 6px 8px;
     border-radius: 6px;
-    min-width: 300px; /* 그리드에 맞게 너비 조정 */
+    min-width: 180px; /* 그리드에 맞게 너비 조정 */
 `;
 
 const ChampionInfo = styled.div`
@@ -475,7 +475,7 @@ const GameHistoryItem = ({ game }) => {
         <>
             <GameCard win={game.win} isExpanded={isExpanded}>
                 <GameContent>
-                    {/* 챔피언, 결과, KDA 정보 */}
+                    {/* 챔피언 및 결과 정보 */}
                     <ChampionSection>
                         <ChampionImage championName={game.championName} size="48px" />
                         <ResultSection win={game.win}>
@@ -484,13 +484,15 @@ const GameHistoryItem = ({ game }) => {
                             </ResultBadge>
                             <GameMode>{getQueueTypeName(game.queueId)}</GameMode>
                         </ResultSection>
-                        <ChampionInfo>
-                            <KDAInfo>{game.kda}</KDAInfo>
-                            <KDAStats>
-                                {game.kills}/{game.deaths}/{game.assists}
-                            </KDAStats>
-                        </ChampionInfo>
                     </ChampionSection>
+
+                    {/* KDA 정보 */}
+                    <ChampionInfo>
+                        <KDAInfo>{game.kda}</KDAInfo>
+                        <KDAStats>
+                            {game.kills}/{game.deaths}/{game.assists}
+                        </KDAStats>
+                    </ChampionInfo>
 
                     {/* 스펠 & 룬 */}
                     <SpellRuneSection data-hover-element>
