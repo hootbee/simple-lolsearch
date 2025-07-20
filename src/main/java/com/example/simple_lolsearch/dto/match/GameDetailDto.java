@@ -72,9 +72,6 @@ public class GameDetailDto {
         private int cs;
         private int totalDamageDealtToChampions;
         private int totalDamageTaken;
-        private Integer goldEarned;
-
-        // 랭크 정보
         private String tier;
         private String rank;
         private int leaguePoints;
@@ -122,6 +119,10 @@ public class GameDetailDto {
 
         public int getGoldEarned() {
             return gameStats != null ? gameStats.getGoldEarned() : 0;
+        }
+
+        public int getChampLevel() {
+            return gameStats != null ? gameStats.getChampLevel() : 0;
         }
 
         public int getVisionScore() {

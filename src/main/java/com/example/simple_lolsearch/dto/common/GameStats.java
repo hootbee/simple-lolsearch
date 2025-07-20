@@ -10,6 +10,7 @@ public class GameStats {
     private int deaths;
     private int assists;
     private int goldEarned;
+    private int champLevel;
     private int visionScore;
     private boolean win;
 }

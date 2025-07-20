@@ -291,6 +291,7 @@ public class MatchDetailServiceImpl implements MatchDetailService {
                 .deaths(participant.getDeaths())
                 .assists(participant.getAssists())
                 .goldEarned(participant.getGoldEarned())
+                .champLevel(participant.getChampLevel())
                 .visionScore(participant.getVisionScore())
                 .win(participant.isWin())
                 .build();

@@ -47,6 +47,7 @@ public class MatchDetailDto {
         private int totalMinionsKilled;
         private int neutralMinionsKilled;
         private int goldEarned;
+        private int champLevel;
         private int totalDamageDealtToChampions;
         private int visionScore;
         private int item0;

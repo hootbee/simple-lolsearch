@@ -115,6 +115,24 @@ const PlayerRow = styled.div`
     }
 `;
 
+const ChampionIconContainer = styled.div`
+    position: relative;
+    width: 32px;
+    height: 32px;
+`;
+
+const ChampionLevel = styled.div`
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 11px;
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-weight: bold;
+`;
+
 // 🔥 클릭 가능한 플레이어 이름 스타일 추가
 const PlayerName = styled.div`
     font-weight: bold;
@@ -222,7 +240,7 @@ const GameDetailView = ({ gameDetail }) => {
 
         // 마스터 이상은 앞에 1 붙이기
         if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(tier.toUpperCase())) {
-            return `1${shortTier}`;
+            return `${shortTier}1`;
         }
 
         // 일반 티어는 숫자 포함
@@ -284,12 +302,17 @@ const GameDetailView = ({ gameDetail }) => {
         };
 
         // 🔥 플레이어 행 컴포넌트
-        const PlayerRowComponent = ({player, index}) => (
+        const PlayerRowComponent = ({player, index}) => {
+            console.log('Player champLevel:', player.champLevel);
+            return (
             <PlayerRow key={index}>
-                <ChampionImage
-                    championName={player.championName}
-                    size="32px"
-                />
+                <ChampionIconContainer>
+                    <ChampionImage
+                        championName={player.championName}
+                        size="32px"
+                    />
+                    <ChampionLevel>{player.champLevel}</ChampionLevel>
+                </ChampionIconContainer>
                 <div>
                     <PlayerName onClick={() => handlePlayerClick(player)}>
                         {player.riotIdGameName || 'Unknown'}
@@ -318,7 +341,7 @@ const GameDetailView = ({ gameDetail }) => {
                     {formatRank(player.tier, player.rank)}
                 </PlayerRank>
             </PlayerRow>
-        );
+        )};
 
         return (
             <DetailContainer>
