@@ -177,12 +177,11 @@ public class MatchDetailServiceImpl implements MatchDetailService {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("참가자 정보를 찾을 수 없습니다"));
 
+            // GameDetailMapperService를 사용하여 PlayerDetailDto 생성
+            GameDetailDto.PlayerDetailDto playerDetail = gameDetailMapperService.mapToPlayerDetail(participant);
+
             // 공통 클래스들 생성
             BaseGameInfo gameInfo = createBaseGameInfo(match);
-            BasePlayerInfo playerInfo = createBasePlayerInfo(participant);
-            GameStats gameStats = createGameStats(participant);
-            ItemSpellInfo itemSpellInfo = createItemSpellInfo(participant);
-            RuneInfo runeInfo = runeExtractorUtil.extractRuneInfo(participant.getPerks());
 
             // 시간 정보 처리
             long gameCreation = match.getGameCreation();
@@ -192,12 +191,12 @@ public class MatchDetailServiceImpl implements MatchDetailService {
 
             return GameSummaryDto.builder()
                     .gameInfo(gameInfo)
-                    .playerInfo(playerInfo)
-                    .gameStats(gameStats)
-                    .itemSpellInfo(itemSpellInfo)
-                    .runeInfo(runeInfo)
-                    .kda(GameDataUtils.calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists()))
-                    .cs(GameDataUtils.calculateCS(participant))
+                    .playerInfo(playerDetail.getPlayerInfo())
+                    .gameStats(playerDetail.getGameStats())
+                    .itemSpellInfo(playerDetail.getItemSpellInfo())
+                    .runeInfo(playerDetail.getRuneInfo())
+                    .kda(playerDetail.getKda())
+                    .cs(playerDetail.getCs())
                     .gameDate(absoluteDate)
                     .relativeTime(relativeTime)
                     .detailedTime(detailedTime)
@@ -271,60 +270,6 @@ public class MatchDetailServiceImpl implements MatchDetailService {
     }
 
     // === 공통 클래스 생성 메서드들 ===
-
-
-    private BasePlayerInfo createBasePlayerInfo(MatchDetailDto.ParticipantDto participant) {
-        return BasePlayerInfo.builder()
-                .puuid(participant.getPuuid())
-                .riotIdGameName(getDisplayName(participant))
-                .riotIdTagline(participant.getRiotIdTagline())
-                .championName(participant.getChampionName())
-                .championId(participant.getChampionId())
-                .lane(participant.getLane())
-                .role(participant.getRole())
-                .build();
-    }
-
-    private GameStats createGameStats(MatchDetailDto.ParticipantDto participant) {
-        return GameStats.builder()
-                .kills(participant.getKills())
-                .deaths(participant.getDeaths())
-                .assists(participant.getAssists())
-                .goldEarned(participant.getGoldEarned())
-                .champLevel(participant.getChampLevel())
-                .visionScore(participant.getVisionScore())
-                .win(participant.isWin())
-                .build();
-    }
-
-    private ItemSpellInfo createItemSpellInfo(MatchDetailDto.ParticipantDto participant) {
-        List<Integer> items = GameDataUtils.extractItems(participant);
-
-        return ItemSpellInfo.builder()
-                .items(items)
-                .trinket(participant.getItem6())
-                .summonerSpell1Id(participant.getSummoner1Id())
-                .summonerSpell2Id(participant.getSummoner2Id())
-                .build();
-    }
-
-    private String getDisplayName(MatchDetailDto.ParticipantDto participant) {
-        if (participant.getRiotIdGameName() != null &&
-                !participant.getRiotIdGameName().trim().isEmpty()) {
-            String tagline = participant.getRiotIdTagline();
-            if (tagline != null && !tagline.trim().isEmpty()) {
-                return participant.getRiotIdGameName() + "#" + tagline;
-            }
-            return participant.getRiotIdGameName();
-        }
-
-        String puuid = participant.getPuuid();
-        if (puuid != null && puuid.length() > 8) {
-            return "Player_" + puuid.substring(0, 8);
-        }
-
-        return "Unknown Player";
-    }
 
     // === 스케줄러 및 페이징 메서드들 ===
 
