@@ -67,6 +67,17 @@ const ChampionInfo = styled.div`
     justify-content: center;
 `;
 
+const MultiKillBadge = styled.div`
+    background-color: #c6443e;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 4px;
+`;
+
 const KDAInfo = styled.div`
     font-size: 0.9rem;
     color: #333;
@@ -318,7 +329,8 @@ const ErrorMessage = styled.div`
 const GameHistoryItem = ({ game }) => {
     console.log('Game Data Mapping Check:', {
         totalDamageDealtToChampions: game.totalDamageDealtToChampions,
-        totalDamageTaken: game.totalDamageTaken
+        totalDamageTaken: game.totalDamageTaken,
+        largestMultiKill: game.largestMultiKill
     });
     const [showTooltip, setShowTooltip] = useState(false);
 
@@ -344,6 +356,18 @@ const GameHistoryItem = ({ game }) => {
         const remainingSeconds = seconds % 60;
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
+
+    const getMultiKillText = (multiKill) => {
+        switch (multiKill) {
+            case 2: return '더블킬';
+            case 3: return '트리플킬';
+            case 4: return '쿼드라킬';
+            case 5: return '펜타킬';
+            default: return null;
+        }
+    };
+
+    const multiKillText = getMultiKillText(game.largestMultiKill);
 
     const getRelativeTime = () => {
         return game.relativeTime || '시간 정보 없음';
@@ -505,6 +529,7 @@ const GameHistoryItem = ({ game }) => {
 
                     {/* KDA 정보 */}
                     <ChampionInfo>
+                        {multiKillText && <MultiKillBadge>{multiKillText}</MultiKillBadge>}
                         <KDAInfo>{game.kda}</KDAInfo>
                         <KDAStats>
                             {game.kills}/{game.deaths}/{game.assists}
