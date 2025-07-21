@@ -11,7 +11,7 @@ const getRankBackgroundColor = (tier) => {
         case 'BRONZE': return '#8b4513';
         case 'SILVER': return '#c0c0c0';
         case 'GOLD': return '#ffd700';
-        case 'PLATINUM': return '#e5e4e2';
+        case 'PLATINUM': return '#73A9AD'; // <--- 이 부분을 변경했습니다.
         case 'EMERALD': return '#50c878';
         case 'DIAMOND': return '#b9f2ff';
         case 'MASTER': return '#9932cc';
