@@ -13,6 +13,7 @@ public class GameStats {
     private int champLevel;
     private Integer totalDamageDealtToChampions;
     private Integer totalDamageTaken;
+    private Integer largestMultiKill;
     private int visionScore;
     private boolean win;
 }

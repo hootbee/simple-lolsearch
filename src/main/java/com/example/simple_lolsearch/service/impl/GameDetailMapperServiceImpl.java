@@ -176,6 +176,7 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
                 .champLevel(participant.getChampLevel())
                 .totalDamageDealtToChampions(participant.getTotalDamageDealtToChampions())
                 .totalDamageTaken(participant.getTotalDamageTaken())
+                .largestMultiKill(participant.getLargestMultiKill())
                 .visionScore(participant.getVisionScore())
                 .win(participant.isWin())
                 .build();

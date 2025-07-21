@@ -50,6 +50,7 @@ public class MatchDetailDto {
         private int champLevel;
         private int totalDamageDealtToChampions;
         private Integer totalDamageTaken;
+        private Integer largestMultiKill;
         private int visionScore;
         private int item0;
         private int item1;

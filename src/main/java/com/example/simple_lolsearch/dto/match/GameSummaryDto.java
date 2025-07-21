@@ -99,6 +99,9 @@ public class GameSummaryDto {
     public Integer getTotalDamageTaken() {
         return gameStats != null ? gameStats.getTotalDamageTaken() : 0;
     }
+    public Integer getLargestMultiKill() {
+        return gameStats != null ? gameStats.getLargestMultiKill() : 0;
+    }
 
     public int getVisionScore() {
         return gameStats != null ? gameStats.getVisionScore() : 0;
