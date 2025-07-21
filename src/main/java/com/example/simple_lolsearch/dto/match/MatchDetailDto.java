@@ -49,6 +49,7 @@ public class MatchDetailDto {
         private int goldEarned;
         private int champLevel;
         private int totalDamageDealtToChampions;
+        private Integer totalDamageTaken;
         private int visionScore;
         private int item0;
         private int item1;

@@ -11,6 +11,8 @@ public class GameStats {
     private int assists;
     private int goldEarned;
     private int champLevel;
+    private Integer totalDamageDealtToChampions;
+    private Integer totalDamageTaken;
     private int visionScore;
     private boolean win;
 }

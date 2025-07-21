@@ -93,6 +93,12 @@ public class GameSummaryDto {
     public int getGoldEarned() {
         return gameStats != null ? gameStats.getGoldEarned() : 0;
     }
+    public Integer getTotalDamageDealtToChampions() {
+        return gameStats != null ? gameStats.getTotalDamageDealtToChampions() : 0;
+    }
+    public Integer getTotalDamageTaken() {
+        return gameStats != null ? gameStats.getTotalDamageTaken() : 0;
+    }
 
     public int getVisionScore() {
         return gameStats != null ? gameStats.getVisionScore() : 0;

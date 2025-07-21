@@ -103,8 +103,6 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
                 .kda(GameDataUtils.calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists()))
                 .killParticipation(0.0)
                 .cs(GameDataUtils.calculateCS(participant))
-                .totalDamageDealtToChampions(participant.getTotalDamageDealtToChampions())
-                .totalDamageTaken(0)
                 // 랭크 정보는 기본값으로 설정
                 .tier("UNRANKED")
                 .rank("")
@@ -176,6 +174,8 @@ public class GameDetailMapperServiceImpl implements GameDetailMapperService {
                 .assists(participant.getAssists())
                 .goldEarned(participant.getGoldEarned())
                 .champLevel(participant.getChampLevel())
+                .totalDamageDealtToChampions(participant.getTotalDamageDealtToChampions())
+                .totalDamageTaken(participant.getTotalDamageTaken())
                 .visionScore(participant.getVisionScore())
                 .win(participant.isWin())
                 .build();

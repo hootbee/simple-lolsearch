@@ -70,8 +70,6 @@ public class GameDetailDto {
         private String kda;
         private double killParticipation;
         private int cs;
-        private int totalDamageDealtToChampions;
-        private int totalDamageTaken;
         private String tier;
         private String rank;
         private int leaguePoints;
@@ -163,6 +161,12 @@ public class GameDetailDto {
 
         public List<Integer> getStatRunes() {
             return runeInfo != null ? runeInfo.getStatRunes() : null;
+        }
+        public Integer getTotalDamageDealtToChampions() {
+            return gameStats != null ? gameStats.getTotalDamageDealtToChampions() : 0;
+        }
+        public Integer getTotalDamageTaken() {
+            return gameStats != null ? gameStats.getTotalDamageTaken() : 0;
         }
     }
 
