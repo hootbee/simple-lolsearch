@@ -37,18 +37,37 @@ public class PlayerDataServiceImpl implements PlayerDataService {
 
     public PlayerProfileDto getPlayerProfile(String gameName, String tagLine) {
         log.info("플레이어 프로필 조회 시작: {}#{}", gameName, tagLine);
+        try {
+            // 1. RiotId를 PUUID로 변환
+            AccountDto account = summonerService.getAccountByRiotId(gameName, tagLine);
+            String puuid = account.getPuuid();
+            log.info("PUUID 조회 성공: {}", puuid);
 
-        // 1. 캐시된 데이터 확인
-        Optional<PlayerEntity> cachedPlayer = getCachedPlayerIfValid(gameName, tagLine);
+            // 2. DB에서 PUUID로 플레이어 조회
+            Optional<PlayerEntity> cachedPlayerOpt = playerRepository.findByPuuidWithRanks(puuid);
 
-        if (cachedPlayer.isPresent()) {
-            log.info("캐시된 데이터 사용: {}#{}", gameName, tagLine);
-            return convertToPlayerProfileDto(cachedPlayer.get());
+            if (cachedPlayerOpt.isPresent()) {
+                PlayerEntity player = cachedPlayerOpt.get();
+                log.info("캐시된 데이터 사용: puuid={}", puuid);
+
+                // GameName과 TagLine이 변경되었을 수 있으므로 업데이트
+                if (!gameName.equals(player.getGameName()) || !tagLine.equals(player.getTagLine())) {
+                    player.setGameName(gameName);
+                    player.setTagLine(tagLine);
+                    playerRepository.save(player);
+                    log.info("Riot ID 변경 감지, 업데이트: {}#{}", gameName, tagLine);
+                }
+                return convertToPlayerProfileDto(player);
+            }
+
+            // 3. DB에 데이터가 없을 경우, API에서 전체 정보 조회 후 저장
+            log.info("캐시된 데이터 없음. API에서 최신 데이터 조회: {}#{}", gameName, tagLine);
+            return fetchAndSavePlayerProfile(gameName, tagLine);
+
+        } catch (Exception e) {
+            log.error("플레이어 프로필 조회 및 저장 실패: {}#{}", gameName, tagLine, e);
+            throw new RuntimeException("플레이어 프로필 처리 중 오류가 발생했습니다", e);
         }
-
-        // 2. API에서 최신 데이터 조회 후 저장
-        log.info("API에서 최신 데이터 조회: {}#{}", gameName, tagLine);
-        return fetchAndSavePlayerProfile(gameName, tagLine);
     }
 
     public PlayerProfileDto refreshPlayerProfile(String gameName, String tagLine) {
@@ -100,20 +119,20 @@ public class PlayerDataServiceImpl implements PlayerDataService {
         return ranks.get(0);
     }
 
-    private Optional<PlayerEntity> getCachedPlayerIfValid(String gameName, String tagLine) {
-        Optional<PlayerEntity> playerOpt = playerRepository.findByGameNameAndTagLineWithRanks(gameName, tagLine);
-
-        if (playerOpt.isPresent()) {
-            PlayerEntity playerEntity = playerOpt.get();
-            LocalDateTime cacheExpiry = playerEntity.getUpdatedAt().plus(CACHE_DURATION);
-
-            if (LocalDateTime.now().isBefore(cacheExpiry)) {
-                return Optional.of(playerEntity);
-            }
-        }
-
-        return Optional.empty();
-    }
+//    private Optional<PlayerEntity> getCachedPlayerIfValid(String gameName, String tagLine) {
+//        Optional<PlayerEntity> playerOpt = playerRepository.findByGameNameAndTagLineWithRanks(gameName, tagLine);
+//
+//        if (playerOpt.isPresent()) {
+//            PlayerEntity playerEntity = playerOpt.get();
+//            LocalDateTime cacheExpiry = playerEntity.getUpdatedAt().plus(CACHE_DURATION);
+//
+//            if (LocalDateTime.now().isBefore(cacheExpiry)) {
+//                return Optional.of(playerEntity);
+//            }
+//        }
+//
+//        return Optional.empty();
+//    }
 
     private PlayerProfileDto fetchAndSavePlayerProfile(String gameName, String tagLine) {
         try {

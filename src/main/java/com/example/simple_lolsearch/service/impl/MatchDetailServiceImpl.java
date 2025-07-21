@@ -83,18 +83,8 @@ public class MatchDetailServiceImpl implements MatchDetailService {
     }
 
     private Optional<MatchDetailEntity> getCachedMatchIfValid(String matchId) {
-        Optional<MatchDetailEntity> matchOpt = matchDetailRepository.findById(matchId);
-
-        if (matchOpt.isPresent()) {
-            MatchDetailEntity matchEntity = matchOpt.get();
-            LocalDateTime cacheExpiry = matchEntity.getUpdatedAt().plus(CACHE_DURATION);
-
-            if (LocalDateTime.now().isBefore(cacheExpiry)) {
-                return Optional.of(matchEntity);
-            }
-        }
-
-        return Optional.empty();
+        // 캐시 유효 기간 체크 없이 DB에 데이터가 있으면 바로 반환
+        return matchDetailRepository.findById(matchId);
     }
 
     private GameSummaryDto fetchAndSaveGameSummary(String matchId, String puuid) {
