@@ -270,10 +270,10 @@ const GameDetailView = ({ gameDetail }) => {
                         console.warn('계정 정보를 찾을 수 없습니다');
                         alert('해당 플레이어의 계정 정보를 찾을 수 없습니다.');
                     }
-                } else if (player.riotIdGameName && player.riotIdTagLine) {
+                } else if (player.riotIdGameName && player.riotIdTagline) {
                     // 백업: riotId 정보가 있으면 사용
                     const encodedGameName = encodeURIComponent(player.riotIdGameName);
-                    const encodedTagLine = encodeURIComponent(player.riotIdTagLine);
+                    const encodedTagLine = encodeURIComponent(player.riotIdTagline);
 
                     console.log('backup: riotId로 검색 페이지 이동:', `${encodedGameName}#${encodedTagLine}`);
                     navigate(`/search/${encodedGameName}/${encodedTagLine}`);
@@ -287,10 +287,16 @@ const GameDetailView = ({ gameDetail }) => {
             }
         };
 
-        // 🔥 플레이어 행 컴포넌트
-        const PlayerRowComponent = ({player, index}) => {
-            console.log('Player champLevel:', player.champLevel);
-            return (
+    // 🔥 플레이어 행 컴포넌트
+    // 🔥 플레이어 행 컴포넌트
+    const PlayerRowComponent = ({player, index}) => {
+        console.log('Player champLevel:', player.champLevel);
+        console.log('Player championName:', player.championName);
+        console.log('Player riotIdGameName:', player.riotIdGameName); // 게임네임만
+        console.log('Player riotIdTagline:', player.riotIdTagline); // 태그라인만
+        console.log('Player 전체 객체:', player);
+
+        return (
             <PlayerRow key={index}>
                 <ChampionIconContainer>
                     <ChampionImage
@@ -299,14 +305,21 @@ const GameDetailView = ({ gameDetail }) => {
                     />
                     <ChampionLevel>{player.champLevel}</ChampionLevel>
                 </ChampionIconContainer>
+
                 <div>
                     <PlayerName onClick={() => handlePlayerClick(player)}>
                         {player.riotIdGameName || 'Unknown'}
                     </PlayerName>
-                    <div style={{fontSize: '0.75rem', color: '#888'}}>
-                        {player.championName}
-                    </div>
+                    {player.riotIdTagline && (
+                        <span style={{fontSize: '0.7rem', color: '#888', fontWeight: 'normal'}}>
+                        #{player.riotIdTagline}
+                    </span>
+                    )}
+                    {/*<div style={{fontSize: '0.75rem', color: '#888'}}>*/}
+                    {/*    {player.championName}*/}
+                    {/*</div>*/}
                 </div>
+
                 <PlayerKDA>
                     {player.kills}/{player.deaths}/{player.assists}
                 </PlayerKDA>
@@ -321,15 +334,15 @@ const GameDetailView = ({ gameDetail }) => {
                     <div>CS: {player.cs}</div>
                     <div>골드: {player.goldEarned?.toLocaleString()}</div>
                 </PlayerStats>
-                <PlayerRank
-                    tier={player.tier}
-                >
+                <PlayerRank tier={player.tier}>
                     {formatRank(player.tier, player.rank)}
                 </PlayerRank>
             </PlayerRow>
-        )};
+        );
+    };
 
-        return (
+
+    return (
             <DetailContainer>
                 <GameInfo>
                     <GameTitle>{gameDetail.gameMode}</GameTitle>
