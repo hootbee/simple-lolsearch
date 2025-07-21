@@ -11,7 +11,7 @@ const getRankBackgroundColor = (tier) => {
         case 'BRONZE': return '#8b4513';
         case 'SILVER': return '#c0c0c0';
         case 'GOLD': return '#ffd700';
-        case 'PLATINUM': return '#73A9AD'; // <--- 이 부분을 변경했습니다.
+        case 'PLATINUM': return '#73A9AD';
         case 'EMERALD': return '#50c878';
         case 'DIAMOND': return '#b9f2ff';
         case 'MASTER': return '#9932cc';
@@ -248,21 +248,7 @@ const GameDetailView = ({ gameDetail }) => {
         return shortRank ? `${shortTier}${shortRank}` : shortTier;
     };
 
-    const getRankBackgroundColor = (tier) => {
-        switch (tier ? tier.toUpperCase() : '') {
-            case 'IRON': return '#4a4a4a';
-            case 'BRONZE': return '#8b4513';
-            case 'SILVER': return '#c0c0c0';
-            case 'GOLD': return '#ffd700';
-            case 'PLATINUM': return '#e5e4e2';
-            case 'EMERALD': return '#50c878';
-            case 'DIAMOND': return '#b9f2ff';
-            case 'MASTER': return '#9932cc';
-            case 'GRANDMASTER': return '#ff4500';
-            case 'CHALLENGER': return '#00bfff';
-            default: return '#808080'; // UNRANKED 또는 기타
-        }
-    };
+
 
         // 🔥 플레이어 클릭 핸들러
         const handlePlayerClick = async (player) => {
