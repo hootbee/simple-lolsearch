@@ -14,6 +14,9 @@ public class GameStats {
     private Integer totalDamageDealtToChampions;
     private Integer totalDamageTaken;
     private Integer largestMultiKill;
+    private String kda;
+    private Double killParticipation;
+    private Integer cs;
     private int visionScore;
     private boolean win;
 }

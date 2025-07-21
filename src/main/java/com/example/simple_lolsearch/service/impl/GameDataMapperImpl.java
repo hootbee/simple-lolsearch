@@ -100,9 +100,6 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .gameStats(gameStats)
                 .itemSpellInfo(itemSpellInfo)
                 .runeInfo(runeInfo)
-                .kda(GameDataUtils.calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists()))
-                .killParticipation(0.0)
-                .cs(GameDataUtils.calculateCS(participant))
                 .build();
     }
 
@@ -111,19 +108,19 @@ public class GameDataMapperImpl implements GameDataMapper {
     /**
      * 킬관여율 계산을 위한 별도 메서드 (팀 정보 필요)
      */
-    public GameDetailDto.PlayerDetailDto mapToPlayerDetailWithTeamInfo(
-            MatchDetailDto.ParticipantDto participant,
-            List<MatchDetailDto.ParticipantDto> allParticipants
-    ) {
-        GameDetailDto.PlayerDetailDto basePlayer = mapToPlayerDetail(participant);
-
-        // 킬관여율 계산
-        double killParticipation = calculateKillParticipation(participant, allParticipants);
-
-        return basePlayer.toBuilder()
-                .killParticipation(killParticipation)
-                .build();
-    }
+//    public GameDetailDto.PlayerDetailDto mapToPlayerDetailWithTeamInfo(
+//            MatchDetailDto.ParticipantDto participant,
+//            List<MatchDetailDto.ParticipantDto> allParticipants
+//    ) {
+//        GameDetailDto.PlayerDetailDto basePlayer = mapToPlayerDetail(participant);
+//
+//        // 킬관여율 계산
+//        double killParticipation = calculateKillParticipation(participant, allParticipants);
+//
+//        return basePlayer.toBuilder()
+//                .killParticipation(killParticipation)
+//                .build();
+//    }
 
     // === 공통 클래스 생성 메서드들 ===
 
@@ -165,6 +162,9 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .totalDamageDealtToChampions(participant.getTotalDamageDealtToChampions())
                 .totalDamageTaken(participant.getTotalDamageTaken())
                 .largestMultiKill(participant.getLargestMultiKill())
+                .cs(participant.getTotalMinionsKilled() + participant.getNeutralMinionsKilled())
+                .kda(GameDataUtils.calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists()))
+                .killParticipation(0.0)
                 .visionScore(participant.getVisionScore())
                 .win(participant.isWin())
                 .build();

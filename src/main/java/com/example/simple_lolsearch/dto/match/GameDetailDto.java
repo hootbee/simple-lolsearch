@@ -66,11 +66,6 @@ public class GameDetailDto {
         private ItemSpellInfo itemSpellInfo;
         private RuneInfo runeInfo;
 
-        // 추가 정보
-        private String kda;
-        private double killParticipation;
-        private int cs;
-
         // === 편의 메서드들 ===
         public String getPuuid() {
             return playerInfo != null ? playerInfo.getPuuid() : null;
@@ -170,6 +165,15 @@ public class GameDetailDto {
         }
         public String getRiotIdTagline() {
             return playerInfo != null ? playerInfo.getRiotIdTagline() : null;
+        }
+        public String getKda() {
+            return gameStats != null ? gameStats.getKda() : null;
+        }
+        public Double getKillParticipation() {
+            return gameStats != null ? gameStats.getKillParticipation() : 0.0;
+        }
+        public Integer getCs() {
+            return gameStats != null ? gameStats.getCs() : 0;
         }
     }
 
