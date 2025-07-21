@@ -171,6 +171,9 @@ public class GameDetailDto {
         public Integer getLargestMultiKill() {
             return gameStats != null ? gameStats.getLargestMultiKill() : 0;
         }
+        public String getRiotIdTagline() {
+            return playerInfo != null ? playerInfo.getRiotIdTagline() : null;
+        }
     }
 
     @Data

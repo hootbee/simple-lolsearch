@@ -158,7 +158,7 @@ public class GameDataMapperImpl implements GameDataMapper {
     private BasePlayerInfo createBasePlayerInfo(MatchDetailDto.ParticipantDto participant) {
         return BasePlayerInfo.builder()
                 .puuid(participant.getPuuid())
-                .riotIdGameName(getDisplayName(participant))
+                .riotIdGameName(participant.getRiotIdGameName())
                 .riotIdTagline(participant.getRiotIdTagline())
                 .championName(participant.getChampionName())
                 .championId(participant.getChampionId())
@@ -251,23 +251,5 @@ public class GameDataMapperImpl implements GameDataMapper {
         return Math.round(participation * 10.0) / 10.0;
     }
 
-    private String getDisplayName(MatchDetailDto.ParticipantDto participant) {
-        // Riot ID가 있으면 사용
-        if (participant.getRiotIdGameName() != null &&
-                !participant.getRiotIdGameName().trim().isEmpty()) {
-            String tagline = participant.getRiotIdTagline();
-            if (tagline != null && !tagline.trim().isEmpty()) {
-                return participant.getRiotIdGameName() + "#" + tagline;
-            }
-            return participant.getRiotIdGameName();
-        }
 
-        // 둘 다 없으면 PUUID의 일부 사용
-        String puuid = participant.getPuuid();
-        if (puuid != null && puuid.length() > 8) {
-            return "Player_" + puuid.substring(0, 8);
-        }
-
-        return "Unknown Player";
-    }
 }
