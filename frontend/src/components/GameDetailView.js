@@ -334,8 +334,8 @@ const GameDetailView = ({ gameDetail }) => {
                     <div>CS: {player.cs}</div>
                     <div>골드: {player.goldEarned?.toLocaleString()}</div>
                 </PlayerStats>
-                <PlayerRank tier={player.tier}>
-                    {formatRank(player.tier, player.rank)}
+                <PlayerRank tier={player.playerInfo.tier}>
+                    {formatRank(player.playerInfo.tier, player.playerInfo.rank)}
                 </PlayerRank>
             </PlayerRow>
         );

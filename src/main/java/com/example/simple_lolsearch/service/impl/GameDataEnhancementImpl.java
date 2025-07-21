@@ -72,17 +72,21 @@ public class GameDataEnhancementImpl implements GameDataEnhancement {
 
         if (rankInfo != null) {
             return player.toBuilder()
-                    .tier(rankInfo.getTier())
-                    .rank(rankInfo.getRank())
-                    .leaguePoints(rankInfo.getLeaguePoints())
+                    .playerInfo(player.getPlayerInfo().toBuilder()
+                            .tier(rankInfo.getTier())
+                            .rank(rankInfo.getRank())
+                            .leaguePoints(rankInfo.getLeaguePoints())
+                            .build())
                     .build();
         }
 
         // 랭크 정보가 없는 경우 기본값 유지
         return player.toBuilder()
-                .tier("UNRANKED")
-                .rank("")
-                .leaguePoints(0)
+                .playerInfo(player.getPlayerInfo().toBuilder()
+                        .tier("UNRANKED")
+                        .rank("")
+                        .leaguePoints(0)
+                        .build())
                 .build();
     }
 

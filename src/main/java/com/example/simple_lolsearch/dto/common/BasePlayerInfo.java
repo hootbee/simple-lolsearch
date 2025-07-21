@@ -11,6 +11,9 @@ public class BasePlayerInfo {
     private String riotIdTagline;
     private String championName;
     private int championId;
+    private String tier;
+    private String rank;
+    private Integer leaguePoints;
     private String lane;
     private String role;
 }

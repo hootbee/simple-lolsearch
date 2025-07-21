@@ -70,9 +70,6 @@ public class GameDetailDto {
         private String kda;
         private double killParticipation;
         private int cs;
-        private String tier;
-        private String rank;
-        private int leaguePoints;
 
         // === 편의 메서드들 ===
         public String getPuuid() {

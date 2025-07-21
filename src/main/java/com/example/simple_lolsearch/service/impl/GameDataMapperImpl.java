@@ -103,25 +103,10 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .kda(GameDataUtils.calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists()))
                 .killParticipation(0.0)
                 .cs(GameDataUtils.calculateCS(participant))
-                // 랭크 정보는 기본값으로 설정
-                .tier("UNRANKED")
-                .rank("")
-                .leaguePoints(0)
                 .build();
     }
 
-    public GameDetailDto.PlayerDetailDto mapToPlayerDetailWithRank(
-            MatchDetailDto.ParticipantDto participant,
-            LeagueEntryDto rankInfo
-    ) {
-        GameDetailDto.PlayerDetailDto basePlayer = mapToPlayerDetail(participant);
 
-        return basePlayer.toBuilder()
-                .tier(rankInfo.getTier())
-                .rank(rankInfo.getRank())
-                .leaguePoints(rankInfo.getLeaguePoints())
-                .build();
-    }
 
     /**
      * 킬관여율 계산을 위한 별도 메서드 (팀 정보 필요)
@@ -164,6 +149,9 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .championId(participant.getChampionId())
                 .lane(participant.getLane())
                 .role(participant.getRole())
+                .tier("UNRANKED") // 기본값 설정
+                .rank("UNRANKED") // 기본값 설정
+                .leaguePoints(null)
                 .build();
     }
 

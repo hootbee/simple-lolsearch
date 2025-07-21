@@ -13,5 +13,4 @@ public interface GameDataMapper {
 
     GameDetailDto.PlayerDetailDto mapToPlayerDetail(MatchDetailDto.ParticipantDto participantDto);
 
-    GameDetailDto.PlayerDetailDto mapToPlayerDetailWithRank(MatchDetailDto.ParticipantDto participant, LeagueEntryDto leagueEntryDto);
 }
