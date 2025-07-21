@@ -33,7 +33,7 @@ const GameContent = styled.div`
     column-gap: 8px;
 
     /* 각 컬럼의 너비를 콘텐츠에 맞게 재조정합니다. */
-    grid-template-columns: 180px 100px 150px 225px 180px 120px;
+    grid-template-columns: 180px 100px 150px 225px 150px 90px 120px;
 
     & > *:not(:last-child) {
         position: relative;
@@ -106,6 +106,17 @@ const StatsSection = styled.div`
     gap: 16px;
     padding: 6px 8px;
     border-radius: 6px;
+`;
+
+const DamageStats = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: bold;
 `;
 
 const StatItem = styled.div`
@@ -305,6 +316,10 @@ const ErrorMessage = styled.div`
 
 /* ---------- Component ---------- */
 const GameHistoryItem = ({ game }) => {
+    console.log('Game Data Mapping Check:', {
+        totalDamageDealtToChampions: game.totalDamageDealtToChampions,
+        totalDamageTaken: game.totalDamageTaken
+    });
     const [showTooltip, setShowTooltip] = useState(false);
 
     // 아이템 호버 상태
@@ -538,6 +553,12 @@ const GameHistoryItem = ({ game }) => {
                             <span>{game.visionScore}</span>
                         </StatItem>
                     </StatsSection>
+
+                    {/* 데미지 정보 */}
+                    <DamageStats>
+                        <span style={{ color: '#c6443e' }}>{game.totalDamageDealtToChampions?.toLocaleString()}</span>
+                        <span style={{ color: '#555' }}>{game.totalDamageTaken?.toLocaleString()}</span>
+                    </DamageStats>
 
                     {/* 시간 정보 */}
                     <TimeSection>
