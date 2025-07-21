@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import ChampionImage from './ChampionImage';
 import ItemBuild from './ItemBuild';
 import SpellRuneDisplay from './SpellRuneDisplay';
@@ -67,15 +67,26 @@ const ChampionInfo = styled.div`
     justify-content: center;
 `;
 
+const getMultiKillColor = (multiKill) => {
+    switch (multiKill) {
+        case 2: return css`background: linear-gradient(45deg, #4facfe, #00f2fe);`; // Double Kill
+        case 3: return css`background: linear-gradient(45deg, #ff9a44, #fc6076);`; // Triple Kill
+        case 4: return css`background: linear-gradient(45deg, #d4145a, #fbb03b);`; // Quadra Kill
+        case 5: return css`background: linear-gradient(45deg, #8a2be2, #ff00ff); color: #fff;`; // Penta Kill
+        default: return css`background-color: #c6443e;`;
+    }
+};
+
 const MultiKillBadge = styled.div`
-    background-color: #c6443e;
+    ${({ multiKill }) => getMultiKillColor(multiKill)}
     color: white;
-    padding: 4px 8px;
-    border-radius: 10px;
+    padding: 4px 10px;
+    border-radius: 12px;
     font-size: 0.8rem;
     font-weight: bold;
     text-align: center;
     margin-bottom: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 `;
 
 const KDAInfo = styled.div`
@@ -89,20 +100,30 @@ const KDAInfo = styled.div`
 `;
 
 const KDAStats = styled.div`
-    font-size: 1.05rem; /* Larger font size */
+    font-size: 1.1rem;
     color: #666;
+    letter-spacing: 1px;
+
+    b {
+        font-weight: 700;
+        color: #333;
+    }
+
+    span {
+        margin: 0 0.2em;
+    }
 `;
 
 // 스펠&룬 영역
 const SpellRuneSection = styled.div`
-    padding: 6px 8px; // 8px 12px에서 줄임
+    padding: 6px 8px;
     border-radius: 6px;
 `;
 
 
 const ItemSection = styled.div`
     text-align: center;
-    padding: 6px 8px; // 8px 12px에서 줄임
+    padding: 6px 8px;
     border-radius: 6px;
 `;
 
@@ -125,9 +146,14 @@ const DamageStats = styled.div`
     gap: 8px;
     padding: 6px 8px;
     border-radius: 6px;
-    text-align: center;
     font-size: 0.9rem;
     font-weight: bold;
+
+    div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
 `;
 
 const StatItem = styled.div`
@@ -529,10 +555,14 @@ const GameHistoryItem = ({ game }) => {
 
                     {/* KDA 정보 */}
                     <ChampionInfo>
-                        {multiKillText && <MultiKillBadge>{multiKillText}</MultiKillBadge>}
+                        {multiKillText && <MultiKillBadge multiKill={game.largestMultiKill}>{multiKillText}</MultiKillBadge>}
                         <KDAInfo>{game.kda}</KDAInfo>
                         <KDAStats>
-                            {game.kills}/{game.deaths}/{game.assists}
+                            <b>{game.kills}</b>
+                            <span>/</span>
+                            <b>{game.deaths}</b>
+                            <span>/</span>
+                            <b>{game.assists}</b>
                         </KDAStats>
                     </ChampionInfo>
 
@@ -581,8 +611,14 @@ const GameHistoryItem = ({ game }) => {
 
                     {/* 데미지 정보 */}
                     <DamageStats>
-                        <span style={{ color: '#c6443e' }}>{game.totalDamageDealtToChampions?.toLocaleString()}</span>
-                        <span style={{ color: '#555' }}>{game.totalDamageTaken?.toLocaleString()}</span>
+                        <div>
+                            <span>⚔️</span>
+                            <span style={{ color: '#c6443e' }}>{game.totalDamageDealtToChampions?.toLocaleString()}</span>
+                        </div>
+                        <div>
+                            <span>🛡️</span>
+                            <span style={{ color: '#555' }}>{game.totalDamageTaken?.toLocaleString()}</span>
+                        </div>
                     </DamageStats>
 
                     {/* 시간 정보 */}
