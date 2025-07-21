@@ -3,7 +3,7 @@ package com.example.simple_lolsearch.controller;
 import com.example.simple_lolsearch.dto.*;
 import com.example.simple_lolsearch.dto.match.GameDetailDto;
 import com.example.simple_lolsearch.dto.match.GameSummaryDto;
-import com.example.simple_lolsearch.service.MatchDetailService;
+import com.example.simple_lolsearch.service.MatchDataService;
 import com.example.simple_lolsearch.service.PlayerDataService;
 import com.example.simple_lolsearch.service.SummonerService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class SummonerController {
 
     private final SummonerService summonerService;
     private final PlayerDataService playerDataService;
-    private final MatchDetailService matchDetailService;
+    private final MatchDataService matchDataService;
 
     /* 1. 계정 정보 */
     @GetMapping("/account")
@@ -61,7 +61,7 @@ public ResponseEntity<List<GameSummaryDto>> getGameHistory(
                 .getPuuid();
 
         // 2. 시간 기반 서비스 호출 (lastGameTime = null이면 최신 게임들)
-        return matchDetailService.getGameHistory(puuid, null, count);
+        return matchDataService.getGameHistory(puuid, null, count);
     });
 }
 
@@ -84,7 +84,7 @@ public ResponseEntity<List<GameSummaryDto>> getGameHistory(
             @RequestParam Long lastGameTime,
             @RequestParam(defaultValue = "5") int count) {
 
-        return wrap(() -> matchDetailService.getGameHistory(puuid, lastGameTime, count));
+        return wrap(() -> matchDataService.getGameHistory(puuid, lastGameTime, count));
     }
 
 
@@ -92,7 +92,7 @@ public ResponseEntity<List<GameSummaryDto>> getGameHistory(
     @GetMapping("/game-detail/{matchId}")
     public ResponseEntity<GameDetailDto> getGameDetail(@PathVariable String matchId) {
         log.info("게임 상세 분석 조회 요청: {}", matchId);
-        return wrap(() -> matchDetailService.getGameDetail(matchId));
+        return wrap(() -> matchDataService.getGameDetail(matchId));
     }
 
 

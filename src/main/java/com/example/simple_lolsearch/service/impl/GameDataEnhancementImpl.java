@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GameDetailEnhancementServiceImpl implements GameDetailEnhancementService {
+public class GameDataEnhancementImpl implements GameDataEnhancement {
     private final PlayerDataService playerDataService;
-    private final GameDetailMapperService gameDetailMapperService;
+    private final GameDataMapper gameDataMapper;
 
     @Override
     public GameDetailDto enhanceWithRankInfo(GameDetailDto gameDetail, MatchDetailDto matchDetail) {

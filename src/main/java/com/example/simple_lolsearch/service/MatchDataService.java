@@ -5,7 +5,7 @@ import com.example.simple_lolsearch.dto.match.GameSummaryDto;
 
 import java.util.List;
 
-public interface MatchDetailService {
+public interface MatchDataService {
     GameSummaryDto getGameSummary(String matchId, String puuid);
 
     GameDetailDto getGameDetail(String matchId);

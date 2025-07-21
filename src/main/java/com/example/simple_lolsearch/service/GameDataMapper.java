@@ -6,7 +6,7 @@ import com.example.simple_lolsearch.dto.match.MatchDetailDto;
 
 import java.util.List;
 
-public interface GameDetailMapperService {
+public interface GameDataMapper {
     GameDetailDto mapToGameDetail(MatchDetailDto matchDetailDto);
 
     GameDetailDto.TeamDetailDto mapToTeamDetail(List<MatchDetailDto.ParticipantDto> teamParticipants, MatchDetailDto.TeamDto teamDto);

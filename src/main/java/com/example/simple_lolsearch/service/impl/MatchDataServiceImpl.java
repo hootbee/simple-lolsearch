@@ -7,7 +7,6 @@ import com.example.simple_lolsearch.dto.match.MatchDetailDto;
 import com.example.simple_lolsearch.entity.MatchDetailEntity;
 import com.example.simple_lolsearch.repository.MatchDetailRepository;
 import com.example.simple_lolsearch.service.*;
-import com.example.simple_lolsearch.util.GameDataUtils;
 import com.example.simple_lolsearch.util.RuneExtractorUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,15 +29,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class MatchDetailServiceImpl implements MatchDetailService {
+public class MatchDataServiceImpl implements MatchDataService {
 
     private final MatchDetailRepository matchDetailRepository;
     private final SummonerService summonerService;
-    private final GameDetailMapperService gameDetailMapperService;
+    private final GameDataMapper gameDataMapper;
     private final TimeFormatterService timeFormatterService;
     private final RuneExtractorUtil runeExtractorUtil;
     private final ObjectMapper objectMapper;
-    private final GameDetailEnhancementService gameDetailEnhancementService;
+    private final GameDataEnhancement gameDataEnhancement;
 
     private static final Duration CACHE_DURATION = Duration.ofDays(30);
 
@@ -168,7 +167,7 @@ public class MatchDetailServiceImpl implements MatchDetailService {
                     .orElseThrow(() -> new RuntimeException("참가자 정보를 찾을 수 없습니다"));
 
             // GameDetailMapperService를 사용하여 PlayerDetailDto 생성
-            GameDetailDto.PlayerDetailDto playerDetail = gameDetailMapperService.mapToPlayerDetail(participant);
+            GameDetailDto.PlayerDetailDto playerDetail = gameDataMapper.mapToPlayerDetail(participant);
 
             // 공통 클래스들 생성
             BaseGameInfo gameInfo = createBaseGameInfo(match);
@@ -250,8 +249,8 @@ public class MatchDetailServiceImpl implements MatchDetailService {
             matchDetail.setMetadata(metadata);
             matchDetail.setInfo(info);
 
-            GameDetailDto gameDetail = gameDetailMapperService.mapToGameDetail(matchDetail);
-            return gameDetailEnhancementService.enhanceWithRankInfo(gameDetail, matchDetail);
+            GameDetailDto gameDetail = gameDataMapper.mapToGameDetail(matchDetail);
+            return gameDataEnhancement.enhanceWithRankInfo(gameDetail, matchDetail);
 
         } catch (Exception e) {
             log.error("GameDetail 변환 실패: {}", match.getMatchId(), e);

@@ -9,7 +9,7 @@ import com.example.simple_lolsearch.util.RuneExtractorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import com.example.simple_lolsearch.service.GameDetailMapperService;
+import com.example.simple_lolsearch.service.GameDataMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GameDetailMapperServiceImpl implements GameDetailMapperService {
+public class GameDataMapperImpl implements GameDataMapper {
 
     private final TimeFormatterService timeFormatterService;
     private final RuneExtractorUtil runeExtractorUtil;

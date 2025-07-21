@@ -2,7 +2,7 @@ package com.example.simple_lolsearch.service;
 
 import com.example.simple_lolsearch.dto.match.GameDetailDto;
 import com.example.simple_lolsearch.dto.match.MatchDetailDto;
-import com.example.simple_lolsearch.service.impl.GameDetailMapperServiceImpl;
+import com.example.simple_lolsearch.service.impl.GameDataMapperImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat; // 수정된 import
 @SpringBootTest
 @ActiveProfiles("test")
 @DisplayName("GameDetailMapperService 실제 데이터 통합 테스트")
-class GameDetailMapperServiceRealDataTest {
+class GameDataMapperRealDataTest {
 
     @Autowired
-    private GameDetailMapperServiceImpl gameDetailMapperService;
+    private GameDataMapperImpl gameDetailMapperService;
 
     @Autowired
     private RiotApiService riotApiService;
