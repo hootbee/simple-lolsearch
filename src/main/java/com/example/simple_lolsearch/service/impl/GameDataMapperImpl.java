@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -73,8 +72,13 @@ public class GameDataMapperImpl implements GameDataMapper {
             return null;
         }
 
+        // 팀의 총 킬 수 계산
+        int teamTotalKills = teamParticipants.stream()
+                .mapToInt(MatchDetailDto.ParticipantDto::getKills)
+                .sum();
+
         List<GameDetailDto.PlayerDetailDto> players = teamParticipants.stream()
-                .map(this::mapToPlayerDetail)
+                .map(participant -> mapToPlayerDetail(participant, teamTotalKills))
                 .collect(Collectors.toList());
 
         return GameDetailDto.TeamDetailDto.builder()
@@ -87,11 +91,10 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .build();
     }
 
-    @Override
-    public GameDetailDto.PlayerDetailDto mapToPlayerDetail(MatchDetailDto.ParticipantDto participant) {
+    public GameDetailDto.PlayerDetailDto mapToPlayerDetail(MatchDetailDto.ParticipantDto participant, int teamTotalKills) {
         // 공통 클래스들을 생성
         BasePlayerInfo playerInfo = createBasePlayerInfo(participant);
-        GameStats gameStats = createGameStats(participant);
+        GameStats gameStats = createGameStats(participant, teamTotalKills);
         ItemSpellInfo itemSpellInfo = createItemSpellInfo(participant);
         RuneInfo runeInfo = runeExtractorUtil.extractRuneInfo(participant.getPerks());
 
@@ -102,25 +105,6 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .runeInfo(runeInfo)
                 .build();
     }
-
-
-
-    /**
-     * 킬관여율 계산을 위한 별도 메서드 (팀 정보 필요)
-     */
-//    public GameDetailDto.PlayerDetailDto mapToPlayerDetailWithTeamInfo(
-//            MatchDetailDto.ParticipantDto participant,
-//            List<MatchDetailDto.ParticipantDto> allParticipants
-//    ) {
-//        GameDetailDto.PlayerDetailDto basePlayer = mapToPlayerDetail(participant);
-//
-//        // 킬관여율 계산
-//        double killParticipation = calculateKillParticipation(participant, allParticipants);
-//
-//        return basePlayer.toBuilder()
-//                .killParticipation(killParticipation)
-//                .build();
-//    }
 
     // === 공통 클래스 생성 메서드들 ===
 
@@ -152,7 +136,9 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .build();
     }
 
-    private GameStats createGameStats(MatchDetailDto.ParticipantDto participant) {
+    private GameStats createGameStats(MatchDetailDto.ParticipantDto participant, int teamTotalKills) {
+        double killParticipation = calculateKillParticipation(participant, teamTotalKills);
+
         return GameStats.builder()
                 .kills(participant.getKills())
                 .deaths(participant.getDeaths())
@@ -164,7 +150,7 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .largestMultiKill(participant.getLargestMultiKill())
                 .cs(participant.getTotalMinionsKilled() + participant.getNeutralMinionsKilled())
                 .kda(GameDataUtils.calculateKDA(participant.getKills(), participant.getDeaths(), participant.getAssists()))
-                .killParticipation(0.0)
+                .killParticipation(killParticipation)
                 .visionScore(participant.getVisionScore())
                 .win(participant.isWin())
                 .build();
@@ -222,15 +208,7 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .build();
     }
 
-    private double calculateKillParticipation(
-            MatchDetailDto.ParticipantDto participant,
-            List<MatchDetailDto.ParticipantDto> allParticipants
-    ) {
-        int teamTotalKills = allParticipants.stream()
-                .filter(p -> p.getTeamId() == participant.getTeamId())
-                .mapToInt(MatchDetailDto.ParticipantDto::getKills)
-                .sum();
-
+    private double calculateKillParticipation(MatchDetailDto.ParticipantDto participant, int teamTotalKills) {
         if (teamTotalKills == 0) {
             return 0.0;
         }
@@ -238,6 +216,6 @@ public class GameDataMapperImpl implements GameDataMapper {
         double participation = (double)(participant.getKills() + participant.getAssists()) / teamTotalKills * 100;
         return Math.round(participation * 10.0) / 10.0;
     }
-
-
 }
+
+

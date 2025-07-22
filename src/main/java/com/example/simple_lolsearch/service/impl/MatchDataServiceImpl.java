@@ -166,8 +166,14 @@ public class MatchDataServiceImpl implements MatchDataService {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("참가자 정보를 찾을 수 없습니다"));
 
+            // 해당 참가자가 속한 팀의 총 킬 수 계산
+            int teamTotalKills = participants.stream()
+                    .filter(p -> p.getTeamId() == participant.getTeamId())
+                    .mapToInt(MatchDetailDto.ParticipantDto::getKills)
+                    .sum();
+
             // GameDetailMapperService를 사용하여 PlayerDetailDto 생성
-            GameDetailDto.PlayerDetailDto playerDetail = gameDataMapper.mapToPlayerDetail(participant);
+            GameDetailDto.PlayerDetailDto playerDetail = gameDataMapper.mapToPlayerDetail(participant, teamTotalKills);
 
             // 공통 클래스들 생성
             BaseGameInfo gameInfo = createBaseGameInfo(match);
@@ -184,8 +190,6 @@ public class MatchDataServiceImpl implements MatchDataService {
                     .gameStats(playerDetail.getGameStats())
                     .itemSpellInfo(playerDetail.getItemSpellInfo())
                     .runeInfo(playerDetail.getRuneInfo())
-                    .kda(playerDetail.getKda())
-                    .cs(playerDetail.getCs())
                     .gameDate(absoluteDate)
                     .relativeTime(relativeTime)
                     .detailedTime(detailedTime)

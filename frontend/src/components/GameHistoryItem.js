@@ -114,6 +114,13 @@ const KDAStats = styled.div`
     }
 `;
 
+const KillParticipation = styled.div`
+    font-size: 0.8rem;
+    color: #c6443e;
+    font-weight: bold;
+    margin-top: 4px;
+`;
+
 // 스펠&룬 영역
 const SpellRuneSection = styled.div`
     padding: 6px 8px;
@@ -564,6 +571,11 @@ const GameHistoryItem = ({ game }) => {
                             <span>/</span>
                             <b>{game.assists}</b>
                         </KDAStats>
+                        {game.killParticipation > 0 && (
+                            <KillParticipation>
+                                킬관여 {game.killParticipation}%
+                            </KillParticipation>
+                        )}
                     </ChampionInfo>
 
                     {/* 스펠 & 룬 */}

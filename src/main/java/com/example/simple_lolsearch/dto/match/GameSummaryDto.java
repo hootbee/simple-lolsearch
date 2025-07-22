@@ -15,8 +15,6 @@ public class GameSummaryDto {
     private RuneInfo runeInfo;
 
     // 추가 정보
-    private String kda;
-    private int cs;
     private String gameDate;
     private String relativeTime;
     private String detailedTime;
@@ -107,6 +105,18 @@ public class GameSummaryDto {
         return gameStats != null ? gameStats.getVisionScore() : 0;
     }
 
+    public double getKillParticipation() {
+        return gameStats != null ? gameStats.getKillParticipation() : 0;
+    }
+
+    public String getKda() {
+        return gameStats != null ? gameStats.getKda() : "0/0/0";
+    }
+
+    public int getCs() {
+        return gameStats != null ? gameStats.getCs() : 0;
+    }
+
     // 아이템 & 스펠 편의 메서드
     public List<Integer> getItems() {
         return itemSpellInfo != null ? itemSpellInfo.getItems() : null;
@@ -145,4 +155,5 @@ public class GameSummaryDto {
         return runeInfo != null ? runeInfo.getStatRunes() : null;
     }
 }
+
 

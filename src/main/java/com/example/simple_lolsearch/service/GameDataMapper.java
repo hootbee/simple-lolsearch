@@ -11,6 +11,6 @@ public interface GameDataMapper {
 
     GameDetailDto.TeamDetailDto mapToTeamDetail(List<MatchDetailDto.ParticipantDto> teamParticipants, MatchDetailDto.TeamDto teamDto);
 
-    GameDetailDto.PlayerDetailDto mapToPlayerDetail(MatchDetailDto.ParticipantDto participantDto);
+    GameDetailDto.PlayerDetailDto mapToPlayerDetail(MatchDetailDto.ParticipantDto participantDto, int teamTotalKills);
 
 }
