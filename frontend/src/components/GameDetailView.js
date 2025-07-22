@@ -156,6 +156,37 @@ const PlayerName = styled.div`
 const PlayerKDA = styled.div`
     text-align: center;
     color: #666;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+`;
+
+const KdaText = styled.div`
+    font-size: 0.65rem;
+    color: #555;
+    font-weight: bold;
+`;
+
+const KDAStats = styled.div`
+    font-size: 0.75rem; // Smaller font
+    letter-spacing: 0.5px;
+
+    b {
+        font-weight: 900; // Bolder numbers
+        color: #333;
+    }
+
+    span {
+        margin: 0 0.25em;
+        color: #999; // Lighter slashes
+    }
+`;
+
+const KillParticipation = styled.div`
+    font-size: 0.6rem;
+    color: #c6443e;
+    font-weight: bold;
 `;
 
 const PlayerItems = styled.div`
@@ -321,7 +352,19 @@ const GameDetailView = ({ gameDetail }) => {
                 </div>
 
                 <PlayerKDA>
-                    {player.kills}/{player.deaths}/{player.assists}
+                    <KdaText>{player.kda}</KdaText>
+                    <KDAStats>
+                        <b>{player.kills}</b>
+                        <span>/</span>
+                        <b>{player.deaths}</b>
+                        <span>/</span>
+                        <b>{player.assists}</b>
+                    </KDAStats>
+                    {player.killParticipation > 0 && (
+                        <KillParticipation>
+                            {player.killParticipation}%
+                        </KillParticipation>
+                    )}
                 </PlayerKDA>
                 <PlayerItems>
                     <ItemBuild
