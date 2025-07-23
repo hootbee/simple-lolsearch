@@ -23,6 +23,13 @@ const GameHistoryTitle = styled.h3`
     margin: 0;
 `;
 
+const FilterContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+`;
+
 const FilterSection = styled.div`
     display: flex;
     gap: 8px;
@@ -110,13 +117,15 @@ const NoMoreGames = styled.div`
     border-radius: 8px;
 `;
 
-const GameHistory = ({
+const GameHistory = ({ 
                          gameHistory,
                          onLoadMore,
                          loading = false,
                          hasMore = true,
                          error = null,
-                         puuid // 🔥 gameName, tagLine 대신 puuid 사용
+                         puuid, // 🔥 gameName, tagLine 대신 puuid 사용
+                         onQueueFilterChange, // 🔥 추가: 큐 필터 변경 핸들러
+                         selectedQueueId // 🔥 추가: 선택된 큐 ID
                      }) => {
     const [filter, setFilter] = useState('all');
 
@@ -189,32 +198,40 @@ const GameHistory = ({
                 <GameHistoryTitle>
                     최근 {filteredGames.length}/{gameHistory.length}경기
                 </GameHistoryTitle>
-                <FilterSection>
-                    <FilterButton
-                        active={filter === 'all'}
-                        onClick={() => setFilter('all')}
-                    >
-                        전체
-                    </FilterButton>
-                    <FilterButton
-                        active={filter === 'today'}
-                        onClick={() => setFilter('today')}
-                    >
-                        오늘
-                    </FilterButton>
-                    <FilterButton
-                        active={filter === 'week'}
-                        onClick={() => setFilter('week')}
-                    >
-                        최근 7일
-                    </FilterButton>
-                    <FilterButton
-                        active={filter === 'month'}
-                        onClick={() => setFilter('month')}
-                    >
-                        최근 30일
-                    </FilterButton>
-                </FilterSection>
+                <FilterContainer>
+                    <FilterSection>
+                        <FilterButton
+                            active={filter === 'all'}
+                            onClick={() => setFilter('all')}
+                        >
+                            전체
+                        </FilterButton>
+                        <FilterButton
+                            active={filter === 'today'}
+                            onClick={() => setFilter('today')}
+                        >
+                            오늘
+                        </FilterButton>
+                        <FilterButton
+                            active={filter === 'week'}
+                            onClick={() => setFilter('week')}
+                        >
+                            최근 7일
+                        </FilterButton>
+                        <FilterButton
+                            active={filter === 'month'}
+                            onClick={() => setFilter('month')}
+                        >
+                            최근 30일
+                        </FilterButton>
+                    </FilterSection>
+                    <FilterSection>
+                        <FilterButton active={selectedQueueId === null} onClick={() => onQueueFilterChange(null)}>전체</FilterButton>
+                        <FilterButton active={selectedQueueId === 420} onClick={() => onQueueFilterChange(420)}>솔로랭크</FilterButton>
+                        <FilterButton active={selectedQueueId === 440} onClick={() => onQueueFilterChange(440)}>자유랭크</FilterButton>
+                        <FilterButton active={selectedQueueId === 450} onClick={() => onQueueFilterChange(450)}>칼바람 나락</FilterButton>
+                    </FilterSection>
+                </FilterContainer>
             </Header>
 
             {filteredGames.map((game, index) => (

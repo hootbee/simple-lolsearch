@@ -19,7 +19,8 @@ import {
     getPlayerProfile,
     getGameHistory,
     refreshPlayerProfile,
-    loadMoreGameHistoryByPuuid
+    loadMoreGameHistoryByPuuid,
+    getGameHistoryByQueueId
 } from '../services/api';
 
 function SearchResultPage() {
@@ -42,6 +43,10 @@ function SearchResultPage() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMoreGames, setHasMoreGames] = useState(true);
     const [loadMoreError, setLoadMoreError] = useState(null);
+
+    // 게임 모드 필터 관련 상태
+    const [selectedQueueId, setSelectedQueueId] = useState(null); // null: 전체, 420: 솔랭, 440: 자랭, 450: 칼바람 등
+    const [gameTypePage, setGameTypePage] = useState(0);
 
     // URL 파라미터 변경 시 검색 실행
     useEffect(() => {
@@ -280,6 +285,34 @@ function SearchResultPage() {
         }
     };
 
+    // 게임 모드 필터 핸들러
+    const handleQueueFilterChange = async (queueId) => {
+        if (!userPuuid) return;
+
+        setSelectedQueueId(queueId);
+        setGameTypePage(0); // 페이지 초기화
+        setLoading(true);
+        setError(null);
+
+        try {
+            let games;
+            if (queueId === null) {
+                // 전체
+                games = await getGameHistory(gameName, tagLine, 20);
+            } else {
+                // 특정 큐
+                games = await getGameHistoryByQueueId(userPuuid, queueId, 0, 20);
+            }
+            setGameHistoryData(games);
+            setHasMoreGames(games.length >= 20);
+        } catch (err) {
+            setError(err.message || '게임 기록 조회에 실패했습니다.');
+            setGameHistoryData([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <>
             <GlobalStyle />
@@ -389,6 +422,8 @@ function SearchResultPage() {
                                     hasMore={hasMoreGames}
                                     error={loadMoreError}
                                     puuid={userPuuid} // 🔥 PUUID 전달
+                                    onQueueFilterChange={handleQueueFilterChange} // 🔥 핸들러 전달
+                                    selectedQueueId={selectedQueueId} // 🔥 선택된 ID 전달
                                 />
                             </div>
                         )}
