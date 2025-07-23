@@ -24,6 +24,17 @@ public interface MatchDetailRepository extends JpaRepository<MatchDetailEntity, 
     // 게임 모드별 조회
     List<MatchDetailEntity> findByGameModeOrderByGameCreationDesc(String gameMode);
 
+    // 큐 ID별 조회 (특정 플레이어)
+    @Query("SELECT m FROM MatchDetailEntity m " +
+           "WHERE m.participantsPuuids LIKE %:puuid% " +
+           "AND m.queueId = :queueId " +
+           "ORDER BY m.gameCreation DESC")
+    List<MatchDetailEntity> findByPuuidAndQueueIdOrderByGameCreationDesc(
+            @Param("puuid") String puuid,
+            @Param("queueId") Integer queueId,
+            Pageable pageable
+    );
+
     // 특정 기간 게임 조회
     List<MatchDetailEntity> findByGameCreationBetween(Long startTime, Long endTime);
 

@@ -179,3 +179,18 @@ export const getGameHistoryByPuuid = async (puuid, count = 20) => {
         handleApiError(error);
     }
 };
+
+// 🔥 새로 추가: Queue ID 기반 게임 히스토리 조회
+export const getGameHistoryByQueueId = async (puuid, queueId, page = 0, size = 10) => {
+    try {
+        console.log('🚀 Queue ID 기반 게임 히스토리 API 호출:', { puuid, queueId, page, size });
+        const response = await api.get('/summoner/game-history/by-queue', {
+            params: { puuid, queueId, page, size }
+        });
+        console.log('✅ Queue ID 기반 게임 히스토리 응답:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ Queue ID 기반 게임 히스토리 조회 실패:', error);
+        handleApiError(error);
+    }
+};

@@ -385,4 +385,15 @@ public class MatchDataServiceImpl implements MatchDataService {
             return null;
         }
     }
+
+    @Override
+    public List<GameSummaryDto> getGameSummariesByQueueId(String puuid, Integer queueId, int page, int size) {
+        log.info("큐 ID별 게임 요약 조회: puuid={}, queueId={}, page={}, size={}", puuid, queueId, page, size);
+        Pageable pageable = PageRequest.of(page, size);
+        List<MatchDetailEntity> matches = matchDetailRepository.findByPuuidAndQueueIdOrderByGameCreationDesc(puuid, queueId, pageable);
+
+        return matches.stream()
+                .map(match -> convertToGameSummary(match, puuid))
+                .collect(Collectors.toList());
+    }
 }

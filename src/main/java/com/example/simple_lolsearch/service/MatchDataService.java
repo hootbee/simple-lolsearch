@@ -17,4 +17,6 @@ public interface MatchDataService {
     List<GameSummaryDto> getGameHistoryWithPagination(String puuid, int start, int count);
 
     List<GameSummaryDto> getGameHistory(String puuid, Long lastGameTime, int count);
+
+    List<GameSummaryDto> getGameSummariesByQueueId(String puuid, Integer queueId, int page, int size);
 }

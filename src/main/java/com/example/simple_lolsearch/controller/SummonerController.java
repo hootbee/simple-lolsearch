@@ -164,4 +164,15 @@ public ResponseEntity<List<GameSummaryDto>> getGameHistory(
     private interface ServiceCall<T> {
         T exec() throws Exception;
     }
+
+    @GetMapping("/game-history/by-queue")
+    public ResponseEntity<List<GameSummaryDto>> getGameHistoryByQueueId(
+            @RequestParam String puuid,
+            @RequestParam Integer queueId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        log.info("큐 ID 기반 게임 기록 조회 요청: puuid={}, queueId={}, page={}, size={}", puuid, queueId, page, size);
+        return wrap(() -> matchDataService.getGameSummariesByQueueId(puuid, queueId, page, size));
+    }
 }
