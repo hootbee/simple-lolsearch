@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ChampionImage from './ChampionImage';
 import ItemBuild from './ItemBuild';
 import { getAccountByPuuid } from '../services/api';
+import { objectiveIcons } from '../utils/objectiveUtils';
 
 const getRankBackgroundColor = (tier) => {
     switch (tier ? tier.toUpperCase() : '') {
@@ -96,7 +97,7 @@ const PlayersGrid = styled.div`
 const PlayerRow = styled.div`
     display: grid;
     /* 챔피언 | 닉네임 | KDA | 아이템 | CS/골드 | 랭크 */
-    grid-template-columns: 35px 105px 65px 105px 50px 45px;
+    grid-template-columns: 35px 105px 65px 105px 60px 45px;
     align-items: center;
     gap: 8px; /* 간격 조금 더 벌림 */
     padding: 8px;
@@ -213,23 +214,30 @@ const PlayerStats = styled.div`
 `;
 
 const ObjectiveStats = styled.div`
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
     border-top: 1px solid #eee;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    display: flex; /* Flexbox 사용 */
+    justify-content: space-around; /* 아이템들을 균등하게 배치 */
+    align-items: center; /* 세로 중앙 정렬 */
     gap: 10px;
-    text-align: center;
-    font-size: 0.8rem;
 `;
 
 const ObjectiveItem = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 5px; /* 아이콘과 텍스트 사이 간격 */
     color: #666;
+    font-size: 0.9rem;
+
+    img {
+        width: 24px; /* 아이콘 크기 */
+        height: 24px;
+    }
 
     strong {
-        display: block;
+        font-size: 1rem; /* 숫자 크기 */
         color: #333;
-        font-size: 1.1em;
     }
 `;
 
@@ -417,28 +425,28 @@ const GameDetailView = ({ gameDetail }) => {
 
                         <ObjectiveStats>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.riftHerald} alt="Rift Herald" />
                                 <strong>{gameDetail.blueTeam.teamStats.riftHeraldKills}</strong>
-                                전령
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.atakhan} alt="Atakhan" />
                                 <strong>{gameDetail.blueTeam.teamStats.atakhanKills}</strong>
-                                아타칸
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.baron} alt="Baron" />
                                 <strong>{gameDetail.blueTeam.teamStats.baronKills}</strong>
-                                바론
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.dragon} alt="Dragon" />
                                 <strong>{gameDetail.blueTeam.teamStats.dragonKills}</strong>
-                                드래곤
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.tower} alt="Tower" />
                                 <strong>{gameDetail.blueTeam.teamStats.towerKills}</strong>
-                                타워
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.inhibitor} alt="Inhibitor" />
                                 <strong>{gameDetail.blueTeam.teamStats.inhibitorKills}</strong>
-                                억제기
                             </ObjectiveItem>
                         </ObjectiveStats>
                     </TeamSection>
@@ -463,28 +471,28 @@ const GameDetailView = ({ gameDetail }) => {
 
                         <ObjectiveStats>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.riftHerald} alt="Rift Herald" />
                                 <strong>{gameDetail.redTeam.teamStats.riftHeraldKills}</strong>
-                                전령
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.atakhan} alt="Atakhan" />
                                 <strong>{gameDetail.redTeam.teamStats.atakhanKills}</strong>
-                                아타칸
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.baron} alt="Baron" />
                                 <strong>{gameDetail.redTeam.teamStats.baronKills}</strong>
-                                바론
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.dragon} alt="Dragon" />
                                 <strong>{gameDetail.redTeam.teamStats.dragonKills}</strong>
-                                드래곤
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.tower} alt="Tower" />
                                 <strong>{gameDetail.redTeam.teamStats.towerKills}</strong>
-                                타워
                             </ObjectiveItem>
                             <ObjectiveItem>
+                                <img src={objectiveIcons.inhibitor} alt="Inhibitor" />
                                 <strong>{gameDetail.redTeam.teamStats.inhibitorKills}</strong>
-                                억제기
                             </ObjectiveItem>
                         </ObjectiveStats>
                     </TeamSection>
