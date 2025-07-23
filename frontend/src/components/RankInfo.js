@@ -196,10 +196,18 @@ const RankInfo = ({ leagueEntries }) => {
         );
     }
 
+    const sortedEntries = [...leagueEntries].sort((a, b) => {
+        const order = {
+            'RANKED_SOLO_5x5': 1,
+            'RANKED_FLEX_SR': 2,
+        };
+        return (order[a.queueType] || 99) - (order[b.queueType] || 99);
+    });
+
     return (
         <RankContainer>
             <RankTitle>랭크 정보</RankTitle>
-            {leagueEntries.map((entry, index) => {
+            {sortedEntries.map((entry, index) => {
                 const winRate = calculateWinRate(entry.wins, entry.losses);
                 const tierImageUrl = getTierImageUrl(entry.tier, entry.rank);
                 const tierColor = getTierColor(entry.tier);
