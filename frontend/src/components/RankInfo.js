@@ -177,53 +177,60 @@ const RankInfo = ({ leagueEntries }) => {
         }
     };
 
-    if (!leagueEntries || leagueEntries.length === 0) {
-        return (
-            <RankContainer>
-                <RankTitle>랭크 정보</RankTitle>
-                <UnrankedMessage>
-                    <UnrankedImage
-                        src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/unranked.png"
-                        alt="언랭크"
-                        onError={(e) => {
-                            console.error('언랭크 이미지 로드 실패');
-                            e.target.style.display = 'none';
-                        }}
-                    />
-                    언랭크
-                </UnrankedMessage>
-            </RankContainer>
-        );
-    }
-
-    const sortedEntries = [...leagueEntries].sort((a, b) => {
-        const order = {
-            'RANKED_SOLO_5x5': 1,
-            'RANKED_FLEX_SR': 2,
+    // 항상 솔로랭크와 자유랭크를 표시하도록 데이터 가공
+    const queueTypesToShow = ['RANKED_SOLO_5x5', 'RANKED_FLEX_SR'];
+    const processedEntries = queueTypesToShow.map(queueType => {
+        const entry = leagueEntries?.find(e => e.queueType === queueType);
+        if (entry) {
+            return entry; // 랭크 정보가 있는 경우
+        }
+        // 랭크 정보가 없는 경우 언랭크 플레이스홀더 생성
+        return {
+            queueType: queueType,
+            tier: 'UNRANKED',
+            wins: 0,
+            losses: 0,
         };
-        return (order[a.queueType] || 99) - (order[b.queueType] || 99);
     });
 
     return (
         <RankContainer>
             <RankTitle>랭크 정보</RankTitle>
-            {sortedEntries.map((entry, index) => {
+            {processedEntries.map((entry, index) => {
+                // 언랭크 항목 렌더링
+                if (entry.tier === 'UNRANKED') {
+                    return (
+                        <RankItem key={index} queueType={entry.queueType}>
+                            <LeftSection>
+                                <QueueType>{getQueueTypeName(entry.queueType)}</QueueType>
+                                <TierImageContainer>
+                                    <UnrankedImage
+                                        src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/unranked.png"
+                                        alt="언랭크"
+                                        style={{ width: '64px', height: '64px' }}
+                                    />
+                                    <TierInfo>
+                                        <TierDisplay tierColor="#666">
+                                            Unranked
+                                        </TierDisplay>
+                                    </TierInfo>
+                                </TierImageContainer>
+                            </LeftSection>
+                        </RankItem>
+                    );
+                }
+
+                // 랭크된 항목 렌더링
                 const winRate = calculateWinRate(entry.wins, entry.losses);
                 const tierImageUrl = getTierImageUrl(entry.tier, entry.rank);
                 const tierColor = getTierColor(entry.tier);
                 const tierKorean = getTierKoreanName(entry.tier);
                 const rankKorean = getRankKoreanName(entry.rank);
 
-                // 실제 데이터 확인
-                console.log(`=== 랭크 ${index + 1} 렌더링 ===`);
-                console.log('Entry:', entry);
-                console.log('Image URL:', tierImageUrl);
-
                 return (
                     <RankItem key={index} queueType={entry.queueType}>
                         <LeftSection>
                             <QueueType>{getQueueTypeName(entry.queueType)}</QueueType>
-
                             <TierImageContainer>
                                 <div style={{ position: 'relative' }}>
                                     <TierImage
@@ -234,8 +241,6 @@ const RankInfo = ({ leagueEntries }) => {
                                             console.log(`✅ 이미지 로드 성공: ${entry.tier} ${entry.rank}`);
                                         }}
                                     />
-
-                                    {/* 텍스트 대체 요소 */}
                                     <TierTextFallback
                                         tierColor={tierColor}
                                         style={{ display: 'none' }}
@@ -243,7 +248,6 @@ const RankInfo = ({ leagueEntries }) => {
                                         {entry.tier.charAt(0)}
                                     </TierTextFallback>
                                 </div>
-
                                 <TierInfo>
                                     <TierDisplay tierColor={tierColor}>
                                         {tierKorean} {rankKorean}
@@ -252,7 +256,6 @@ const RankInfo = ({ leagueEntries }) => {
                                 </TierInfo>
                             </TierImageContainer>
                         </LeftSection>
-
                         <WinRate>
                             <WinRatePercent rate={winRate}>{winRate}%</WinRatePercent>
                             <WinLoss>{entry.wins}승 {entry.losses}패</WinLoss>
