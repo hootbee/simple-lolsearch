@@ -126,6 +126,7 @@ public class MatchDetailDto {
         private ObjectiveDto dragon;
         private ObjectiveDto inhibitor;
         private ObjectiveDto riftHerald;
+        private ObjectiveDto atakhan;
         private ObjectiveDto tower;
     }
 

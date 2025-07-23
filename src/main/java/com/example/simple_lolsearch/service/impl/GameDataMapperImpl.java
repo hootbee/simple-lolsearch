@@ -202,6 +202,7 @@ public class GameDataMapperImpl implements GameDataMapper {
                 .baronKills(objectives != null && objectives.getBaron() != null ? objectives.getBaron().getKills() : 0)
                 .dragonKills(objectives != null && objectives.getDragon() != null ? objectives.getDragon().getKills() : 0)
                 .riftHeraldKills(objectives != null && objectives.getRiftHerald() != null ? objectives.getRiftHerald().getKills() : 0)
+                .atakhanKills(objectives != null && objectives.getAtakhan() != null ? objectives.getAtakhan().getKills() : 0)
                 .towerKills(objectives != null && objectives.getTower() != null ? objectives.getTower().getKills() : 0)
                 .inhibitorKills(objectives != null && objectives.getInhibitor() != null ? objectives.getInhibitor().getKills() : 0)
                 .firstBlood(objectives != null && objectives.getChampion() != null ? objectives.getChampion().isFirst() : false)

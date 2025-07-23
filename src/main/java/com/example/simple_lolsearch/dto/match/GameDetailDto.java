@@ -192,7 +192,7 @@ public class GameDetailDto {
         private int riftHeraldKills;
         private int towerKills;
         private int inhibitorKills;
-
+        private Integer atakhanKills;
         // 선취점 정보
         private boolean firstBlood;
     }

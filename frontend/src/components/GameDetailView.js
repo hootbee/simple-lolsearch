@@ -208,7 +208,7 @@ const PlayerStats = styled.div`
     text-align: center;
     display: flex;
     flex-direction: column;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #666;
 `;
 
@@ -375,7 +375,7 @@ const GameDetailView = ({ gameDetail }) => {
                 </PlayerItems>
                 <PlayerStats>
                     <div>CS: {player.cs}</div>
-                    <div>골드: {player.goldEarned?.toLocaleString()}</div>
+                    <div>Gold: {(player.goldEarned / 1000).toFixed(1)}k</div>
                 </PlayerStats>
                 <PlayerRank tier={player.playerInfo.tier}>
                     {formatRank(player.playerInfo.tier, player.playerInfo.rank)}
@@ -417,6 +417,14 @@ const GameDetailView = ({ gameDetail }) => {
 
                         <ObjectiveStats>
                             <ObjectiveItem>
+                                <strong>{gameDetail.blueTeam.teamStats.riftHeraldKills}</strong>
+                                전령
+                            </ObjectiveItem>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.blueTeam.teamStats.atakhanKills}</strong>
+                                아타칸
+                            </ObjectiveItem>
+                            <ObjectiveItem>
                                 <strong>{gameDetail.blueTeam.teamStats.baronKills}</strong>
                                 바론
                             </ObjectiveItem>
@@ -454,6 +462,14 @@ const GameDetailView = ({ gameDetail }) => {
                         </PlayersGrid>
 
                         <ObjectiveStats>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.redTeam.teamStats.riftHeraldKills}</strong>
+                                전령
+                            </ObjectiveItem>
+                            <ObjectiveItem>
+                                <strong>{gameDetail.redTeam.teamStats.atakhanKills}</strong>
+                                아타칸
+                            </ObjectiveItem>
                             <ObjectiveItem>
                                 <strong>{gameDetail.redTeam.teamStats.baronKills}</strong>
                                 바론
